@@ -26226,6 +26226,33 @@ body.rtl .mec-wrap {
     color: #1f2937;
 }
 
+/* The Month Filter button (search-bar option) used to be appended into
+   FullCalendar's own h2 title; it now hangs off this label instead (see
+   tpl.php's calendarHeaderFirstChild), so it needs the same reset the
+   h2 gave it — plus position:relative, which the .datepicker dropdown
+   positions against. !important for the same reason as the buttons
+   above: MEC's own <button> styling and the theme's global button rule
+   both target it otherwise. */
+.mec-ymtabs-gcal-title { position: relative; }
+
+.mec-ymtabs-gcal-title button {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    cursor: pointer;
+}
+
+.mec-ymtabs-gcal-title i {
+    color: #a1a2a3;
+    cursor: pointer;
+    margin-left: 2px;
+    margin-right: 0;
+    font-size: 14px;
+}
+
 @media (max-width: 600px) {
     .mec-ymtabs-gcal-title { font-size: 14px; margin: 0 4px; }
 }

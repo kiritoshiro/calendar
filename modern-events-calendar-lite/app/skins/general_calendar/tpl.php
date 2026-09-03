@@ -251,21 +251,31 @@ $javascript .='
 endif;
 $javascript .='
 			firstDay: "'.esc_js($week_start_day).'",
+			';
+// adventistai.lt: the title and the prev/today/next/prevYear/nextYear
+// buttons that used to fill this toolbar now live in the .mec-ymtabs
+// panel above the calendar (gcalbar_render_bar()), so the only thing
+// left for it to hold is the optional Filter/Find buttons. When those
+// are off there is nothing to put in it, and an *empty* toolbar is not
+// free: FullCalendar still renders the element (with an empty
+// .fc-toolbar-chunk per section, so a CSS :empty rule can't catch it)
+// and it keeps picking up padding/margin/border from MEC's own CSS and
+// from the theme — which is exactly the stray empty bar that appeared
+// between the tab panel and the grid. So don't render it at all.
+if (mec_general_calendar_find_event($this->sf_options, 'find')):
+$javascript .='
             headerToolbar: {
                 left: "",
                 center: "",
-				';
-if (mec_general_calendar_find_event($this->sf_options, 'find')):
-$javascript .='
                 right: "filterEvents,findEvents"
-				';
+            },
+			';
 else :
 $javascript .='
-				right: ""
-				';
+            headerToolbar: false,
+			';
 endif;
 $javascript .='
-            },
 			buttonText: {
                 today: "'. esc_html__('Today', 'modern-events-calendar-lite') .'"
             },
@@ -523,7 +533,16 @@ $javascript .= '
 
 		calendar.render();
 
-		const calendarHeaderFirstChild = jQuery(".fc-header-toolbar").find(".fc-toolbar-chunk h2");
+		// adventistai.lt: this used to be FullCalendar\'s own h2 title
+		// (".fc-toolbar-chunk h2"), which the Month Filter button was hung
+		// off. That title now lives in this skin\'s own bar as
+		// .mec-ymtabs-gcal-title, so anchor to that instead — otherwise the
+		// Month Filter button gets appended to an empty selection and never
+		// appears. The h2 lookup is kept as a fallback in case a future MEC
+		// update puts the native title back.
+		const calendarHeaderFirstChild = $mecGcalbarBar.find(".mec-ymtabs-gcal-title").length
+			? $mecGcalbarBar.find(".mec-ymtabs-gcal-title")
+			: jQuery(".fc-header-toolbar").find(".fc-toolbar-chunk h2");
 		const calendarHeaderLastChild = jQuery(".fc-header-toolbar").find(".fc-toolbar-chunk:last-child");
 		const calendarHeaderButton = calendarHeaderLastChild.find(".fc-button-group");
 		';

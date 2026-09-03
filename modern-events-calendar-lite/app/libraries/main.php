@@ -9138,7 +9138,11 @@ class MEC_main extends MEC_base
         wp_enqueue_style('mec-time-picker', $this->asset('packages/timepicker/jquery.timepicker.min.css'));
 
         // Include JS
-        wp_enqueue_script('mec-time-picker', $this->asset('packages/timepicker/jquery.timepicker.min.js'));
+        // adventistai.lt: same missing-dependency bug as the month picker
+        // below — this one fails quietly rather than throwing (its wrapper
+        // is "typeof jQuery != 'undefined' && ..."), so the time picker just
+        // never initialises when it loads first.
+        wp_enqueue_script('mec-time-picker', $this->asset('packages/timepicker/jquery.timepicker.min.js'), ['jquery']);
     }
 
     /**
@@ -9181,7 +9185,14 @@ class MEC_main extends MEC_base
             'dates' => $dates,
         ];
         echo '<script>var MEC_Month_Picker_Data = ' . json_encode($data, JSON_UNESCAPED_UNICODE) . ' </script>';
-        wp_enqueue_script('mec-month-picker-js', $this->asset('packages/month-picker/MonthPicker.js'));
+        // adventistai.lt: MonthPicker.js is a jQuery plugin — its IIFE ends
+        // with "}( window.jQuery )" and registers $.fn.monthPicker — so it
+        // throws "Cannot read properties of undefined (reading 'fn')" if it
+        // runs before jQuery. Without a declared dependency WordPress is free
+        // to print it first (and any script-ordering/optimizer plugin will),
+        // so declare it. Same reason as the 'jquery' deps factory.php gives
+        // its own scripts.
+        wp_enqueue_script('mec-month-picker-js', $this->asset('packages/month-picker/MonthPicker.js'), ['jquery']);
     }
 
     function get_client_ip()
