@@ -30,3 +30,14 @@ jobs:
           php -l modern-events-calendar-lite/app/skins/general_calendar/tpl.php
       - name: Verify fork customizations
         run: node tests/verify-customizations.js
+      - name: Build installable plugin package
+        if: github.ref == 'refs/heads/codex/calendar-navigation-updater-20260903'
+        run: zip -qr modern-events-calendar-lite-7.35.1.2.zip modern-events-calendar-lite
+      - name: Upload installable plugin package
+        if: github.ref == 'refs/heads/codex/calendar-navigation-updater-20260903'
+        uses: actions/upload-artifact@v4
+        with:
+          name: modern-events-calendar-lite-7.35.1.2-package
+          path: modern-events-calendar-lite-7.35.1.2.zip
+          if-no-files-found: error
+          retention-days: 7
