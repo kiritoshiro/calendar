@@ -28,12 +28,13 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.1', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.2', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
 assert.match(main, /^\s*\*\s*Update URI:\s*https:\/\/github\.com\/kiritoshiro\/calendar\s*$/m);
 assert.doesNotMatch(main, /MEC_API_UPDATE/);
+assert.doesNotMatch(main, /MEC_API_ACTIVATION/);
 
 assert.match(updater, /const REPOSITORY = 'kiritoshiro\/calendar';/);
 assert.match(updater, /ADVENTISTAI_CALENDAR_GITHUB_TOKEN/);
@@ -50,6 +51,7 @@ assert.doesNotMatch(init, /load_auto_update|in_plugin_update_message/);
 assert.doesNotMatch(feature, /add_submenu_page\([^\n]+MEC-go-pro/);
 assert.doesNotMatch(feature, /add_submenu_page\([^\n]+MEC-addons/);
 assert.doesNotMatch(feature, /webnus\.net\/wp-json\/wninfo|mec-purchase/);
+assert.doesNotMatch(feature, /activate_license|revoke_license|plugin_activation_request/);
 assert.doesNotMatch(dashboard, /notifications\.webnus\.site|mec_custom_msg|mec-pro-notice/);
 assert.doesNotMatch(settings.slice(0, 1000), /mec_custom_msg/);
 assert.doesNotMatch(support, /freshsales|Premium Support|mec-pro-notice/i);

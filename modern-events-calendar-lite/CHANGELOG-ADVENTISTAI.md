@@ -1,5 +1,17 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.2
+
+- Reviewed the official Webnus changelog through 7.36.2, published on
+  1 September 2026.
+- Backported the relevant 7.36.2 Lite-package correction by removing the
+  vendor Pro-license AJAX endpoints, activation API, and leftover settings
+  status UI from this Lite-only fork.
+- Intentionally skipped the new Webnus license system, Pro booking and Stripe
+  work, marketing/tracking additions, and unrelated editor redesigns.
+- This remains a selective 7.35.1-based fork; version 7.35.1.2 does not claim
+  to contain the complete upstream 7.36.2 release.
+
 ## 7.35.1.1
 
 - Merged the General Calendar date and navigation controls into the blue

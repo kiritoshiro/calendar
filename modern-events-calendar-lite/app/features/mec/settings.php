@@ -1461,11 +1461,6 @@ jQuery("#mec_settings_form").on("submit", function(event)
     jQuery(".dpr-save-btn").addClass("loading").text("'.esc_js(esc_attr__('Saved', 'modern-events-calendar-lite')).'");
     jQuery("<div class=\"wns-saved-settings\">'.esc_js(esc_attr__('Settings Saved!', 'modern-events-calendar-lite')).'</div>").insertBefore("#wns-be-content");
 
-    if(jQuery(".mec-purchase-verify").text() != "'.esc_js(esc_attr__('Verified', 'modern-events-calendar-lite')).'")
-    {
-        jQuery(".mec-purchase-verify").text("'.esc_js(esc_attr__('Checking ...', 'modern-events-calendar-lite')).'");
-    }
-
     var settings = jQuery("#mec_settings_form").serialize();
     if(jQuery.isArray(jQuery("#mec_settings_form #invoice_attendees_custom_fields").val()) && jQuery("#mec_settings_form #invoice_attendees_custom_fields").val().length==0){
       settings += "&mec[settings][attendees_custom_fields][]=";
@@ -1487,10 +1482,6 @@ jQuery("#mec_settings_form").on("submit", function(event)
                 jQuery(".dpr-save-btn").removeClass("loading").text("'.esc_js(esc_attr__('Save Changes', 'modern-events-calendar-lite')).'");
                 jQuery(".wns-saved-settings").remove();
                 jQuery(".mec-loarder-wrap").remove();
-                if(jQuery(".mec-purchase-verify").text() != "'.esc_js(esc_attr__('Verified', 'modern-events-calendar-lite')).'")
-                {
-                    jQuery(".mec-purchase-verify").text("'.esc_js(esc_attr__('Please Refresh Page', 'modern-events-calendar-lite')).'");
-                }
             }, 1000);
         },
         error: function(jqXHR, textStatus, errorThrown)

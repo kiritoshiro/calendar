@@ -149,10 +149,6 @@ class MEC_feature_mec extends MEC_base
         // Import Settings
         $this->factory->action('wp_ajax_import_settings', [$this, 'import_settings']);
 
-        // License Activation
-        $this->factory->action('wp_ajax_activate_license', [$this, 'activate_license']);
-        $this->factory->action('wp_ajax_revoke_license', [$this, 'revoke_license']);
-
         // Close Notification
         $this->factory->action('wp_ajax_close_notification', [$this, 'close_notification']);
 
@@ -219,88 +215,6 @@ class MEC_feature_mec extends MEC_base
 
         // Constant Contact Authorize
         $this->factory->action('admin_init', [$this, 'constantcontact_authorize']);
-    }
-
-    /* Activate License */
-    public function activate_license()
-    {
-        if ($this->getPRO())
-        {
-            // Current User is not Permitted
-            if (!current_user_can('manage_options')) $this->main->response(['success' => 0, 'code' => 'ADMIN_ONLY']);
-
-            if (!wp_verify_nonce(sanitize_text_field($_REQUEST['nonce']), 'mec_settings_nonce')) exit();
-
-            $options = get_option('mec_options');
-            $options['product_name'] = sanitize_text_field($_REQUEST['content']['LicenseTypeJson']);
-            $options['purchase_code'] = sanitize_text_field($_REQUEST['content']['PurchaseCodeJson']);
-            $payload = [];
-
-            $verify = $this->plugin_activation_request($options);
-
-            if ($verify && isset($verify->item_link))
-            {
-                $payload['message'] = esc_html__('success');
-                $payload['status'] = true;
-                $payload['button_text'] = esc_html__('revoke', 'modern-events-calendar-lite');
-                update_option('mec_license_status', 'active');
-                $options['product_id'] = $verify->item_id;
-            }
-            else
-            {
-                $payload['message'] = esc_html__('Activation failed');
-                $payload['status'] = false;
-                $payload['button_text'] = esc_html__('submit', 'modern-events-calendar-lite');
-                update_option('mec_license_status', 'faild');
-            }
-
-            update_option('mec_options', $options);
-            $payload = json_encode($payload);
-            echo MEC_kses::element($payload);
-            wp_die();
-        }
-    }
-
-    public function revoke_license()
-    {
-        if ($this->getPRO())
-        {
-            $options = get_option('mec_options');
-            $options['product_name'] = '';
-            $options['purchase_code'] = '';
-            $options['product_id'] = '';
-            update_option('mec_options', $options);
-
-            $payload = json_encode(['message' => 'revoked', 'status' => true, 'button_text' => esc_html__('submit', 'modern-events-calendar-lite')]);
-            echo MEC_kses::element($payload);
-            wp_die();
-        }
-    }
-
-    // MEC activation request
-    public function plugin_activation_request($options)
-    {
-        $code = $options['purchase_code'];
-        if (empty($code)) return false;
-
-        $product_name = $options['product_name'];
-        $item_id = $options['product_id'];
-        $url = get_home_url();
-        $verify_url = MEC_API_ACTIVATION . '/activation/verify?category=mec&license=' . $code . '&url=' . $url . '&item_id=' . $item_id;
-
-        $JSON = wp_remote_retrieve_body(wp_remote_get($verify_url, [
-            'body' => null,
-            'timeout' => '120',
-            'redirection' => '10',
-            'user-agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
-        ]));
-
-        if ($JSON != '')
-        {
-            $data = json_decode($JSON);
-            return $data;
-        }
-        else return false;
     }
 
     /* Download MEC settings */

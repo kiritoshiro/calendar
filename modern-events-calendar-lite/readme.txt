@@ -3,7 +3,7 @@ Contributors: adventistai.lt
 Tags: Event, Events, Calendar, Booking, Schedule, Organizer, Venue
 Requires at least: 5.8
 Tested up to: 7.0.2
-Stable tag: 7.35.1.1
+Stable tag: 7.35.1.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
