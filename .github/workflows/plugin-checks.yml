@@ -33,7 +33,12 @@ jobs:
       - name: Lint all plugin PHP files
         shell: bash
         run: |
+          set -euo pipefail
           mapfile -d '' php_files < <(find modern-events-calendar-lite -type f -name '*.php' -print0)
+          if (( ${#php_files[@]} == 0 )); then
+            echo 'No plugin PHP files were found.'
+            exit 1
+          fi
           echo "Checking ${#php_files[@]} PHP files with PHP 8.4"
           for file in "${php_files[@]}"; do
             php -l "$file" >/dev/null
@@ -43,7 +48,9 @@ jobs:
         run: node tests/verify-customizations.js
 
       - name: Check customized JavaScript syntax
-        run: node --check modern-events-calendar-lite/assets/js/frontend.js
+        run: |
+          node --check modern-events-calendar-lite/assets/js/frontend.js
+          node --check tests/verify-customizations.js
 
       - name: Validate WPML XML configuration
         run: python -c "import xml.etree.ElementTree as ET; ET.parse('modern-events-calendar-lite/wpml-config.xml')"
@@ -51,7 +58,8 @@ jobs:
       - name: Reject unresolved merge conflict markers
         shell: bash
         run: |
-          if git grep -n -E '^(<<<<<<<|>>>>>>>)' -- '*.php' '*.js' '*.css' '*.xml' '*.yml' '*.yaml'; then
+          set -euo pipefail
+          if git grep -n -E '^[[:space:]]*(<<<<<<< .+|=======|>>>>>>> .+)[[:space:]]*$' -- '*.php' '*.js' '*.css' '*.xml' '*.json' '*.yml' '*.yaml'; then
             echo 'Unresolved merge conflict markers detected.'
             exit 1
           fi
@@ -86,7 +94,6 @@ jobs:
 
       - name: Run official WordPress Plugin Check security checks
         id: wordpress-check
-        continue-on-error: true
         uses: WordPress/plugin-check-action@10857da14b6c2246d15402b3e69f777edcf8c12e # v1.1.9
         with:
           build-dir: ./modern-events-calendar-lite
@@ -102,5 +109,5 @@ jobs:
           if [ "$CHECK_OUTCOME" = 'success' ]; then
             echo 'No blocking result was returned by the WordPress security checks.' >> "$GITHUB_STEP_SUMMARY"
           else
-            echo 'Plugin Check reported findings or a checker error. Review the annotations and the uploaded Plugin Check artifact. This check is advisory so legacy upstream findings do not block every commit.' >> "$GITHUB_STEP_SUMMARY"
+            echo 'Plugin Check reported security findings or a checker error. The workflow is intentionally blocking so these findings must be reviewed before the change is accepted.' >> "$GITHUB_STEP_SUMMARY"
           fi
