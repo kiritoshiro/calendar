@@ -110,10 +110,7 @@ final class Base
 	{
 
 		add_action('admin_notices', array($this, 'upgrade_notice'));
-		add_action('admin_notices', array($this, 'marketing_notice'));
 		add_action('wp_ajax_mec-upgrade-transactions-in-db', array(__CLASS__, 'upgrade_transactions_db_by_ajax'));
-
-		add_action('init', [$this, 'init']);
 
 		register_activation_hook(MEC_CORE_FILE, __CLASS__ . '::register_activation');
 		$db_version = get_option('mec_core_db', '1.0.0');
@@ -144,15 +141,7 @@ final class Base
 	 */
 	public function init()
 	{
-		// PostHog product tracking. Only needed in wp-admin (settings save,
-		// consent popup, cron scheduling) and during WP-Cron (the snapshot job).
-		// Skip front-end visitor requests entirely so page loads are untouched.
-		if (is_admin() || (defined('DOING_CRON') && DOING_CRON))
-		{
-			(new \MEC\Tracking\PostHog())->init();
-			(new \MEC\Tracking\Consent())->init();
-			(new \MEC\Tracking\Snapshot())->init();
-		}
+		// Vendor telemetry is intentionally disabled in the adventistai.lt fork.
 	}
 
 	public static function should_include_assets()
@@ -279,64 +268,4 @@ final class Base
 		}
 	}
 
-	public function marketing_notice()
-	{
-		$factory = \MEC::getInstance('app.libraries.factory');
-
-		// Deactivate MEC Lite when Pro is installed
-		if (!$factory->getPRO()):
-			if (!current_user_can('activate_plugins')) {
-				return;
-			}
-
-		$response_lite = wp_remote_get(
-			add_query_arg(
-				array( // posts from 101 to 200
-					'per_page' => 1,
-					'page' => 1,
-					'categories' => 4,
-				),
-				'https://notifications.webnus.site/wp-json/wp/v2/posts'
-			),
-			array(
-				'timeout' => 50, // Fix for: cURL error 28: Operation timed out after...
-			)
-		);
-
-		if (is_wp_error($response_lite) || wp_remote_retrieve_response_code($response_lite) !== 200) {
-			return;
-		}
-
-		$body = json_decode(wp_remote_retrieve_body($response_lite));
-
-		if (is_countable($body) && count($body) > 0) :
-			$featured_media = $body[0]->featured_media;
-			$title = $body[0]->title->rendered;
-			$content = $body[0]->content->rendered;
-
-			$featured_image = wp_remote_get(
-				'https://notifications.webnus.site/wp-json/wp/v2/media/' . $featured_media,
-				array(
-					'timeout' => 50, // Fix for: cURL error 28: Operation timed out after...
-				)
-			);
-
-			if (is_wp_error($featured_image) || wp_remote_retrieve_response_code($featured_image) !== 200) {
-				return;
-			}
-
-			$body_featured_image = json_decode(wp_remote_retrieve_body($featured_image));
-			$lite_featured_image = $body_featured_image->guid->rendered;
-			?>
-				<div class="notice notice-info is-dismissible">
-
-					<div class="postbox-header">
-						<h2 class="hndle ui-sortable-handle"><?php echo $title; ?></h2>
-					</div>
-					<p><?php echo $content ?></p>
-				</div>
-<?php
-			endif;
-		endif;
-	}
 }

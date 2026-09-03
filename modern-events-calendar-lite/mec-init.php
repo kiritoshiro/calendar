@@ -66,9 +66,6 @@ class MEC
             if(is_plugin_active('modern-events-calendar/mec.php')) deactivate_plugins('modern-events-calendar-lite/modern-events-calendar-lite.php');
         }
 
-        // Initialize Auto Update Feature
-        $factory->action('admin_init', array($factory, 'load_auto_update'));
-
         // Registering MEC actions
         $factory->load_actions();
 
@@ -127,8 +124,6 @@ class MEC
         // Register language files for localization before MEC triggers translations.
         $factory->action('plugins_loaded', array($factory, 'load_languages'));
 
-        // Plugin Update Notification
-        $factory->action('in_plugin_update_message-' . MEC_BASENAME , array($factory, 'mecShowUpgradeNotification') , 10,2);
     }
 
     /**

@@ -1,0 +1,146 @@
+/* adventistai.lt calendar navigation overrides.
+ * Loaded after MEC frontend styles so the custom General Calendar header
+ * remains stable even when the upstream stylesheet changes. */
+
+.mec-ymtabs-gcalbar .mec-ymtabs-yearbar.mec-ymtabs-gcal-navigator {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 34px clamp(150px, 22vw, 220px) 34px minmax(0, 1fr);
+    align-items: center;
+    justify-content: stretch;
+    gap: 6px;
+    padding: 10px 14px;
+    background: var(--ymtabs-accent);
+    border-top: 0;
+}
+
+.mec-ymtabs-gcalbar .mec-gcalbar-nav-today {
+    grid-column: 1;
+    justify-self: end;
+}
+
+.mec-ymtabs-gcalbar .mec-gcalbar-nav-prev {
+    grid-column: 2;
+}
+
+.mec-ymtabs-gcalbar .mec-ymtabs-gcal-title {
+    grid-column: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    width: 100%;
+    margin: 0;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    text-align: center;
+    overflow: hidden;
+}
+
+.mec-ymtabs-gcalbar .mec-gcalbar-nav-next {
+    grid-column: 4;
+}
+
+.mec-ymtabs-gcalbar .mec-ymtabs-gcal-navigator > .gCalendarMonthFilterButton {
+    grid-column: 5;
+    justify-self: start;
+    margin: 0;
+}
+
+.mec-ymtabs-gcalbar .mec-gcalbar-nav-prev,
+.mec-ymtabs-gcalbar .mec-gcalbar-nav-next {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    justify-self: center;
+    width: 32px;
+    height: 32px;
+    padding: 0 !important;
+    color: #fff !important;
+    font-size: 22px !important;
+    border-radius: 50% !important;
+}
+
+.mec-ymtabs-gcalbar .mec-gcalbar-nav-today {
+    color: #fff !important;
+    opacity: .92;
+}
+
+.mec-ymtabs-gcalbar .mec-gcalbar-nav-prev:hover,
+.mec-ymtabs-gcalbar .mec-gcalbar-nav-next:hover,
+.mec-ymtabs-gcalbar .mec-gcalbar-nav-today:hover {
+    color: #fff !important;
+    background: rgba(255, 255, 255, .15) !important;
+}
+
+.mec-ymtabs-year-control {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.mec-ymtabs-gcalbar .mec-ymtabs-year-select {
+    position: static !important;
+    width: auto;
+    min-width: 0;
+    height: auto;
+    margin: 0 !important;
+    padding: 1px 13px 1px 2px !important;
+    border: 0 !important;
+    border-bottom: 1px dotted rgba(255, 255, 255, .72) !important;
+    border-radius: 0 !important;
+    outline: 0;
+    box-shadow: none !important;
+    background: transparent !important;
+    color: #fff !important;
+    font: inherit;
+    line-height: inherit;
+    letter-spacing: .02em;
+    text-align: center;
+    text-transform: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.mec-ymtabs-gcalbar .mec-ymtabs-year-select option {
+    background: #fff;
+    color: #1f2937;
+}
+
+.mec-ymtabs-gcalbar .mec-ymtabs-year-select:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.mec-ymtabs-year-caret {
+    position: absolute;
+    right: 1px;
+    top: 50%;
+    color: #fff;
+    font-size: 10px;
+    line-height: 1;
+    pointer-events: none;
+    transform: translateY(-48%);
+}
+
+@media (max-width: 480px) {
+    .mec-ymtabs-gcalbar .mec-ymtabs-yearbar.mec-ymtabs-gcal-navigator {
+        grid-template-columns: minmax(0, 1fr) 32px minmax(128px, 160px) 32px minmax(0, 1fr);
+        gap: 2px;
+        padding: 8px 6px;
+    }
+
+    .mec-ymtabs-gcalbar .mec-ymtabs-gcal-title {
+        font-size: 14px;
+    }
+
+    .mec-ymtabs-gcalbar .mec-gcalbar-nav-today {
+        padding-right: 4px !important;
+        padding-left: 4px !important;
+        font-size: 12px !important;
+    }
+}

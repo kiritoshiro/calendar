@@ -29,66 +29,10 @@ global $wp_version;
     </div>
     <div class="welcome-content w-clearfix extra">
 
-        <?php if (!$this->getPRO()): ?>
-            <div class="w-row mec-pro-notice" style="margin-bottom: 30px;">
-                <div class="w-col-sm-12">
-                    <div class="info-msg support-box">
-                        <p><?php echo sprintf(esc_html__("%s, if you need support, you can purchase our Extra Support feature through links below:", 'modern-events-calendar-lite'), '<strong>' . esc_html__('Dear user', 'modern-events-calendar-lite') . '</strong>'); ?></p>
-                        <a target="_blank" href="https://webnus.net/checkout?edd_action=add_to_cart&download_id=960896"> Get 12 Month Premium Support </a>
-                        <a target="_blank" href="https://webnus.net/checkout?edd_action=add_to_cart&download_id=960724"> Get 6 Month Premium Support </a>
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($this->getPRO()): ?>
-            <div class="w-row mec-pro-notice" style="margin-bottom: 30px;">
-                <div class="w-col-sm-12">
-                    <div class="info-msg support-box">
-                        <p><?php echo sprintf(esc_html__("%s, we won't charge you for any extra price after a year for using MEC or receiving updates, but you will need to renew your license if you needed support by then. You can use links below in order to do that:", 'modern-events-calendar-lite'), '<strong>' . esc_html__('Dear user', 'modern-events-calendar-lite') . '</strong>'); ?></p>
-                        <a target="_blank" href="https://webnus.net/checkout?edd_action=add_to_cart&download_id=960896"> Get 12 Month Premium Support </a>
-                        <a target="_blank" href="https://webnus.net/checkout?edd_action=add_to_cart&download_id=960724"> Get 6 Month Premium Support </a>
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
+        <!-- Vendor premium-support promotions are omitted in this build. -->
 
         <?php if (current_user_can('read')): ?>
-            <script>
-                (function() {
-                    var version = parseInt(Math.random() * 10000);
-                    var webformKey = "8dd552ab6041bd25d23d8a8467819f701f9196106be0e25edc6870c9cc922bdc_" + version;
-                    var loaderHTML = '<div class="fs-webform-loader" style="margin:auto">  <style type="text/css">  .loader-box{    width:100%;    margin:auto;    margin-top:50px;    text-align:center;  }  .loader {      border-radius: 50%;      width: 20px;      height: 20px;      animation: spin 1s linear infinite;      border: 3px solid #12344D;      border-top: 3px solid #B3DFFF;      display:block;      margin: 25px auto;  }  @keyframes spin {      0% { transform: rotate(0deg); }      100% { transform: rotate(360deg); }  }  #loader-text{    vertical-align:middle;    text-align:center;    color: #333;    display: inline-block;    vertical-align: middle;    margin-top:-20px;    height:100%;  }  </style>  <div class="loader-box">    <div class="loader"></div>    <div id="loader-text">    </div>  </div></div>';
-                    var containerHTML = '<div id="fs-webform-container_' + webformKey + '" class="fs-webform-container fs_8dd552ab6041bd25d23d8a8467819f701f9196106be0e25edc6870c9cc922bdc" style="display:none;"></div>';
-                    var scriptTag = document.currentScript || document.getElementById("fs_8dd552ab6041bd25d23d8a8467819f701f9196106be0e25edc6870c9cc922bdc") || document.getElementById("fswebforms") || document.getElementById("formservjs");
-                    var docHook = scriptTag.parentElement;
-                    var content = document.createElement("div");
-                    scriptTag.id = webformKey;
-                    docHook.appendChild(content);
-                    content.innerHTML = loaderHTML + containerHTML;
-
-                    var webformOptions = {
-                        key: "8dd552ab6041bd25d23d8a8467819f701f9196106be0e25edc6870c9cc922bdc",
-                        url: "https://webform.freshsales.io/assets/webforms/8dd552ab6041bd25d23d8a8467819f701f9196106be0e25edc6870c9cc922bdc/10",
-                        domainURL: "https://webnus.freshsales.io",
-                        format: "js",
-                        version: version,
-                        formVersion: 10
-                    };
-
-                    if (window.WebFormQueue) {
-                        WebFormQueue.add(webformOptions);
-                    } else {
-                        var script = document.createElement("script");
-                        script.src = "https://assets.freshsales.io/assets/webform-6a8bd10d9118645b79d2d3b3a3112e0901bf1beb.js";
-                        script.onload = function() {
-                            WebFormQueue.add(webformOptions);
-                        };
-                        var webformContainer = document.getElementById("fs-webform-container_" + webformKey);
-                        webformContainer.appendChild(script);
-                    }
-                })();
-            </script>
+            <!-- The external vendor sales/support webform is intentionally not loaded. -->
             <div class="w-row">
                 <div class="w-col-sm-12">
                     <div class="w-box support-page searchbox">
@@ -331,8 +275,7 @@ global $wp_version;
                             <div class="mec-faq-accordion">
                                 <div class="mec-faq-accordion-trigger"><a href="" class="active"><?php echo esc_html__('How should I update plugin?', 'modern-events-calendar-lite'); ?></a></div>
                                 <div class="mec-faq-accordion-content active">
-                                    <?php echo sprintf(__('You have two options:<br>
-                            1-	Uploading the plugin file using FTP. For more information, please <a href="%s" target="_blank">click here</a>.<br>
+                                    <?php echo sprintf(__('Updates for this adventistai.lt build are delivered through the standard WordPress Plugins and Updates screens from its private GitHub repository. Configure the read-only GitHub token described in GITHUB-UPDATES.md, then use Dashboard &gt; Updates &gt; Check Again.<br>
                             2-	Using the auto-update feature which needs the adding of the purchase code in the corresponding section in the plugin. For more information, please <a href="%s" target="_blank">click here</a>.', 'modern-events-calendar-lite'), 'https://webnus.net/dox/modern-events-calendar/how-to-update-manually-plugin/', 'https://webnus.net/dox/modern-events-calendar/how-to-auto-update-plugin/'); ?>
                                 </div>
 
@@ -508,3 +451,4 @@ global $wp_version;
         <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="1ec276e5-9da2-4a16-859f-eae7bcbb4ae9";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
     <?php endif;
 });
+

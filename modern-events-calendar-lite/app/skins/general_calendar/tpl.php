@@ -231,6 +231,7 @@ $javascript .='
 			datesSet: function(arg) {
 			    mecGcalbarSync(arg.view.currentStart);
 			    var mecGcalbarTitle = arg.view.title;
+			    var mecGcalbarYear = arg.view.currentStart.getUTCFullYear();
 			';
 if ($lang === 'is') :
 $javascript .='
@@ -243,7 +244,7 @@ $javascript .='
 ';
 endif;
 $javascript .='
-			    $mecGcalbarBar.find(".mec-ymtabs-gcal-title").text(mecGcalbarTitle);
+			    mecGcalbarSetTitle(mecGcalbarTitle, mecGcalbarYear);
 			},
 			';
 if ($lang === 'is') :
@@ -460,6 +461,7 @@ $javascript .= '
 
 		var $mecGcalbarBar = jQuery("#mec-gcalbar-'.esc_js($this->id).'");
 		var mecGcalbarAjaxUrl = "'. admin_url('admin-ajax.php', NULL) .'";
+		var mecGcalbarYearRequest = null;
 
 		/* adventistai.lt: talk to FullCalendar in its OWN time, never the
 		   browser\'s. This calendar is initialised with timeZone set to
@@ -491,9 +493,53 @@ $javascript .= '
 			$mecGcalbarBar.find(".mec-ymtabs-item[data-mec-year=\"" + year + "\"][data-mec-month=\"" + mm + "\"]").addClass("mec-ymtabs-item-active");
 		}
 
+		function mecGcalbarPopulateYearSelect(year) {
+			var $select = $mecGcalbarBar.find(".mec-ymtabs-year-select");
+			var yearString = String(year);
+			var hasYear = $select.find("option[value=\"" + yearString + "\"]").length > 0;
+
+			if (!hasYear || $select.find("option").length < 2) {
+				var firstYear = Math.max(1900, year - 25);
+				var lastYear = Math.min(2100, year + 25);
+				var fragment = document.createDocumentFragment();
+
+				for (var optionYear = firstYear; optionYear <= lastYear; optionYear++) {
+					var option = document.createElement("option");
+					option.value = String(optionYear);
+					option.textContent = String(optionYear);
+					fragment.appendChild(option);
+				}
+
+				$select.empty();
+				if ($select[0]) $select[0].appendChild(fragment);
+			}
+
+			$select.val(yearString);
+		}
+
+		function mecGcalbarSetTitle(title, year) {
+			var titleText = String(title || "");
+			var yearText = String(year);
+			var yearPosition = titleText.indexOf(yearText);
+			var before = "";
+			var after = "";
+
+			if (yearPosition >= 0) {
+				before = titleText.slice(0, yearPosition);
+				after = titleText.slice(yearPosition + yearText.length);
+			} else {
+				after = titleText ? " " + titleText : "";
+			}
+
+			$mecGcalbarBar.find(".mec-ymtabs-gcal-title-before").text(before);
+			$mecGcalbarBar.find(".mec-ymtabs-gcal-title-after").text(after);
+			mecGcalbarPopulateYearSelect(year);
+		}
+
 		function mecGcalbarLoadYear(year, activeYear, activeMonth) {
+			if (mecGcalbarYearRequest) mecGcalbarYearRequest.abort();
 			$mecGcalbarBar.addClass("mec-ymtabs-loading");
-			jQuery.ajax({
+			var request = jQuery.ajax({
 				url: mecGcalbarAjaxUrl,
 				type: "post",
 				dataType: "json",
@@ -505,21 +551,25 @@ $javascript .= '
 				},
 				success: function(response) {
 					if (!response || typeof response.html === "undefined") return;
+					if (parseInt(response.year, 10) !== year) return;
 					$mecGcalbarBar.find(".mec-ymtabs-months").html(response.html);
-					$mecGcalbarBar.find(".mec-ymtabs-year-label").text(response.year);
-					$mecGcalbarBar.find(".mec-ymtabs-year-prev").attr("data-mec-year-jump", response.year - 1);
-					$mecGcalbarBar.find(".mec-ymtabs-year-next").attr("data-mec-year-jump", response.year + 1);
+					$mecGcalbarBar.attr("data-mec-shown-year", response.year);
+					mecGcalbarPopulateYearSelect(parseInt(response.year, 10));
 				},
 				complete: function() {
-					$mecGcalbarBar.removeClass("mec-ymtabs-loading");
+					if (mecGcalbarYearRequest === request) {
+						mecGcalbarYearRequest = null;
+						$mecGcalbarBar.removeClass("mec-ymtabs-loading");
+					}
 				}
 			});
+			mecGcalbarYearRequest = request;
 		}
 
 		function mecGcalbarSync(dateObj) {
 			var year = dateObj.getUTCFullYear();
 			var month = dateObj.getUTCMonth() + 1;
-			var shownYear = parseInt($mecGcalbarBar.find(".mec-ymtabs-year-label").text(), 10);
+			var shownYear = parseInt($mecGcalbarBar.attr("data-mec-shown-year"), 10);
 			if (shownYear !== year) {
 				mecGcalbarLoadYear(year, year, month);
 			} else {
@@ -527,9 +577,10 @@ $javascript .= '
 			}
 		}
 
-		$mecGcalbarBar.on("click", ".mec-ymtabs-year-nav", function(e) {
-			e.preventDefault();
-			var targetYear = parseInt(jQuery(this).attr("data-mec-year-jump"), 10);
+		$mecGcalbarBar.on("change", ".mec-ymtabs-year-select", function() {
+			var targetYear = parseInt(jQuery(this).val(), 10);
+			if (!Number.isFinite(targetYear)) return;
+			targetYear = Math.max(1900, Math.min(2100, targetYear));
 			var curMonth = calendar.getDate().getUTCMonth() + 1;
 			calendar.gotoDate(mecGcalbarMonthStart(targetYear, curMonth));
 		});
@@ -543,8 +594,8 @@ $javascript .= '
 			calendar.gotoDate(mecGcalbarMonthStart(y, m));
 		});
 
-		// adventistai.lt: prev/Today/next controls for the merged row-2
-		// navigator (gcalbar_render_bar()) — these replace FullCalendar\'s
+		// adventistai.lt: fixed-position month controls in the merged header
+		// (gcalbar_render_bar()) — these replace FullCalendar\'s
 		// own headerToolbar prev/today/next buttons (turned off above), so
 		// this is the only navigation control now, all driven off the same
 		// calendar instance as the tabs.
@@ -565,13 +616,12 @@ $javascript .= '
 
 		// adventistai.lt: this used to be FullCalendar\'s own h2 title
 		// (".fc-toolbar-chunk h2"), which the Month Filter button was hung
-		// off. That title now lives in this skin\'s own bar as
-		// .mec-ymtabs-gcal-title, so anchor to that instead — otherwise the
-		// Month Filter button gets appended to an empty selection and never
-		// appears. The h2 lookup is kept as a fallback in case a future MEC
-		// update puts the native title back.
-		const calendarHeaderFirstChild = $mecGcalbarBar.find(".mec-ymtabs-gcal-title").length
-			? $mecGcalbarBar.find(".mec-ymtabs-gcal-title")
+		// off. The month filter belongs in the open fifth grid column of our
+		// merged bar; keeping it outside the fixed-width title prevents it
+		// from shifting or covering the month arrows. The native h2 lookup is
+		// retained as a fallback for a future upstream toolbar change.
+		const calendarHeaderFirstChild = $mecGcalbarBar.find(".mec-ymtabs-gcal-navigator").length
+			? $mecGcalbarBar.find(".mec-ymtabs-gcal-navigator")
 			: jQuery(".fc-header-toolbar").find(".fc-toolbar-chunk h2");
 		const calendarHeaderLastChild = jQuery(".fc-header-toolbar").find(".fc-toolbar-chunk:last-child");
 		const calendarHeaderButton = calendarHeaderLastChild.find(".fc-button-group");

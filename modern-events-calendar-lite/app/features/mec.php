@@ -571,10 +571,8 @@ class MEC_feature_mec extends MEC_base
         $capability = (current_user_can('administrator') ? 'manage_options' : 'mec_settings');
         add_submenu_page('mec-intro', esc_html__('MEC - Settings', 'modern-events-calendar-lite'), esc_html__('Settings', 'modern-events-calendar-lite'), apply_filters('mec_menu_cap', $capability, 'settings'), 'MEC-settings', [$this, 'page']);
 
-        add_submenu_page('mec-intro', esc_html__('MEC - Addons', 'modern-events-calendar-lite'), esc_html__('Addons', 'modern-events-calendar-lite'), apply_filters('mec_menu_cap', 'manage_options', 'addons'), 'MEC-addons', [$this, 'addons']);
         add_submenu_page('mec-intro', esc_html__('MEC - Wizard', 'modern-events-calendar-lite'), esc_html__('Wizard', 'modern-events-calendar-lite'), apply_filters('mec_menu_cap', 'edit_pages', 'wizard'), 'MEC-wizard', [$this, 'setup_wizard']);
 
-        if (!$this->getPRO()) add_submenu_page('mec-intro', esc_html__('MEC - Go Pro', 'modern-events-calendar-lite'), esc_html__('Go Pro', 'modern-events-calendar-lite'), apply_filters('mec_menu_cap', 'manage_options', 'go_pro'), 'MEC-go-pro', [$this, 'go_pro']);
         do_action('after_mec_submenu_action');
     }
 
@@ -1737,100 +1735,8 @@ class MEC_feature_mec extends MEC_base
 
         echo '</ul></div>';
 
-        /**
-         * News Cache
-         */
-        $obj = get_transient('mec_webnus_news');
-
-        // Fetch fresh data if transient expired
-        if (false === $obj)
-        {
-            $response = wp_remote_get(
-                'https://webnus.net/wp-json/wninfo/v1/posts/',
-                [
-                    'timeout'     => 15,
-                    'redirection' => 5,
-                    'sslverify'   => true,
-                    'user-agent'  => 'Mozilla/5.0',
-                    'headers'     => [
-                        'Accept' => 'application/json',
-                    ],
-                ]
-            );
-
-            // Default empty array
-            $obj = [];
-
-            // Ensure request succeeded
-            if (!is_wp_error($response))
-            {
-                $body = wp_remote_retrieve_body($response);
-
-                $decoded = json_decode($body);
-
-                // Ensure valid array response
-                if (is_array($decoded) && !empty($decoded))
-                {
-                    $obj = $decoded;
-
-                    // Cache for 24 hours
-                    set_transient('mec_webnus_news', $obj, DAY_IN_SECONDS);
-                }
-            }
-        }
-
-        // News
-        if (!empty($obj) && is_array($obj))
-        {
-            echo '<h3 class="mec-metabox-feed-head">' . esc_html__('News & Updates', 'modern-events-calendar-lite') . '</h3>
-            <div class="mec-metabox-feed-content">
-                <ul>';
-
-            foreach ($obj as $key => $value)
-            {
-                if (
-                    !is_object($value)
-                    || !isset($value->title)
-                    || !isset($value->content)
-                    || !isset($value->link)
-                )
-                {
-                    continue;
-                }
-
-                echo '<li>
-                    <a href="' . esc_url($value->link) . '" target="_blank" rel="noopener noreferrer">
-                        ' . esc_html($value->title) . '
-                    </a>
-
-                    <p>' . esc_html($value->content) . '</p>
-                </li>';
-            }
-
-            echo '</ul></div>';
-        }
-
-        // Footer Links
-        echo '<div class="mec-metabox-footer">
-            <a href="https://webnus.net/blog/" target="_blank" rel="noopener noreferrer">
-                ' . esc_html__('Blog', 'modern-events-calendar-lite') . '
-                <span aria-hidden="true" class="dashicons dashicons-external"></span>
-            </a>
-
-            <a href="https://webnus.net/dox/modern-events-calendar/" target="_blank" rel="noopener noreferrer">
-                ' . esc_html__('Help', 'modern-events-calendar-lite') . '
-                <span aria-hidden="true" class="dashicons dashicons-external"></span>
-            </a>';
-
-        if ($this->getPRO())
-        {
-            echo '<a href="https://webnus.net/mec-purchase" target="_blank" rel="noopener noreferrer">
-                ' . esc_html__('Go Pro', 'modern-events-calendar-lite') . '
-                <span aria-hidden="true" class="dashicons dashicons-external"></span>
-            </a>';
-        }
-
-        echo '</div>';
+        // Vendor news, sales links, and Go Pro UI are intentionally omitted
+        // from the adventistai.lt maintained build.
     }
 
     public function dashboard_widget_total_booking_ajax_handler()

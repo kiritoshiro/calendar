@@ -1,15 +1,14 @@
 ﻿=== Modern Events Calendar Lite ===
-Contributors: webnus
-Donate link: https://webnus.net
+Contributors: adventistai.lt
 Tags: Event, Events, Calendar, Booking, Schedule, Organizer, Venue
-Requires at least: 4.0.0
+Requires at least: 5.8
 Tested up to: 7.0.2
-Stable tag: 7.35.1
-Requires PHP: 5.6
+Stable tag: 7.35.1.1
+Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress event calendar plugin is the best tool used for managing events websites. Modern Events Calendar is a comprehensive events management plugin
+The adventistai.lt maintained build of Modern Events Calendar Lite, with a streamlined administration interface and private GitHub updates.
 
 == Description ==
 WordPress event calendar plugin is the best tool used for managing events websites. Modern Events Calendar is a comprehensive events management plugin. It is a FREE events management plugin which is extremely user-friendly and well-designed for displaying the events calendar on the websites, ever easier.

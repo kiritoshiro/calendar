@@ -1,0 +1,23 @@
+/* Remove vendor sales surfaces from the adventistai.lt maintained build.
+ * Feature capability checks remain intact; this only removes promotional UI. */
+
+.mec-pro-notice,
+.mec-lite-notification,
+.mec-custom-msg-notification-set-box,
+.mec-custom-msg-2-notification-set-box,
+.mec-go-pro-features-wrap,
+.mec-pro-badge,
+.mec-only-pro,
+.mec-pro-feature,
+#toplevel_page_mec-intro a[href*="MEC-go-pro"],
+.mec-wrap a[href*="webnus.net/mec-purchase"],
+#webnus-dashboard a[href*="webnus.net/mec-purchase"] {
+    display: none !important;
+}
+
+/* Modern WordPress-supported browsers can remove the complete contextual
+ * upsell notice instead of leaving its non-actionable sentence behind. */
+.mec-wrap .info-msg:has(a[href*="webnus.net/mec-purchase"]),
+#webnus-dashboard .info-msg:has(a[href*="webnus.net/mec-purchase"]) {
+    display: none !important;
+}

@@ -878,28 +878,47 @@ class MEC_skin_general_calendar extends MEC_skins
         return mb_substr($full_label, 0, 4).'.';
     }
 
-    /** One query per month (an event spanning several months is counted
-     *  in each one it touches). Uses tstart/tend since those are the
-     *  indexed columns on #__mec_dates. Same approach as
-     *  MEC_skin_monthly_view::ymtabs_counts_for_year(). */
+    /**
+     * Count events for all twelve month tabs in one database query.
+     *
+     * An event that spans multiple months is counted once in every month it
+     * touches. CASE expressions keep that behaviour while avoiding the old
+     * twelve-query loop on every calendar render and year change.
+     */
     public function gcalbar_counts_for_year($year)
     {
         global $wpdb;
 
+        $year = max(1900, min(2100, (int) $year));
         $table  = $wpdb->prefix.'mec_dates';
         $counts = array_fill(1, 12, 0);
+        $select = array();
+        $values = array();
 
         for($m = 1; $m <= 12; $m++)
         {
             $month_start_ts = strtotime(sprintf('%04d-%02d-01 00:00:00', $year, $m));
             $month_end_ts   = strtotime(date('Y-m-t 23:59:59', $month_start_ts));
 
-            $sql = $wpdb->prepare(
-                "SELECT COUNT(DISTINCT post_id) FROM {$table} WHERE status = %s AND public = %d AND tstart <= %d AND tend >= %d",
-                'publish', 1, $month_end_ts, $month_start_ts
-            );
+            $select[] = "COUNT(DISTINCT CASE WHEN tstart <= %d AND tend >= %d THEN post_id END) AS month_{$m}";
+            $values[] = $month_end_ts;
+            $values[] = $month_start_ts;
+        }
 
-            $counts[$m] = (int) $wpdb->get_var($sql);
+        $year_start_ts = strtotime(sprintf('%04d-01-01 00:00:00', $year));
+        $year_end_ts   = strtotime(sprintf('%04d-12-31 23:59:59', $year));
+        $values[] = 'publish';
+        $values[] = 1;
+        $values[] = $year_end_ts;
+        $values[] = $year_start_ts;
+
+        $sql = "SELECT ".implode(', ', $select)." FROM {$table} WHERE status = %s AND public = %d AND tstart <= %d AND tend >= %d";
+        $prepared = call_user_func_array(array($wpdb, 'prepare'), array_merge(array($sql), $values));
+        $row = $wpdb->get_row($prepared, ARRAY_A);
+
+        if(is_array($row))
+        {
+            for($m = 1; $m <= 12; $m++) $counts[$m] = (int) ($row['month_'.$m] ?? 0);
         }
 
         return $counts;
@@ -912,36 +931,26 @@ class MEC_skin_general_calendar extends MEC_skins
 
         ob_start();
         ?>
-        <div class="mec-ymtabs mec-ymtabs-gcalbar" id="mec-gcalbar-<?php echo esc_attr($this->id); ?>" data-mec-id="<?php echo esc_attr($this->id); ?>" data-ajax-url="<?php echo esc_url(admin_url('admin-ajax.php')); ?>">
+        <div class="mec-ymtabs mec-ymtabs-gcalbar" id="mec-gcalbar-<?php echo esc_attr($this->id); ?>" data-mec-id="<?php echo esc_attr($this->id); ?>" data-mec-shown-year="<?php echo esc_attr($year); ?>" data-ajax-url="<?php echo esc_url(admin_url('admin-ajax.php')); ?>">
 
-            <div class="mec-ymtabs-yearbar">
-                <button type="button" class="mec-ymtabs-year-nav mec-ymtabs-year-prev" data-mec-year-jump="<?php echo esc_attr($year - 1); ?>" aria-label="<?php esc_attr_e('Previous year', 'modern-events-calendar-lite'); ?>">&#9664;</button>
-                <span class="mec-ymtabs-year-label"><?php echo esc_html($year); ?></span>
-                <button type="button" class="mec-ymtabs-year-nav mec-ymtabs-year-next" data-mec-year-jump="<?php echo esc_attr($year + 1); ?>" aria-label="<?php esc_attr_e('Next year', 'modern-events-calendar-lite'); ?>">&#9654;</button>
+            <div class="mec-ymtabs-yearbar mec-ymtabs-gcal-navigator">
+                <button type="button" class="mec-ymtabs-today mec-gcalbar-nav-today"><?php esc_html_e('Today', 'modern-events-calendar-lite'); ?></button>
+                <button type="button" class="mec-ymtabs-jump mec-gcalbar-nav-prev" aria-label="<?php esc_attr_e('Previous month', 'modern-events-calendar-lite'); ?>">&lsaquo;</button>
+                <span class="mec-ymtabs-gcal-title">
+                    <span class="mec-ymtabs-gcal-title-before"></span>
+                    <span class="mec-ymtabs-year-control">
+                        <select class="mec-ymtabs-year-label mec-ymtabs-year-select" aria-label="<?php esc_attr_e('Select year', 'modern-events-calendar-lite'); ?>">
+                            <option value="<?php echo esc_attr($year); ?>" selected><?php echo esc_html($year); ?></option>
+                        </select>
+                        <span class="mec-ymtabs-year-caret" aria-hidden="true">&#9662;</span>
+                    </span>
+                    <span class="mec-ymtabs-gcal-title-after"></span>
+                </span>
+                <button type="button" class="mec-ymtabs-jump mec-gcalbar-nav-next" aria-label="<?php esc_attr_e('Next month', 'modern-events-calendar-lite'); ?>">&rsaquo;</button>
             </div>
 
             <div class="mec-ymtabs-months">
                 <?php echo $this->gcalbar_render_months_row($year, $year, $month); ?>
-            </div>
-
-            <?php
-            // adventistai.lt: FullCalendar's own "‹ Today ›" controls (plus
-            // its month/year title) used to render as a second, visually
-            // separate bordered box below this panel (FullCalendar's default
-            // headerToolbar). They're rendered here instead — as row 2 of
-            // this same panel, mirroring how the Monthly View skin merges
-            // its small navigator — and the native toolbar's title/prev/
-            // today/next/prevYear/nextYear are all turned off in tpl.php's
-            // FullCalendar init (headerToolbar.left), so there's no second,
-            // competing set of controls. .mec-ymtabs-gcal-title is kept in
-            // sync with the current month/year from tpl.php's datesSet
-            // callback.
-            ?>
-            <div class="mec-ymtabs-gcal-navigator">
-                <button type="button" class="mec-ymtabs-jump mec-gcalbar-nav-prev" aria-label="<?php esc_attr_e('Previous month', 'modern-events-calendar-lite'); ?>">&lsaquo;</button>
-                <button type="button" class="mec-ymtabs-today mec-gcalbar-nav-today"><?php esc_html_e('Today', 'modern-events-calendar-lite'); ?></button>
-                <span class="mec-ymtabs-gcal-title"></span>
-                <button type="button" class="mec-ymtabs-jump mec-gcalbar-nav-next" aria-label="<?php esc_attr_e('Next month', 'modern-events-calendar-lite'); ?>">&rsaquo;</button>
             </div>
 
         </div>
@@ -987,9 +996,13 @@ class MEC_skin_general_calendar extends MEC_skins
         if (empty($site_locale)) $site_locale = 'en_US';
         if (get_locale() !== $site_locale) switch_to_locale($site_locale);
 
-        $year         = isset($_REQUEST['year']) ? (int) $_REQUEST['year'] : (int) current_time('Y');
-        $active_year  = isset($_REQUEST['active_year']) ? (int) $_REQUEST['active_year'] : $year;
-        $active_month = isset($_REQUEST['active_month']) ? (int) $_REQUEST['active_month'] : 0;
+        $year         = isset($_POST['year']) ? (int) wp_unslash($_POST['year']) : (int) current_time('Y');
+        $active_year  = isset($_POST['active_year']) ? (int) wp_unslash($_POST['active_year']) : $year;
+        $active_month = isset($_POST['active_month']) ? (int) wp_unslash($_POST['active_month']) : 0;
+
+        $year = max(1900, min(2100, $year));
+        $active_year = max(1900, min(2100, $active_year));
+        $active_month = max(0, min(12, $active_month));
 
         wp_send_json(array(
             'year' => $year,

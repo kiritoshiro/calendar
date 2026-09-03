@@ -1,0 +1,32 @@
+name: Plugin checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+      - name: Lint changed PHP surfaces
+        run: |
+          php -l modern-events-calendar-lite/modern-events-calendar-lite.php
+          php -l modern-events-calendar-lite/mec-init.php
+          php -l modern-events-calendar-lite/app/libraries/github-updater.php
+          php -l modern-events-calendar-lite/app/libraries/factory.php
+          php -l modern-events-calendar-lite/app/core/src/Base.php
+          php -l modern-events-calendar-lite/app/features/mec.php
+          php -l modern-events-calendar-lite/app/features/mec/dashboard.php
+          php -l modern-events-calendar-lite/app/features/mec/settings.php
+          php -l modern-events-calendar-lite/app/features/mec/support-page.php
+          php -l modern-events-calendar-lite/app/skins/general_calendar.php
+          php -l modern-events-calendar-lite/app/skins/general_calendar/tpl.php
+      - name: Verify fork customizations
+        run: node tests/verify-customizations.js

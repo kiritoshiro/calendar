@@ -13,9 +13,6 @@ $currencies = $this->main->get_currencies();
 // WordPress Pages
 $pages = get_pages();
 
-echo MEC_kses::full($this->main->mec_custom_msg_2('yes', 'yes'));
-echo MEC_kses::full($this->main->mec_custom_msg('', ''));
-
 // Display Addons Notification
 $get_n_option = get_option('mec_addons_notification_option');
 
