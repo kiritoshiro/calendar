@@ -912,7 +912,7 @@ class MEC_skin_general_calendar extends MEC_skins
 
         ob_start();
         ?>
-        <div class="mec-ymtabs" id="mec-gcalbar-<?php echo esc_attr($this->id); ?>" data-mec-id="<?php echo esc_attr($this->id); ?>" data-ajax-url="<?php echo esc_url(admin_url('admin-ajax.php')); ?>">
+        <div class="mec-ymtabs mec-ymtabs-gcalbar" id="mec-gcalbar-<?php echo esc_attr($this->id); ?>" data-mec-id="<?php echo esc_attr($this->id); ?>" data-ajax-url="<?php echo esc_url(admin_url('admin-ajax.php')); ?>">
 
             <div class="mec-ymtabs-yearbar">
                 <button type="button" class="mec-ymtabs-year-nav mec-ymtabs-year-prev" data-mec-year-jump="<?php echo esc_attr($year - 1); ?>" aria-label="<?php esc_attr_e('Previous year', 'modern-events-calendar-lite'); ?>">&#9664;</button>
@@ -922,6 +922,26 @@ class MEC_skin_general_calendar extends MEC_skins
 
             <div class="mec-ymtabs-months">
                 <?php echo $this->gcalbar_render_months_row($year, $year, $month); ?>
+            </div>
+
+            <?php
+            // adventistai.lt: FullCalendar's own "‹ Today ›" controls (plus
+            // its month/year title) used to render as a second, visually
+            // separate bordered box below this panel (FullCalendar's default
+            // headerToolbar). They're rendered here instead — as row 2 of
+            // this same panel, mirroring how the Monthly View skin merges
+            // its small navigator — and the native toolbar's title/prev/
+            // today/next/prevYear/nextYear are all turned off in tpl.php's
+            // FullCalendar init (headerToolbar.left), so there's no second,
+            // competing set of controls. .mec-ymtabs-gcal-title is kept in
+            // sync with the current month/year from tpl.php's datesSet
+            // callback.
+            ?>
+            <div class="mec-ymtabs-gcal-navigator">
+                <button type="button" class="mec-ymtabs-jump mec-gcalbar-nav-prev" aria-label="<?php esc_attr_e('Previous month', 'modern-events-calendar-lite'); ?>">&lsaquo;</button>
+                <button type="button" class="mec-ymtabs-today mec-gcalbar-nav-today"><?php esc_html_e('Today', 'modern-events-calendar-lite'); ?></button>
+                <span class="mec-ymtabs-gcal-title"></span>
+                <button type="button" class="mec-ymtabs-jump mec-gcalbar-nav-next" aria-label="<?php esc_attr_e('Next month', 'modern-events-calendar-lite'); ?>">&rsaquo;</button>
             </div>
 
         </div>

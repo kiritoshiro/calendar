@@ -22519,12 +22519,26 @@ span.mec-booking-field-required {
   margin-bottom: 8px;
 }
 
+/* adventistai.lt: this toolbar used to also carry the title +
+   prev/today/next/prevYear/nextYear buttons, which made it read as a
+   second box (with its own border) sitting right below the .mec-ymtabs
+   tab bar. Those controls now live in .mec-ymtabs-gcal-navigator (part
+   of the same panel as the tabs — see gcalbar_render_bar() and tpl.php's
+   headerToolbar config) instead, so this only ever holds the optional
+   filter/find buttons now: no border/box around it any more, and it
+   collapses to nothing when those buttons aren't enabled. */
 .mec-gCalendar #mec-gCalendar-wrap .fc-header-toolbar.fc-toolbar {
-  border: 1px solid #e3e4e5;
-  border-radius: var(--mec-primary-border-radius);
-  padding: 18px 30px 10px;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin: 0 0 10px;
   position: relative;
   flex-wrap: wrap;
+}
+
+.mec-gCalendar #mec-gCalendar-wrap .fc-header-toolbar.fc-toolbar:empty {
+  display: none;
+  margin: 0;
 }
 
 .mec-gCalendar #mec-gCalendar-wrap h2.fc-toolbar-title {
@@ -26188,6 +26202,34 @@ body.rtl .mec-wrap {
 }
 
 /* ---------- Responsive tab grid: 6x2 -> 4x3 -> 3x4 -> 2x6 ---------- */
+
+/* ---------- General Calendar's merged navigator (row 2) -------------
+   Same idea as the Monthly View navigator above, but for the
+   FullCalendar-powered "General Calendar" skin: its own native
+   prev/today/next controls are turned off (see tpl.php's headerToolbar
+   config) and replaced with this row so the whole thing reads as one
+   panel instead of a second bordered box underneath the tabs. */
+.mec-ymtabs-gcal-navigator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #fff;
+    border-top: 1px dotted rgba(0, 0, 0, .12);
+    padding: 10px 14px;
+}
+
+.mec-ymtabs-gcal-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 10px;
+    color: #1f2937;
+}
+
+@media (max-width: 600px) {
+    .mec-ymtabs-gcal-title { font-size: 14px; margin: 0 4px; }
+}
+
 
 /* 700-899px: still 6 columns, but switch to short month names */
 @media (max-width: 899px) and (min-width: 700px) {

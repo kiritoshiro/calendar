@@ -230,17 +230,16 @@ endif;
 $javascript .='
 			datesSet: function(arg) {
 			    mecGcalbarSync(arg.view.currentStart);
+			    var mecGcalbarTitle = arg.view.title;
 			';
 if ($lang === 'is') :
 $javascript .='
 			    var months = ["Jan\u00faar", "Febr\u00faar", "Mars", "Apr\u00edl", "Ma\u00ed", "J\u00fan\u00ed", "J\u00fal\u00ed", "\u00c1g\u00fast", "September", "Okt\u00f3ber", "N\u00f3vember", "Desember"];
-			    var titleEl = document.querySelector("#mec_skin_'.esc_js($this->id).' .fc-toolbar-title");
-			    if (titleEl) {
-			        titleEl.textContent = months[arg.start.getMonth()] + " " + arg.start.getFullYear();
-			    }
+			    mecGcalbarTitle = months[arg.start.getMonth()] + " " + arg.start.getFullYear();
 ';
 endif;
 $javascript .='
+			    $mecGcalbarBar.find(".mec-ymtabs-gcal-title").text(mecGcalbarTitle);
 			},
 			';
 if ($lang === 'is') :
@@ -253,7 +252,7 @@ endif;
 $javascript .='
 			firstDay: "'.esc_js($week_start_day).'",
             headerToolbar: {
-                left: "title,prevYear,prev,today,next,nextYear",
+                left: "",
                 center: "",
 				';
 if (mec_general_calendar_find_event($this->sf_options, 'find')):
@@ -502,6 +501,24 @@ $javascript .= '
 			var y = parseInt(jQuery(this).data("mec-year"), 10);
 			var m = parseInt(jQuery(this).data("mec-month"), 10);
 			calendar.gotoDate(new Date(y, m - 1, 1));
+		});
+
+		// adventistai.lt: prev/Today/next controls for the merged row-2
+		// navigator (gcalbar_render_bar()) — these replace FullCalendar\'s
+		// own headerToolbar prev/today/next buttons (turned off above), so
+		// this is the only navigation control now, all driven off the same
+		// calendar instance as the tabs.
+		$mecGcalbarBar.on("click", ".mec-gcalbar-nav-prev", function(e) {
+			e.preventDefault();
+			calendar.prev();
+		});
+		$mecGcalbarBar.on("click", ".mec-gcalbar-nav-next", function(e) {
+			e.preventDefault();
+			calendar.next();
+		});
+		$mecGcalbarBar.on("click", ".mec-gcalbar-nav-today", function(e) {
+			e.preventDefault();
+			calendar.today();
 		});
 
 		calendar.render();
