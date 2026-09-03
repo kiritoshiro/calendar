@@ -10,11 +10,15 @@ permissions:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['7.4', '8.4']
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: ${{ matrix.php-version }}
       - name: Lint changed PHP surfaces
         run: |
           php -l modern-events-calendar-lite/modern-events-calendar-lite.php
