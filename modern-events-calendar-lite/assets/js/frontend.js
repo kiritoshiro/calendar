@@ -7462,6 +7462,12 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
  * now or added later, with a single binding made once.
  * The small native navigator's own prev/next/Today/jump-year
  * buttons are untouched and still use MEC's own mechanism as before.
+ * The delegated handlers below explicitly skip bars carrying
+ * .mec-ymtabs-gcalbar (the General Calendar skin's own tab bar,
+ * general_calendar.php's gcalbar_render_bar()) — see the comment above
+ * that guard for why: without it, this module's own AJAX flow fired on
+ * every General Calendar tab click too and could block a fast follow-up
+ * click on the same bar for the length of a needless request.
  * ============================================================= */
 (function ($) {
     'use strict';
@@ -7573,34 +7579,57 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
     }
 
     $(function () {
-        $(document).on('click', '.mec-ymtabs-item', function (e) {
-            e.preventDefault();
-            var $item = $(this);
-            var $bar = $item.closest('.mec-ymtabs');
-            if ($bar.hasClass('mec-ymtabs-loading')) return;
-            goToMonth($bar, parseInt($item.data('mec-year'), 10), parseInt($item.data('mec-month'), 10));
-        });
+        // adventistai.lt: the General Calendar skin (general_calendar/tpl.php)
+        // has its own, fully self-contained .mec-ymtabs bar — same markup and
+        // class names (mec-ymtabs, mec-ymtabs-item, mec-ymtabs-year-nav) so
+        // the CSS matches, but its clicks are already handled by its own
+        // inline script (scoped to that one bar via jQuery, using FullCalendar's
+        // own gotoDate() API) and it never renders the Monthly-View-specific
+        // #mec_monthly_view_month_* / #mec_skin_events_* elements this module
+        // targets. Without this guard, EVERY click on a General Calendar tab
+        // also ran through goToMonth() below: it always missed on the
+        // "already loaded" check (those elements never exist there), so it
+        // fell through to a needless mec_monthly_view_load_month AJAX call
+        // every time — which set mec-ymtabs-loading on that bar for the
+        // round-trip (CSS: pointer-events: none on .mec-ymtabs-months), so a
+        // second click made while the first was still in flight would land
+        // on nothing, or resolve after the user had already moved to a
+        // different tab. Re-namespaced with '.mecYmtabs' and unbound first so
+        // this only ever binds once even if the script executes more than
+        // once on the same page (e.g. a builder/widget re-running it).
+        $(document).off('click.mecYmtabs', '.mec-ymtabs-item')
+            .on('click.mecYmtabs', '.mec-ymtabs-item', function (e) {
+                var $item = $(this);
+                var $bar = $item.closest('.mec-ymtabs');
+                if ($bar.hasClass('mec-ymtabs-gcalbar')) return;
+                e.preventDefault();
+                if ($bar.hasClass('mec-ymtabs-loading')) return;
+                goToMonth($bar, parseInt($item.data('mec-year'), 10), parseInt($item.data('mec-month'), 10));
+            });
 
-        $(document).on('click', '.mec-ymtabs-year-nav', function (e) {
-            e.preventDefault();
-            var $bar = $(this).closest('.mec-ymtabs');
-            var targetYear = $(this).data('mec-year-jump');
-            var activeYear = parseInt($bar.find('.mec-ymtabs-item-active').data('mec-year'), 10) || targetYear;
-            var activeMonth = parseInt($bar.find('.mec-ymtabs-item-active').data('mec-month'), 10) || 1;
-            loadYear($bar, targetYear, activeYear, activeMonth);
-        });
+        $(document).off('click.mecYmtabs', '.mec-ymtabs-year-nav')
+            .on('click.mecYmtabs', '.mec-ymtabs-year-nav', function (e) {
+                var $bar = $(this).closest('.mec-ymtabs');
+                if ($bar.hasClass('mec-ymtabs-gcalbar')) return;
+                e.preventDefault();
+                var targetYear = $(this).data('mec-year-jump');
+                var activeYear = parseInt($bar.find('.mec-ymtabs-item-active').data('mec-year'), 10) || targetYear;
+                var activeMonth = parseInt($bar.find('.mec-ymtabs-item-active').data('mec-month'), 10) || 1;
+                loadYear($bar, targetYear, activeYear, activeMonth);
+            });
 
         // MEC's own monthly-view JS triggers this after every month change,
         // whether from a tab click (goToMonth, above), a prev/next link, or
         // the Today/jump-year buttons in the small native navigator.
-        $(document).on('load_calendar_data', function () {
-            $('.mec-ymtabs').each(function () {
-                var $bar = $(this);
-                var id = $bar.data('mec-id');
-                var $selected = $('#mec_skin_' + id + ' .mec-month-container-selected');
-                syncFromMonthId($bar, $selected.data('month-id'));
+        $(document).off('load_calendar_data.mecYmtabs')
+            .on('load_calendar_data.mecYmtabs', function () {
+                $('.mec-ymtabs').not('.mec-ymtabs-gcalbar').each(function () {
+                    var $bar = $(this);
+                    var id = $bar.data('mec-id');
+                    var $selected = $('#mec_skin_' + id + ' .mec-month-container-selected');
+                    syncFromMonthId($bar, $selected.data('month-id'));
+                });
             });
-        });
     });
 
 })(jQuery);

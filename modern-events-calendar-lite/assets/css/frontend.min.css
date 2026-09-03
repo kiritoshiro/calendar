@@ -625,3 +625,4 @@
 }
 
 .mec-magenda-agenda .mec-event-footer { display: none; }
+.mec-ymtabs .mec-skin-monthly-view-month-navigator-container .mec-month-navigator{border:0;border-top:1px dotted rgba(0,0,0,.12);border-radius:0}.mec-ymtabs-gcal-navigator{display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;border-top:1px dotted rgba(0,0,0,.12);padding:10px 14px}.mec-ymtabs-gcal-title{font-size:16px;font-weight:700;margin:0 10px;color:#1f2937}@media (max-width:600px){.mec-ymtabs-gcal-title{font-size:14px;margin:0 4px}}.mec-gCalendar #mec-gCalendar-wrap .fc-header-toolbar.fc-toolbar{border:0;border-radius:0;padding:0;margin:0 0 10px;position:relative;flex-wrap:wrap}.mec-gCalendar #mec-gCalendar-wrap .fc-header-toolbar.fc-toolbar:empty{display:none;margin:0}
