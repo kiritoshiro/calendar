@@ -22,13 +22,15 @@ const support = plugin('app/features/mec/support-page.php');
 const base = plugin('app/core/src/Base.php');
 const skin = plugin('app/skins/general_calendar.php');
 const template = plugin('app/skins/general_calendar/tpl.php');
+const weeklySkin = plugin('app/skins/weekly_view.php');
+const frontendJs = plugin('assets/js/frontend.js');
 const frontendCss = plugin('assets/css/adventistai-calendar.css');
 
 const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.2', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.3', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -86,5 +88,16 @@ assert.match(frontendCss, /grid-template-columns:\s*minmax\(0, 1fr\) 34px clamp\
 assert.match(frontendCss, /\.mec-gcalbar-nav-prev\s*\{[\s\S]*?grid-column:\s*2;/);
 assert.match(frontendCss, /\.mec-ymtabs-gcal-title\s*\{[\s\S]*?grid-column:\s*3;/);
 assert.match(frontendCss, /\.mec-gcalbar-nav-next\s*\{[\s\S]*?grid-column:\s*4;/);
+assert.match(frontendCss, /\.mec-ymtabs-today\s*\{[\s\S]*?white-space:\s*nowrap\s*!important;/);
+assert.match(frontendCss, /\.mec-gCalendar\s*>\s*#mec-gCalendar-wrap\s*\{[\s\S]*?overflow-x:\s*auto;/);
+assert.match(frontendCss, /@media\s*\(hover:\s*hover\)\s*and\s*\(pointer:\s*fine\)[\s\S]*?min-width:\s*720px;/);
+
+assert.match(weeklySkin, /apply_filters\('mec_adventistai_calendar_locale',\s*'lt_LT'/);
+assert.match(weeklySkin, /switch_to_locale\(\$calendar_locale\)/);
+const miniAgendaInitStart = frontendJs.indexOf("$('.mec-magenda').each(function ()");
+const miniAgendaInitEnd = frontendJs.indexOf("$(document).on('click', '.mec-magenda-day'", miniAgendaInitStart);
+const miniAgendaInit = frontendJs.slice(miniAgendaInitStart, miniAgendaInitEnd);
+assert.ok(miniAgendaInitStart >= 0 && miniAgendaInitEnd > miniAgendaInitStart, 'mini calendar initializer not found');
+assert.match(miniAgendaInit, /loadMonth\(\$root, year, month\)/, 'mini calendar must refresh its visible month on initial load');
 
 console.log('Customization checks passed.');

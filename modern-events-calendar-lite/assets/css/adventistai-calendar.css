@@ -68,6 +68,31 @@
     opacity: .92;
 }
 
+/* Keep the Lithuanian label intact at high desktop zoom. */
+.mec-ymtabs-today {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+}
+
+/* FullCalendar becomes wider than its content column at high desktop zoom.
+ * Make that overflow reachable instead of letting the page/theme clip it. */
+.mec-gCalendar > #mec-gCalendar-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Preserve the useful seven-column desktop layout when zoom reduces the CSS
+ * viewport. Touch/mobile layouts keep MEC's existing responsive behaviour. */
+@media (hover: hover) and (pointer: fine) {
+    .mec-gCalendar > #mec-gCalendar-wrap > .fc {
+        min-width: 720px;
+    }
+}
+
 .mec-ymtabs-gcalbar .mec-gcalbar-nav-prev:hover,
 .mec-ymtabs-gcalbar .mec-gcalbar-nav-next:hover,
 .mec-ymtabs-gcalbar .mec-gcalbar-nav-today:hover {

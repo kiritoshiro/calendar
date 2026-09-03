@@ -7822,6 +7822,14 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
             var $root = $(this);
             selectDay($root, $root.data('default-day'));
             relabelToday($root);
+
+            // The surrounding page may be cached while event occurrences are
+            // updated independently. Refresh the visible month through the
+            // same live endpoint used by the arrows so the first render and
+            // every later navigation always use one complete data source.
+            var year = parseInt($root.data('cur-year'), 10);
+            var month = parseInt($root.data('cur-month'), 10);
+            if (!isNaN(year) && !isNaN(month)) loadMonth($root, year, month);
         });
 
         $(document).on('click', '.mec-magenda-day', function () {

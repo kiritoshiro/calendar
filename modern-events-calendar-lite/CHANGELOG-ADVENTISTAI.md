@@ -1,5 +1,17 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.3
+
+- Prevented the Lithuanian “Šiandien” navigation label from wrapping.
+- Added horizontal scrolling for the seven-column General Calendar when
+  desktop zoom makes it wider than its content area, without changing the
+  existing touch/mobile layout.
+- Made the mini calendar refresh its initially displayed month from the same
+  live endpoint used for month navigation, avoiding incomplete event badges
+  from stale or partial page markup.
+- Kept mini-calendar AJAX responses in Lithuanian regardless of a logged-in
+  WordPress user's profile language.
+
 ## 7.35.1.2
 
 - Reviewed the official Webnus changelog through 7.36.2, published on

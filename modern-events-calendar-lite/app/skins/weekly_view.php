@@ -368,18 +368,14 @@ class MEC_skin_weekly_view extends MEC_skins
      */
     public function load_month()
     {
-        // adventistai.lt: force the SITE's locale for this AJAX request.
-        // admin-ajax.php requests from a logged-in user pick up that
-        // user's own profile language instead of the site's, so
-        // date_i18n() further down would silently render month names in
-        // whatever language the logged-in admin's WP profile is set to
-        // (often English) rather than the site's actual language. This
-        // is why the month-grid + agenda's month/year labels can flip to
-        // English on AJAX-driven month navigation even though the
-        // initial (non-AJAX) page load is unaffected and shows correctly.
-        $site_locale = get_option('WPLANG');
-        if (empty($site_locale)) $site_locale = 'en_US';
-        if (get_locale() !== $site_locale) switch_to_locale($site_locale);
+        // adventistai.lt: the public mini calendar is Lithuanian by default.
+        // admin-ajax.php otherwise adopts a logged-in user's profile locale,
+        // which made month navigation switch the header to English. Keep the
+        // default filterable for multilingual installations, validate it
+        // before passing it to WordPress, and never derive it from the user.
+        $calendar_locale = apply_filters('mec_adventistai_calendar_locale', 'lt_LT', $this);
+        if (!is_string($calendar_locale) || !preg_match('/^[a-z]{2,3}(?:_[A-Z]{2})?$/', $calendar_locale)) $calendar_locale = 'lt_LT';
+        if (function_exists('switch_to_locale') && get_locale() !== $calendar_locale) switch_to_locale($calendar_locale);
 
         $this->sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $this->main->sanitize_deep_array($_REQUEST['sf']) : [];
         $apply_sf_date = isset($_REQUEST['apply_sf_date']) ? sanitize_text_field($_REQUEST['apply_sf_date']) : 1;

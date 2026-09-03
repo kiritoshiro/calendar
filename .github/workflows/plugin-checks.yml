@@ -28,5 +28,8 @@ jobs:
           php -l modern-events-calendar-lite/app/features/mec/support-page.php
           php -l modern-events-calendar-lite/app/skins/general_calendar.php
           php -l modern-events-calendar-lite/app/skins/general_calendar/tpl.php
+          php -l modern-events-calendar-lite/app/skins/weekly_view.php
       - name: Verify fork customizations
         run: node tests/verify-customizations.js
+      - name: Check customized JavaScript syntax
+        run: node --check modern-events-calendar-lite/assets/js/frontend.js

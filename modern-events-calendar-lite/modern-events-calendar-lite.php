@@ -8,7 +8,7 @@
  *   Author URI: https://adventistai.lt
  *   Developer: adventistai.lt
  *   Developer URI: https://adventistai.lt
- *   Version: 7.35.1.2
+ *   Version: 7.35.1.3
  *   Update URI: https://github.com/kiritoshiro/calendar
  *   Text Domain: modern-events-calendar-lite
  *   Domain Path: /languages
@@ -34,7 +34,7 @@ if (!defined('MECEXEC')) {
     define('MEC_BASENAME', plugin_basename(__FILE__)); // modern-events-calendar/mec.php
 
     /** Plugin Version **/
-    define('MEC_VERSION', '7.35.1.2');
+    define('MEC_VERSION', '7.35.1.3');
 
     /** GitHub updater for the adventistai.lt maintained fork **/
     require_once MEC_ABSPATH . 'app/libraries/github-updater.php';
