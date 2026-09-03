@@ -235,7 +235,11 @@ $javascript .='
 if ($lang === 'is') :
 $javascript .='
 			    var months = ["Jan\u00faar", "Febr\u00faar", "Mars", "Apr\u00edl", "Ma\u00ed", "J\u00fan\u00ed", "J\u00fal\u00ed", "\u00c1g\u00fast", "September", "Okt\u00f3ber", "N\u00f3vember", "Desember"];
-			    mecGcalbarTitle = months[arg.start.getMonth()] + " " + arg.start.getFullYear();
+			    // view.currentStart (the displayed month), not arg.start (the
+			    // visible range, which begins in the previous month whenever
+			    // the grid opens with trailing days) - and getUTC*, since
+			    // these are FullCalendar markers. See mecGcalbarMonthStart().
+			    mecGcalbarTitle = months[arg.view.currentStart.getUTCMonth()] + " " + arg.view.currentStart.getUTCFullYear();
 ';
 endif;
 $javascript .='
@@ -457,6 +461,30 @@ $javascript .= '
 		var $mecGcalbarBar = jQuery("#mec-gcalbar-'.esc_js($this->id).'");
 		var mecGcalbarAjaxUrl = "'. admin_url('admin-ajax.php', NULL) .'";
 
+		/* adventistai.lt: talk to FullCalendar in its OWN time, never the
+		   browser\'s. This calendar is initialised with timeZone set to
+		   WordPress\'s gmt_offset (a bare number like "2"), which is not a
+		   timeZone value FullCalendar understands - it wants "local", "UTC",
+		   or a named zone from a plugin - so it falls back to UTC. In that
+		   mode (and in "local" mode too) FullCalendar hands out "marker"
+		   dates whose UTC fields carry the calendar\'s wall clock, and it
+		   reads any Date you give it the same way.
+
+		   So new Date(year, month - 1, 1) - a date at the BROWSER\'s local
+		   midnight - is the wrong thing to hand it: at UTC+2 local Feb 1
+		   00:00 is Jan 31 22:00 UTC, and the calendar duly showed January.
+		   That was the "clicking a month opens the one to its left" bug:
+		   every tab was off by one for any visitor east of Greenwich, and
+		   correct for anyone west of it, which is why it was so slippery.
+
+		   Fix, both directions: hand FullCalendar a plain "YYYY-MM-01"
+		   string (it parses that in its own zone - no browser offset can
+		   creep in), and read markers back with the getUTC* accessors.
+		   Both are correct whichever timeZone the calendar ends up in. */
+		function mecGcalbarMonthStart(year, month) {
+			return year + "-" + ("0" + month).slice(-2) + "-01";
+		}
+
 		function mecGcalbarSetActive(year, month) {
 			var mm = ("0" + month).slice(-2);
 			$mecGcalbarBar.find(".mec-ymtabs-item").removeClass("mec-ymtabs-item-active");
@@ -489,8 +517,8 @@ $javascript .= '
 		}
 
 		function mecGcalbarSync(dateObj) {
-			var year = dateObj.getFullYear();
-			var month = dateObj.getMonth() + 1;
+			var year = dateObj.getUTCFullYear();
+			var month = dateObj.getUTCMonth() + 1;
 			var shownYear = parseInt($mecGcalbarBar.find(".mec-ymtabs-year-label").text(), 10);
 			if (shownYear !== year) {
 				mecGcalbarLoadYear(year, year, month);
@@ -501,16 +529,18 @@ $javascript .= '
 
 		$mecGcalbarBar.on("click", ".mec-ymtabs-year-nav", function(e) {
 			e.preventDefault();
-			var targetYear = parseInt(jQuery(this).data("mec-year-jump"), 10);
-			var curMonth = calendar.getDate().getMonth();
-			calendar.gotoDate(new Date(targetYear, curMonth, 1));
+			var targetYear = parseInt(jQuery(this).attr("data-mec-year-jump"), 10);
+			var curMonth = calendar.getDate().getUTCMonth() + 1;
+			calendar.gotoDate(mecGcalbarMonthStart(targetYear, curMonth));
 		});
 
 		$mecGcalbarBar.on("click", ".mec-ymtabs-item", function(e) {
 			e.preventDefault();
-			var y = parseInt(jQuery(this).data("mec-year"), 10);
-			var m = parseInt(jQuery(this).data("mec-month"), 10);
-			calendar.gotoDate(new Date(y, m - 1, 1));
+			// .attr() not .data(): jQuery coerces "10".."12" to numbers but
+			// leaves "01".."09" as strings, so read the attribute as written.
+			var y = parseInt(jQuery(this).attr("data-mec-year"), 10);
+			var m = parseInt(jQuery(this).attr("data-mec-month"), 10);
+			calendar.gotoDate(mecGcalbarMonthStart(y, m));
 		});
 
 		// adventistai.lt: prev/Today/next controls for the merged row-2
