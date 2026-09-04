@@ -98,10 +98,12 @@ const miniAgendaInit = frontendJs.slice(miniAgendaInitStart, miniAgendaInitEnd);
 assert.ok(miniAgendaInitStart >= 0 && miniAgendaInitEnd > miniAgendaInitStart, 'mini calendar initializer not found');
 assert.match(miniAgendaInit, /loadMonth\(\$root, year, month\)/, 'mini calendar must refresh its visible month on initial load');
 
-assert.match(updater, /'requires_php' => '8\\.4'/);
+assert.ok(updater.includes("'requires_php' => '8.4'"));
 assert.match(updater, /\/releases\/latest/);
 assert.match(updater, /application\/octet-stream/);
 assert.match(main, /option_mec_options/);
 assert.match(main, /booking_status/);
-assert.doesNotMatch(plugin('app/features/mec/meta_boxes/display_options.php'), /assets\\/img\\/skins|wn-hover-img-sh/);
+const displayOptions = plugin('app/features/mec/meta_boxes/display_options.php');
+assert.equal(displayOptions.includes('assets/img/skins'), false);
+assert.equal(displayOptions.includes('wn-hover-img-sh'), false);
 console.log('Customization checks passed.');
