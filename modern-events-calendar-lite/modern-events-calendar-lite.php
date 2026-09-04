@@ -8,7 +8,7 @@
  *   Author URI: https://adventistai.lt
  *   Developer: adventistai.lt
  *   Developer URI: https://adventistai.lt
- *   Version: 7.35.1.3
+ *   Version: 7.35.1.4
  *   Update URI: https://github.com/kiritoshiro/calendar
  *   Text Domain: modern-events-calendar-lite
  *   Domain Path: /languages
@@ -34,7 +34,25 @@ if (!defined('MECEXEC')) {
     define('MEC_BASENAME', plugin_basename(__FILE__)); // modern-events-calendar/mec.php
 
     /** Plugin Version **/
-    define('MEC_VERSION', '7.35.1.3');
+    define('MEC_VERSION', '7.35.1.4');
+
+    /**
+     * Keep removed commerce and messaging modules disabled without deleting old site data.
+     */
+    $mec_calendar_only_options = static function ($options)
+    {
+        if (!is_array($options)) $options = array();
+        if (!isset($options['settings']) || !is_array($options['settings'])) $options['settings'] = array();
+
+        foreach (array('booking_status', 'appointments_status', 'certificate_status', 'notif_per_event', 'mec_cart_status', 'wc_status') as $key)
+        {
+            $options['settings'][$key] = 0;
+        }
+
+        return $options;
+    };
+    add_filter('option_mec_options', $mec_calendar_only_options);
+    add_filter('default_option_mec_options', $mec_calendar_only_options);
 
     /** GitHub updater for the adventistai.lt maintained fork **/
     require_once MEC_ABSPATH . 'app/libraries/github-updater.php';
@@ -63,14 +81,6 @@ if (!defined('MECEXEC')) {
 
     /** Include Webnus MEC class if not included before **/
     if (!class_exists('MEC')) require_once MEC_ABSPATH . 'mec-init.php';
-
-    add_action('before_woocommerce_init', function ()
-    {
-        if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil'))
-        {
-            \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
-        }
-    });
 
     /** Initialize Webnus MEC Plugin **/
     $MEC = MEC::instance();

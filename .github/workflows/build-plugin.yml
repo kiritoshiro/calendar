@@ -1,0 +1,47 @@
+name: Build and publish slim plugin ZIP
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - run: node tests/verify-customizations.js
+      - name: Build calendar-only package
+        shell: bash
+        run: |
+          set -euo pipefail
+          stage="$RUNNER_TEMP/mec-package"
+          mkdir -p "$stage/modern-events-calendar-lite"
+          rsync -a             --exclude='app/api/Twilio/'             --exclude='app/api/TFPDF/'             --exclude='app/api/Stripe/'             --exclude='app/api/Campaign_Monitor/'             --exclude='app/api/XLSX/'             --exclude='app/api/Meetup/'             --exclude='app/api/addons-api/'             --exclude='assets/img/skins/'             --exclude='assets/css/*rtl*.css'             --exclude='app/features/appointments.php'             --exclude='app/features/attendees.php'             --exclude='app/features/autoemails.php'             --exclude='app/features/bookingcalendar.php'             --exclude='app/features/cart.php'             --exclude='app/features/certificates.php'             --exclude='app/features/notifications.php'             --exclude='app/features/profile.php'             --exclude='app/features/sms.php'             --exclude='app/features/wc.php'             --exclude='app/features/webhooks.php'             --exclude='app/features/booking/'             --exclude='app/features/cart/'             --exclude='app/features/profile/'             --exclude='app/features/certificates/'             --exclude='app/modules/booking/'             --exclude='app/modules/attendees-list/'             --exclude='app/modules/progress-bar/'             --exclude='app/modules/qrcode/'             --exclude='app/features/mec/addons.php'             --exclude='app/features/mec/go-pro.php'             --exclude='assets/img/dp-dsb-support.jpg'             --exclude='assets/img/dp-dsb-support2.png'             --exclude='assets/img/mec-addons-teaser1.png'             --exclude='assets/img/mec-lite-backend-go-pro.png'             --exclude='assets/img/support.png'             --exclude='MEC-Installation-Guide.pdf'             --exclude='languages/'             modern-events-calendar-lite/ "$stage/modern-events-calendar-lite/"
+          mkdir -p "$stage/modern-events-calendar-lite/languages"
+          cp modern-events-calendar-lite/languages/index.html "$stage/modern-events-calendar-lite/languages/"
+          cp modern-events-calendar-lite/languages/modern-events-calendar-lite-en_US.* "$stage/modern-events-calendar-lite/languages/"
+          cp modern-events-calendar-lite/languages/modern-events-calendar-lite-ru_RU.* "$stage/modern-events-calendar-lite/languages/"
+          cp modern-events-calendar-lite/languages/modern-events-calendar-lite-lt_LT.po "$stage/modern-events-calendar-lite/languages/"
+          test -f "$stage/modern-events-calendar-lite/app/api/Google/autoload.php"
+          test ! -e "$stage/modern-events-calendar-lite/app/api/Twilio"
+          cd "$stage"
+          zip -qr "$GITHUB_WORKSPACE/modern-events-calendar-lite-7.35.1.4.zip" modern-events-calendar-lite
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: modern-events-calendar-lite-7.35.1.4
+          path: modern-events-calendar-lite-7.35.1.4.zip
+          if-no-files-found: error
+          retention-days: 30
+      - name: Publish updater release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag='v7.35.1.4'
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" modern-events-calendar-lite-7.35.1.4.zip --clobber
+          else
+            gh release create "$tag" modern-events-calendar-lite-7.35.1.4.zip --title "Calendar 7.35.1.4" --notes "Slim adventistai.lt calendar build with Google Calendar integration."
+          fi

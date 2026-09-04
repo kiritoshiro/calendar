@@ -18,7 +18,6 @@ const factory = plugin('app/libraries/factory.php');
 const feature = plugin('app/features/mec.php');
 const dashboard = plugin('app/features/mec/dashboard.php');
 const settings = plugin('app/features/mec/settings.php');
-const support = plugin('app/features/mec/support-page.php');
 const base = plugin('app/core/src/Base.php');
 const skin = plugin('app/skins/general_calendar.php');
 const template = plugin('app/skins/general_calendar/tpl.php');
@@ -30,7 +29,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.3', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.4', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -56,7 +55,6 @@ assert.doesNotMatch(feature, /webnus\.net\/wp-json\/wninfo|mec-purchase/);
 assert.doesNotMatch(feature, /activate_license|revoke_license|plugin_activation_request/);
 assert.doesNotMatch(dashboard, /notifications\.webnus\.site|mec_custom_msg|mec-pro-notice/);
 assert.doesNotMatch(settings.slice(0, 1000), /mec_custom_msg/);
-assert.doesNotMatch(support, /freshsales|Premium Support|mec-pro-notice/i);
 assert.doesNotMatch(base, /marketing_notice|Tracking\\PostHog|Tracking\\Consent|Tracking\\Snapshot/);
 
 const renderStart = skin.indexOf('public function gcalbar_render_bar()');
@@ -100,4 +98,10 @@ const miniAgendaInit = frontendJs.slice(miniAgendaInitStart, miniAgendaInitEnd);
 assert.ok(miniAgendaInitStart >= 0 && miniAgendaInitEnd > miniAgendaInitStart, 'mini calendar initializer not found');
 assert.match(miniAgendaInit, /loadMonth\(\$root, year, month\)/, 'mini calendar must refresh its visible month on initial load');
 
+assert.match(updater, /'requires_php' => '8\\.4'/);
+assert.match(updater, /\/releases\/latest/);
+assert.match(updater, /application\/octet-stream/);
+assert.match(main, /option_mec_options/);
+assert.match(main, /booking_status/);
+assert.doesNotMatch(plugin('app/features/mec/meta_boxes/display_options.php'), /assets\\/img\\/skins|wn-hover-img-sh/);
 console.log('Customization checks passed.');

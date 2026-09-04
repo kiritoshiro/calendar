@@ -69,7 +69,7 @@ final class MEC_Adventistai_GitHub_Updater
             'icons' => array(),
             'banners' => array(),
             'tested' => '7.0.2',
-            'requires_php' => '7.4',
+            'requires_php' => '8.4',
         );
 
         if(version_compare($remote['version'], MEC_VERSION, '>'))
@@ -109,7 +109,7 @@ final class MEC_Adventistai_GitHub_Updater
             'homepage' => self::REPOSITORY_URL,
             'requires' => '5.8',
             'tested' => '7.0.2',
-            'requires_php' => '7.4',
+            'requires_php' => '8.4',
             'last_updated' => $remote['updated_at'],
             'download_link' => $remote['package'],
             'sections' => array(
@@ -142,7 +142,9 @@ final class MEC_Adventistai_GitHub_Updater
 
         if(!isset($args['headers']) || !is_array($args['headers'])) $args['headers'] = array();
         $args['headers']['Authorization'] = 'Bearer ' . $token;
-        $args['headers']['Accept'] = 'application/vnd.github+json';
+        $args['headers']['Accept'] = strpos($url, '/releases/assets/') !== false
+            ? 'application/octet-stream'
+            : 'application/vnd.github+json';
         $args['headers']['X-GitHub-Api-Version'] = '2022-11-28';
         $args['headers']['User-Agent'] = 'adventistai.lt-calendar-updater';
 
@@ -240,11 +242,30 @@ final class MEC_Adventistai_GitHub_Updater
         $version = trim(preg_replace('/\s*(?:\*\/)?\s*$/', '', $matches[1]));
         if(!preg_match('/^\d+(?:\.\d+){1,3}(?:[-+][0-9A-Za-z.-]+)?$/', $version)) return new WP_Error('mec_adventistai_invalid_remote_version');
 
+        $package = 'https://api.github.com/repos/' . self::REPOSITORY . '/zipball/' . rawurlencode($branch);
+        $updated_at = isset($repository['updated_at']) ? sanitize_text_field($repository['updated_at']) : '';
+
+        // Prefer the slim, installable ZIP published by the release workflow.
+        $release = $this->request_json('https://api.github.com/repos/' . self::REPOSITORY . '/releases/latest');
+        if(!is_wp_error($release) && !empty($release['assets']) && is_array($release['assets']))
+        {
+            foreach($release['assets'] as $asset)
+            {
+                $name = isset($asset['name']) ? sanitize_file_name($asset['name']) : '';
+                if(str_ends_with($name, '.zip') && !empty($asset['url']))
+                {
+                    $package = esc_url_raw($asset['url']);
+                    $updated_at = isset($release['published_at']) ? sanitize_text_field($release['published_at']) : $updated_at;
+                    break;
+                }
+            }
+        }
+
         $remote = array(
             'version' => $version,
             'branch' => $branch,
-            'updated_at' => isset($repository['updated_at']) ? sanitize_text_field($repository['updated_at']) : '',
-            'package' => 'https://api.github.com/repos/' . self::REPOSITORY . '/zipball/' . rawurlencode($branch),
+            'updated_at' => $updated_at,
+            'package' => $package,
         );
 
         set_site_transient(self::CACHE_KEY, $remote, 6 * HOUR_IN_SECONDS);

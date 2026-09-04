@@ -21,3 +21,17 @@
 #webnus-dashboard .info-msg:has(a[href*="webnus.net/mec-purchase"]) {
     display: none !important;
 }
+
+
+/* Color cues replace image-heavy skin previews. */
+.wn-img-sh,.wn-hover-img-sh{display:none!important}
+.mec-custom-nice-select .list li{display:flex;align-items:center;gap:9px}
+.mec-custom-nice-select .list li::before{width:12px;height:12px;flex:0 0 12px;border-radius:50%;background:var(--mec-skin-color,#2f638f);box-shadow:inset 0 0 0 1px rgb(0 0 0 / 12%);content:""}
+.mec-custom-nice-select .list li[data-value="clean"]{--mec-skin-color:#159a9c}
+.mec-custom-nice-select .list li[data-value="minimal"]{--mec-skin-color:#8b95a5}
+.mec-custom-nice-select .list li[data-value="modern"]{--mec-skin-color:#7257b5}
+.mec-custom-nice-select .list li[data-value="simple"]{--mec-skin-color:#4f9d69}
+.mec-custom-nice-select .list li[data-value="colorful"]{--mec-skin-color:#e99338}
+.mec-custom-nice-select .list li[data-value="novel"]{--mec-skin-color:#c85a61}
+.mec-custom-nice-select .list li[data-value="fluent"]{--mec-skin-color:#1d9fc4}
+.mec-custom-nice-select .list li[data-value="liquid"]{--mec-skin-color:#183d5d}

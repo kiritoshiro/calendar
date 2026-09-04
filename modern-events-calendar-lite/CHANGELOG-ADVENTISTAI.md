@@ -1,5 +1,14 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.4
+
+- Slimmed the package to calendar rendering and Google Calendar integration.
+- Removed booking, attendee, payment, WooCommerce, SMS, PDF, promotion, and unrelated integration payloads.
+- Retained Lithuanian-first behavior plus English and Russian catalogs.
+- Replaced image-heavy admin skin previews with compact color swatches.
+- Raised the supported runtime to PHP 8.4.
+
+
 ## 7.35.1.3
 
 - Prevented the Lithuanian “Šiandien” navigation label from wrapping.
