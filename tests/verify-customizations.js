@@ -16,6 +16,8 @@ const init = plugin('mec-init.php');
 const updater = plugin('app/libraries/github-updater.php');
 const factory = plugin('app/libraries/factory.php');
 const feature = plugin('app/features/mec.php');
+const ix = plugin('app/features/ix.php');
+const buildWorkflow = read('.github/workflows/build-plugin.yml');
 const dashboard = plugin('app/features/mec/dashboard.php');
 const supportPage = plugin('app/features/mec/support-page.php');
 const settings = plugin('app/features/mec/settings.php');
@@ -30,7 +32,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.6', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.7', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -54,12 +56,17 @@ assert.doesNotMatch(factory, /api\.webnus\.site\/v3|MEC_API_UPDATE/);
 assert.doesNotMatch(init, /load_auto_update|in_plugin_update_message/);
 
 assert.doesNotMatch(feature, /add_submenu_page\([^\n]+MEC-go-pro/);
+assert.doesNotMatch(feature, /MEC-wizard|setup_wizard|display_wizard/);
 assert.doesNotMatch(feature, /add_submenu_page\([^\n]+MEC-addons/);
 assert.doesNotMatch(feature, /webnus\.net\/wp-json\/wninfo|mec-purchase/);
 assert.doesNotMatch(feature, /activate_license|revoke_license|plugin_activation_request/);
 assert.doesNotMatch(dashboard, /notifications\.webnus\.site|mec_custom_msg|mec-pro-notice|youtube\.com|iframe|License Activation|Change Log/);
 assert.match(dashboard, /Upcoming Events/);
 assert.doesNotMatch(supportPage, /youtube\.com|webnus\.net|Create a Support Ticket|Quick Setup Video|WooCommerce Video/);
+assert.doesNotMatch(ix, /include_meetup_api|MEC-f-calendar-import|MEC-meetup-import|MEC-thirdparty|MEC-test-data|MEC-export|MEC-import|sync_f_import|sync_meetup_import/);
+for (const removed of ['app/features/mec/wizard.php', 'app/features/ix/export.php', 'app/features/ix/import.php', 'app/features/ix/import_f_calendar.php', 'app/features/ix/import_meetup.php', 'app/features/ix/thirdparty.php', 'app/features/ix/test_data.php']) {
+    assert.match(buildWorkflow, new RegExp(`--exclude='${removed.replaceAll('/', '\\/')}'`));
+}
 assert.match(supportPage, /System Information/);
 assert.match(supportPage, /Debug Log/);
 assert.match(supportPage, /is_readable\(\$log_file\)/);

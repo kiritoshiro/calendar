@@ -1,5 +1,11 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.7
+
+- Removed the Setup Wizard from the admin menu and install package.
+- Restricted Import / Export routes and synchronization settings to Google Calendar.
+- Excluded legacy Facebook, Meetup, XML, third-party, and test-data screens from the install package.
+
 ## 7.35.1.6
 
 - Removed the vendor tutorial video, license/add-on prompts, and upstream changelog from the calendar dashboard.

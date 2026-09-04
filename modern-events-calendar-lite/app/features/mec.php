@@ -485,32 +485,8 @@ class MEC_feature_mec extends MEC_base
         $capability = (current_user_can('administrator') ? 'manage_options' : 'mec_settings');
         add_submenu_page('mec-intro', esc_html__('MEC - Settings', 'modern-events-calendar-lite'), esc_html__('Settings', 'modern-events-calendar-lite'), apply_filters('mec_menu_cap', $capability, 'settings'), 'MEC-settings', [$this, 'page']);
 
-        add_submenu_page('mec-intro', esc_html__('MEC - Wizard', 'modern-events-calendar-lite'), esc_html__('Wizard', 'modern-events-calendar-lite'), apply_filters('mec_menu_cap', 'edit_pages', 'wizard'), 'MEC-wizard', [$this, 'setup_wizard']);
 
         do_action('after_mec_submenu_action');
-    }
-
-    /**
-     * Get Wizard page
-     * @return void
-     * @author Webnus <info@webnus.net>
-     */
-    public function setup_wizard()
-    {
-        $this->display_wizard();
-    }
-
-    /**
-     * Show Wizard page
-     * @return void
-     * @author Webnus <info@webnus.net>
-     */
-    public function display_wizard()
-    {
-        $path = MEC::import('app.features.mec.wizard', true, true);
-        ob_start();
-        include $path;
-        echo MEC_kses::full(ob_get_clean());
     }
 
     /**
