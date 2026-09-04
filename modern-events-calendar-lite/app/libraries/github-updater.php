@@ -16,7 +16,7 @@ final class MEC_Adventistai_GitHub_Updater
     const REPOSITORY_URL = 'https://github.com/kiritoshiro/calendar';
     const PLUGIN_DIRECTORY = 'modern-events-calendar-lite';
     const REMOTE_PLUGIN_FILE = 'modern-events-calendar-lite/modern-events-calendar-lite.php';
-    const CACHE_KEY = 'mec_adventistai_github_update';
+    const CACHE_KEY = 'mec_adventistai_github_update_v2';
 
     /** @var self|null */
     private static $instance = null;
@@ -40,7 +40,7 @@ final class MEC_Adventistai_GitHub_Updater
         add_filter('pre_set_site_transient_update_plugins', array($this, 'inject_update'));
         add_filter('plugins_api', array($this, 'plugin_information'), 20, 3);
         add_filter('http_request_args', array($this, 'authorize_github_request'), 20, 2);
-        add_filter('upgrader_source_selection', array($this, 'select_plugin_source'), 20, 4);
+        add_filter('upgrader_source_selection', array($this, 'select_plugin_source'), 5, 4);
         add_action('delete_site_transient_update_plugins', array($this, 'clear_cache'));
         add_action('admin_notices', array($this, 'token_notice'));
     }
@@ -247,7 +247,16 @@ final class MEC_Adventistai_GitHub_Updater
 
         // Prefer the slim, installable ZIP published by the release workflow.
         $release = $this->request_json('https://api.github.com/repos/' . self::REPOSITORY . '/releases/latest');
-        if(!is_wp_error($release) && !empty($release['assets']) && is_array($release['assets']))
+        $release_version = !is_wp_error($release) && !empty($release['tag_name'])
+            ? ltrim(sanitize_text_field($release['tag_name']), 'vV')
+            : '';
+
+        if(
+            !is_wp_error($release)
+            && $release_version === $version
+            && !empty($release['assets'])
+            && is_array($release['assets'])
+        )
         {
             foreach($release['assets'] as $asset)
             {

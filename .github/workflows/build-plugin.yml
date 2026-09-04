@@ -11,8 +11,19 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - run: node tests/verify-customizations.js
+      - name: Read plugin version
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^[[:space:]]*\*[[:space:]]*Version:[[:space:]]*//p' modern-events-calendar-lite/modern-events-calendar-lite.php | head -n1 | tr -d '\r')"
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "archive=modern-events-calendar-lite-$version.zip" >> "$GITHUB_OUTPUT"
       - name: Build calendar-only package
         shell: bash
+        env:
+          ARCHIVE: ${{ steps.meta.outputs.archive }}
         run: |
           set -euo pipefail
           stage="$RUNNER_TEMP/mec-package"
@@ -26,22 +37,24 @@ jobs:
           test -f "$stage/modern-events-calendar-lite/app/api/Google/autoload.php"
           test ! -e "$stage/modern-events-calendar-lite/app/api/Twilio"
           cd "$stage"
-          zip -qr "$GITHUB_WORKSPACE/modern-events-calendar-lite-7.35.1.4.zip" modern-events-calendar-lite
+          zip -qr "$GITHUB_WORKSPACE/$ARCHIVE" modern-events-calendar-lite
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: modern-events-calendar-lite-7.35.1.4
-          path: modern-events-calendar-lite-7.35.1.4.zip
+          name: modern-events-calendar-lite-${{ steps.meta.outputs.version }}
+          path: ${{ steps.meta.outputs.archive }}
           if-no-files-found: error
           retention-days: 30
       - name: Publish updater release
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          ARCHIVE: ${{ steps.meta.outputs.archive }}
         shell: bash
         run: |
           set -euo pipefail
-          tag='v7.35.1.4'
+          tag="v$VERSION"
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" modern-events-calendar-lite-7.35.1.4.zip --clobber
+            gh release upload "$tag" "$ARCHIVE" --clobber
           else
-            gh release create "$tag" modern-events-calendar-lite-7.35.1.4.zip --title "Calendar 7.35.1.4" --notes "Slim adventistai.lt calendar build with Google Calendar integration."
+            gh release create "$tag" "$ARCHIVE" --title "Calendar $VERSION" --notes "Slim adventistai.lt calendar build with Google Calendar integration."
           fi

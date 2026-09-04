@@ -29,7 +29,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.4', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.5', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -42,6 +42,9 @@ assert.match(updater, /ADVENTISTAI_CALENDAR_GITHUB_TOKEN/);
 assert.match(updater, /pre_set_site_transient_update_plugins/);
 assert.match(updater, /plugins_api/);
 assert.match(updater, /upgrader_source_selection/);
+assert.match(updater, /select_plugin_source'\), 5, 4/);
+assert.match(updater, /mec_adventistai_github_update_v2/);
+assert.match(updater, /\$release_version === \$version/);
 assert.match(updater, /Authorization'\] = 'Bearer ' \./);
 assert.match(updater, /REMOTE_PLUGIN_FILE = 'modern-events-calendar-lite\/modern-events-calendar-lite\.php'/);
 assert.match(updater, /mec_adventistai_invalid_update_package/);

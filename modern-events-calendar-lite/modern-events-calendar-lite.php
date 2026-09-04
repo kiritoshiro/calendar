@@ -8,7 +8,7 @@
  *   Author URI: https://adventistai.lt
  *   Developer: adventistai.lt
  *   Developer URI: https://adventistai.lt
- *   Version: 7.35.1.4
+ *   Version: 7.35.1.5
  *   Update URI: https://github.com/kiritoshiro/calendar
  *   Text Domain: modern-events-calendar-lite
  *   Domain Path: /languages
@@ -34,7 +34,7 @@ if (!defined('MECEXEC')) {
     define('MEC_BASENAME', plugin_basename(__FILE__)); // modern-events-calendar/mec.php
 
     /** Plugin Version **/
-    define('MEC_VERSION', '7.35.1.4');
+    define('MEC_VERSION', '7.35.1.5');
 
     /**
      * Keep removed commerce and messaging modules disabled without deleting old site data.

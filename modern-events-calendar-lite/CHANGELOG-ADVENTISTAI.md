@@ -1,5 +1,13 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.5
+
+- Run nested GitHub package selection before WordPress validates the plugin.
+- Invalidate updater metadata cached by the earlier zipball-based implementation.
+- Use a release asset only when its tag matches the version on `main`.
+- Build future release names dynamically from the plugin header.
+
+
 ## 7.35.1.4
 
 - Slimmed the package to calendar rendering and Google Calendar integration.
