@@ -1,5 +1,12 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.6
+
+- Removed the vendor tutorial video, license/add-on prompts, and upstream changelog from the calendar dashboard.
+- Reduced Support to System Information and Debug Log.
+- Made the Debug Log panel safe when the debug log does not yet exist.
+
+
 ## 7.35.1.5
 
 - Run nested GitHub package selection before WordPress validates the plugin.

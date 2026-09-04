@@ -4,7 +4,7 @@ Tags: calendar, events, google calendar
 Requires at least: 6.6
 Tested up to: 7.0.2
 Requires PHP: 8.4
-Stable tag: 7.35.1.5
+Stable tag: 7.35.1.6
 License: GPLv2 or later
 
 Focused calendar build maintained by adventistai.lt.
@@ -23,7 +23,7 @@ Booking, attendees, payments, WooCommerce, SMS, PDF invoices, unrelated importer
 Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar → Import / Export. For private updates define ADVENTISTAI_CALENDAR_GITHUB_TOKEN in wp-config.php with repository read access.
 
 == Changelog ==
-= 7.35.1.5 =
+= 7.35.1.6 =
 * Fixed WordPress package validation order and stale updater caching.
 * Slim calendar-only package with Google Calendar integration.
 * PHP 8.4 support.
