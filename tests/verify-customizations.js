@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.8', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.9', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -51,6 +51,16 @@ assert.match(updater, /Authorization'\] = 'Bearer ' \./);
 assert.match(updater, /REMOTE_PLUGIN_FILE = 'modern-events-calendar-lite\/modern-events-calendar-lite\.php'/);
 assert.match(updater, /mec_adventistai_invalid_update_package/);
 assert.doesNotMatch(updater, /[?&](?:token|access_token)=/i, 'a GitHub token must never be placed in a URL');
+assert.doesNotMatch(updater, /mec_adventistai_missing_github_token/, 'update checks must not require a token while the repository is public');
+assert.match(updater, /ERROR_KEY = 'mec_adventistai_github_update_error'/);
+const authorizeStart = updater.indexOf('public function authorize_github_request');
+const authorizeEnd = updater.indexOf('public function select_plugin_source', authorizeStart);
+assert.ok(authorizeStart >= 0 && authorizeEnd > authorizeStart, 'authorize_github_request not found');
+const authorize = updater.slice(authorizeStart, authorizeEnd);
+assert.ok(
+    authorize.indexOf("'Accept'") < authorize.indexOf('$this->get_token()'),
+    'Accept must be set before the token lookup, or unauthenticated asset downloads return JSON instead of the ZIP'
+);
 assert.doesNotMatch(factory, /api\.webnus\.site\/v3|MEC_API_UPDATE/);
 assert.doesNotMatch(init, /load_auto_update|in_plugin_update_message/);
 

@@ -1,5 +1,11 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.9
+
+- Update checks no longer require a GitHub token. The repository is public, so the updater ran into its own token requirement and reported nothing on every site without one.
+- Always send the GitHub API headers, so an unauthenticated release download receives the ZIP instead of JSON metadata.
+- Replaced the standing "token missing" notice with one that appears only when an update check actually fails, and says why.
+
 ## 7.35.1.8
 
 - Moved System Information and Debug Log onto the M.E. Calendar dashboard.
