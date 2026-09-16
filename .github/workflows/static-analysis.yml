@@ -93,6 +93,9 @@ jobs:
             echo 'No fork-maintained PHP files were found; the import commit lookup is wrong.'
             exit 1
           fi
+          # GitHub runs `shell: bash` with -e, so errexit has to go before a
+          # command whose nonzero exit is the result we want to inspect.
+          set +e
           php .github/linters/vendor/bin/phpcs --standard=.github/linters/phpcs-wordpress.xml --report=summary --report-source -- "${files[@]}" | tee phpcs-review.txt
           status="${PIPESTATUS[0]}"
           # 0 clean, 1 warnings, 2 errors. Anything higher means phpcs itself
@@ -176,6 +179,7 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
+          set +e
           zizmor --format sarif --no-online-audits . > zizmor.sarif
           status=$?
           # Any nonzero status means findings, but an empty report means zizmor
