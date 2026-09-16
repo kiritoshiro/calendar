@@ -3,9 +3,10 @@
 /**
  * WordPress updater for the adventistai.lt MEC fork.
  *
- * The repository is private and the plugin lives in a subdirectory of the
- * repository, so this class handles both authenticated GitHub requests and
- * selecting the nested plugin directory after WordPress unpacks the archive.
+ * The plugin lives in a subdirectory of the repository, so this class selects
+ * the nested plugin directory after WordPress unpacks the archive. A GitHub
+ * token is optional: update checks run unauthenticated while the repository is
+ * public, and the token is used automatically as soon as one is defined.
  */
 
 defined('MECEXEC') or die();
@@ -17,6 +18,7 @@ final class MEC_Adventistai_GitHub_Updater
     const PLUGIN_DIRECTORY = 'modern-events-calendar-lite';
     const REMOTE_PLUGIN_FILE = 'modern-events-calendar-lite/modern-events-calendar-lite.php';
     const CACHE_KEY = 'mec_adventistai_github_update_v2';
+    const ERROR_KEY = 'mec_adventistai_github_update_error';
 
     /** @var self|null */
     private static $instance = null;
@@ -125,8 +127,13 @@ final class MEC_Adventistai_GitHub_Updater
     }
 
     /**
-     * Attach the token only to API calls for this exact repository.
-     * Tokens are never put in URLs, transients, notices, or logs.
+     * Shape API calls for this exact repository, and attach the token when one
+     * is defined. Tokens are never put in URLs, transients, notices, or logs.
+     *
+     * The headers are set whether or not a token exists. A release asset only
+     * redirects to the binary when Accept is application/octet-stream; without
+     * it the API answers with JSON metadata, which would install a package
+     * that is not a plugin.
      *
      * @param array  $args
      * @param string $url
@@ -137,16 +144,15 @@ final class MEC_Adventistai_GitHub_Updater
         $repository_api = 'https://api.github.com/repos/' . self::REPOSITORY;
         if($url !== $repository_api && strpos($url, $repository_api . '/') !== 0) return $args;
 
-        $token = $this->get_token();
-        if($token === '') return $args;
-
         if(!isset($args['headers']) || !is_array($args['headers'])) $args['headers'] = array();
-        $args['headers']['Authorization'] = 'Bearer ' . $token;
         $args['headers']['Accept'] = strpos($url, '/releases/assets/') !== false
             ? 'application/octet-stream'
             : 'application/vnd.github+json';
         $args['headers']['X-GitHub-Api-Version'] = '2022-11-28';
         $args['headers']['User-Agent'] = 'adventistai.lt-calendar-updater';
+
+        $token = $this->get_token();
+        if($token !== '') $args['headers']['Authorization'] = 'Bearer ' . $token;
 
         return $args;
     }
@@ -182,19 +188,33 @@ final class MEC_Adventistai_GitHub_Updater
     public function clear_cache()
     {
         delete_site_transient(self::CACHE_KEY);
+        delete_site_transient(self::ERROR_KEY);
     }
 
-    /** Explain the only required setup without exposing token values. */
+    /**
+     * Report a failed update check without exposing token values. Nothing is
+     * shown while checks succeed, which is the normal case for a public
+     * repository with no token defined.
+     */
     public function token_notice()
     {
-        if($this->get_token() !== '' || !current_user_can('update_plugins') || !function_exists('get_current_screen')) return;
+        if(!current_user_can('update_plugins') || !function_exists('get_current_screen')) return;
+
+        $error = get_site_transient(self::ERROR_KEY);
+        if(!is_string($error) || $error === '') return;
 
         $screen = get_current_screen();
         if(!$screen || !in_array($screen->id, array('plugins', 'update-core'), true)) return;
 
         echo '<div class="notice notice-warning"><p>';
         echo '<strong>' . esc_html__('Modern Events Calendar (adventistai.lt):', 'modern-events-calendar-lite') . '</strong> ';
-        echo esc_html__('Private GitHub update checks are disabled until ADVENTISTAI_CALENDAR_GITHUB_TOKEN (or ADVENTISTAI_GITHUB_TOKEN) is defined in wp-config.php.', 'modern-events-calendar-lite');
+        echo esc_html__('The GitHub update check failed.', 'modern-events-calendar-lite') . ' ' . esc_html($error);
+
+        if($this->get_token() === '')
+        {
+            echo ' ' . esc_html__('If the repository is private, define ADVENTISTAI_CALENDAR_GITHUB_TOKEN (or ADVENTISTAI_GITHUB_TOKEN) in wp-config.php.', 'modern-events-calendar-lite');
+        }
+
         echo '</p></div>';
     }
 
@@ -210,9 +230,13 @@ final class MEC_Adventistai_GitHub_Updater
     }
 
     /**
-     * Read the plugin version directly from the repository default branch.
-     * This intentionally follows the default branch instead of Webnus or the
-     * WordPress.org channel. Future updates only need a version bump and push.
+     * Cached entry point for the remote metadata. Successful lookups are held
+     * for six hours; failures are remembered for fifteen minutes so the admin
+     * notice can report them without retrying on every page load.
+     *
+     * The version comes from the repository default branch rather than Webnus
+     * or the WordPress.org channel, so publishing an update needs only a
+     * version bump and a push.
      *
      * @return array|WP_Error
      */
@@ -221,9 +245,31 @@ final class MEC_Adventistai_GitHub_Updater
         $cached = get_site_transient(self::CACHE_KEY);
         if(is_array($cached) && !empty($cached['version'])) return $cached;
 
-        $token = $this->get_token();
-        if($token === '') return new WP_Error('mec_adventistai_missing_github_token');
+        $remote = $this->fetch_remote_version();
 
+        if(is_wp_error($remote))
+        {
+            $message = $remote->get_error_message();
+            if($message === '') $message = $remote->get_error_code();
+
+            set_site_transient(self::ERROR_KEY, $message, 15 * MINUTE_IN_SECONDS);
+            return $remote;
+        }
+
+        delete_site_transient(self::ERROR_KEY);
+        set_site_transient(self::CACHE_KEY, $remote, 6 * HOUR_IN_SECONDS);
+
+        return $remote;
+    }
+
+    /**
+     * Read the plugin version from the repository default branch, then prefer
+     * the slim ZIP published by the release workflow over a source archive.
+     *
+     * @return array|WP_Error
+     */
+    private function fetch_remote_version()
+    {
         $repository = $this->request_json('https://api.github.com/repos/' . self::REPOSITORY);
         if(is_wp_error($repository)) return $repository;
 
@@ -270,15 +316,12 @@ final class MEC_Adventistai_GitHub_Updater
             }
         }
 
-        $remote = array(
+        return array(
             'version' => $version,
             'branch' => $branch,
             'updated_at' => $updated_at,
             'package' => $package,
         );
-
-        set_site_transient(self::CACHE_KEY, $remote, 6 * HOUR_IN_SECONDS);
-        return $remote;
     }
 
     /** @return array|WP_Error */
