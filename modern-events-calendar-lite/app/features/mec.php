@@ -64,7 +64,6 @@ class MEC_feature_mec extends MEC_base
     public function init()
     {
         $this->factory->action('admin_menu', [$this, 'menus']);
-        $this->factory->action('admin_menu', [$this, 'support_menu'], 21);
         $this->factory->action('init', [$this, 'register_post_type']);
         $this->factory->action('add_meta_boxes', [$this, 'register_meta_boxes'], 1);
         $this->factory->filter('post_row_actions', [$this, 'action_links'], 10, 2);
@@ -409,15 +408,6 @@ class MEC_feature_mec extends MEC_base
         }
 
         return $submenu_file;
-    }
-
-    /**
-     * Add the support menu
-     * @author Webnus <info@webnus.net>
-     */
-    public function support_menu()
-    {
-        add_submenu_page('mec-intro', esc_html__('MEC - Support', 'modern-events-calendar-lite'), esc_html__('Support', 'modern-events-calendar-lite'), 'manage_options', 'MEC-support', [$this, 'support_page']);
     }
 
     /**
@@ -892,29 +882,6 @@ class MEC_feature_mec extends MEC_base
         ob_start();
         include $path;
         echo MEC_kses::full(ob_get_clean());
-    }
-
-    /**
-     * Show support page
-     * @return void
-     * @author Webnus <info@webnus.net>
-     */
-    public function display_support()
-    {
-        $path = MEC::import('app.features.mec.support-page', true, true);
-        ob_start();
-        include $path;
-        echo MEC_kses::full(ob_get_clean());
-    }
-
-    /**
-     * support page
-     * @return void
-     * @author Webnus <info@webnus.net>
-     */
-    public function support_page()
-    {
-        $this->display_support();
     }
 
     /**

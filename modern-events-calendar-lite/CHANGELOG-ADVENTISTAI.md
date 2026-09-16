@@ -1,5 +1,10 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.8
+
+- Moved System Information and Debug Log onto the M.E. Calendar dashboard.
+- Removed the standalone Support submenu, page template, and related admin-screen wiring.
+
 ## 7.35.1.7
 
 - Removed the Setup Wizard from the admin menu and install package.
