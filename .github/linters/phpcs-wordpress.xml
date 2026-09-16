@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<ruleset name="Calendar WordPress review">
+    <description>
+        Security, database and dead-code review for the files this fork maintains.
+        Advisory: the surrounding upstream code predates these standards, so the
+        job reports findings instead of blocking the build.
+    </description>
+
+    <config name="minimum_wp_version" value="6.6"/>
+
+    <!-- Escaping, nonces, input validation, unsafe redirects. -->
+    <rule ref="WordPress.Security"/>
+
+    <!-- SQL injection and query cost. -->
+    <rule ref="WordPress.DB.PreparedSQL"/>
+    <rule ref="WordPress.DB.PreparedSQLPlaceholders"/>
+    <rule ref="WordPress.DB.SlowDBQuery"/>
+    <rule ref="WordPress.DB.DirectDatabaseQuery"/>
+
+    <!-- Prefer WordPress APIs over raw filesystem, cURL and JSON calls. -->
+    <rule ref="WordPress.WP.AlternativeFunctions"/>
+
+    <!-- Dead code, unused variables, pointless conditions, wasted work. -->
+    <rule ref="Generic.CodeAnalysis"/>
+    <rule ref="Squiz.PHP.NonExecutableCode"/>
+</ruleset>

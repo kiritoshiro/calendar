@@ -13,3 +13,21 @@ updates:
       - security
     commit-message:
       prefix: ci
+
+  # Static analysis tooling only. The plugin's own Composer dependencies under
+  # modern-events-calendar-lite/app are vendored into the repository, so a lock
+  # file bump there would ship without the matching vendor/ tree; Trivy scans
+  # that lock file for advisories instead.
+  - package-ecosystem: composer
+    directory: /.github/linters
+    schedule:
+      interval: weekly
+      day: monday
+      time: '05:00'
+      timezone: Europe/Vilnius
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+    commit-message:
+      prefix: ci
