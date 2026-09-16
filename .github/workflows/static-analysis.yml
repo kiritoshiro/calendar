@@ -1,0 +1,219 @@
+name: Static analysis
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '41 4 * * 2'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: static-analysis-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php-analysis:
+    name: PHPStan and PHP 8.4+ compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up PHP 8.4
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: none
+
+      - name: Install analysis tooling
+        run: composer install --working-dir=.github/linters --no-interaction --no-progress
+
+      - name: List the files this fork maintains
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(bash .github/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo 'No fork-maintained PHP files were found; the import commit lookup is wrong.'
+            exit 1
+          fi
+          echo "Analysing ${#files[@]} files:"
+          printf '%s\n' "${files[@]}"
+
+      - name: PHP 8.4+ forward compatibility
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(bash .github/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
+          php .github/linters/vendor/bin/phpcs --standard=.github/linters/phpcs-compatibility.xml --report=full -- "${files[@]}"
+
+      - name: PHPStan bug analysis
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(bash .github/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
+          php .github/linters/vendor/bin/phpstan analyse --configuration=.github/linters/phpstan.neon --no-progress --memory-limit=3G -- "${files[@]}"
+
+  wordpress-standards:
+    name: WordPress security and efficiency review (advisory)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up PHP 8.4
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: none
+
+      - name: Install analysis tooling
+        run: composer install --working-dir=.github/linters --no-interaction --no-progress
+
+      - name: Review escaping, queries and dead code
+        id: review
+        shell: bash
+        run: |
+          set -uo pipefail
+          mapfile -t files < <(bash .github/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo 'No fork-maintained PHP files were found; the import commit lookup is wrong.'
+            exit 1
+          fi
+          # GitHub runs `shell: bash` with -e, so errexit has to go before a
+          # command whose nonzero exit is the result we want to inspect.
+          set +e
+          php .github/linters/vendor/bin/phpcs --standard=.github/linters/phpcs-wordpress.xml --report=summary --report-source -- "${files[@]}" | tee phpcs-review.txt
+          status="${PIPESTATUS[0]}"
+          # 0 clean, 1 warnings, 2 errors. Anything higher means phpcs itself
+          # could not run, which must fail the job rather than report nothing.
+          if [ "$status" -gt 2 ]; then
+            echo "phpcs exited with status $status"
+            exit "$status"
+          fi
+          if [ "$status" -eq 0 ]; then
+            echo 'findings=no' >> "$GITHUB_OUTPUT"
+          else
+            echo 'findings=yes' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Summarize the review
+        if: ${{ !cancelled() }}
+        shell: bash
+        env:
+          FINDINGS: ${{ steps.review.outputs.findings }}
+        run: |
+          set -uo pipefail
+          {
+            echo '### WordPress security and efficiency review'
+            echo
+            if [ "$FINDINGS" = 'no' ]; then
+              echo 'No findings in the files this fork maintains.'
+            else
+              echo 'These findings are advisory while the inherited baseline is reduced.'
+              echo 'PHPStan, PHP 8.4 compatibility and Trivy remain blocking.'
+              echo
+              echo '```text'
+              head -c 200000 phpcs-review.txt
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  semgrep:
+    name: Semgrep PHP vulnerability scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Semgrep
+        run: pipx install semgrep
+
+      - name: Scan shipped plugin code
+        shell: bash
+        run: |
+          set -euo pipefail
+          semgrep scan --config p/php --config p/security-audit --config p/secrets --metrics off --oss-only --sarif --output semgrep.sarif --exclude 'app/vendor' --exclude 'app/api' --exclude '*.min.js' modern-events-calendar-lite
+          test -s semgrep.sarif
+
+      - name: Upload Semgrep results
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@977e6ceaea7361825998245d787fa3b4d6b9e5df # codeql-bundle-v2.27.0
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+
+  workflow-security:
+    name: Workflow supply-chain review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install zizmor
+        run: pipx install zizmor
+
+      - name: Audit GitHub Actions workflows
+        id: zizmor
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          zizmor --format sarif --no-online-audits . > zizmor.sarif
+          status=$?
+          # Any nonzero status means findings, but an empty report means zizmor
+          # itself could not run and the job must not pass silently.
+          if [ ! -s zizmor.sarif ]; then
+            echo "zizmor produced no report (exit status $status)"
+            exit 1
+          fi
+          if [ "$status" -eq 0 ]; then
+            echo 'findings=no' >> "$GITHUB_OUTPUT"
+          else
+            echo 'findings=yes' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload zizmor results
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@977e6ceaea7361825998245d787fa3b4d6b9e5df # codeql-bundle-v2.27.0
+        with:
+          sarif_file: zizmor.sarif
+          category: zizmor
+
+      - name: Summarize the workflow audit
+        if: ${{ !cancelled() }}
+        shell: bash
+        env:
+          FINDINGS: ${{ steps.zizmor.outputs.findings }}
+        run: |
+          set -uo pipefail
+          {
+            echo '### GitHub Actions supply-chain audit'
+            echo
+            if [ "$FINDINGS" = 'no' ]; then
+              echo 'zizmor reported no workflow security findings.'
+            else
+              echo 'zizmor reported findings. See the Security tab, code scanning category zizmor.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

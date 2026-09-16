@@ -1,0 +1,13 @@
+name: Calendar CodeQL configuration
+
+# CodeQL has no PHP analyser, so it covers the JavaScript this plugin ships and
+# the workflows that build and publish it. PHP is handled by PHPStan, PHPCS and
+# Semgrep in the static analysis workflow.
+queries:
+  - uses: security-and-quality
+
+paths-ignore:
+  # Minified bundles analyse poorly and are not edited here.
+  - '**/*.min.js'
+  - '**/*.pkgd.js'
+  - 'modern-events-calendar-lite/assets/js/date.format.min.js'

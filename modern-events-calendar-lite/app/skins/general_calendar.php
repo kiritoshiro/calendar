@@ -14,6 +14,7 @@ class MEC_skin_general_calendar extends MEC_skins
     public $skin = 'general_calendar';
     public $activate_first_date = false;
     public $display_all = false;
+    public $loadMoreRunning = false;
 
     /**
      * Registers skin actions into WordPress
@@ -675,7 +676,6 @@ class MEC_skin_general_calendar extends MEC_skins
         $this->args['tax_query'] = $tax_query;
         $this->args['meta_query'] = $meta_query;
         $this->args['tag'] = $mec_tag_query;
-        if ($lang) $this->args['lang'] = sanitize_text_field($lang);
         $this->args['author'] = implode(',', $this->sanitize_author_ids($filter_author));
         $this->args['author__not_in'] = $this->sanitize_author_ids($filter_ex_author);
 

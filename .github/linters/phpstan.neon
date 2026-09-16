@@ -1,0 +1,24 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 0
+    phpVersion: 80400
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
+
+    # Symbols PHPStan must know about but must not analyse: the whole plugin
+    # (so fork files resolve upstream classes) and optional integrations.
+    scanDirectories:
+        - ../../modern-events-calendar-lite
+    scanFiles:
+        - stubs/optional-integrations.php
+
+    ignoreErrors:
+        # Upstream methods document a return type and then fall through without
+        # returning. The docblocks are inaccurate, the behaviour is intentional,
+        # and correcting them across vendored code would fight every upstream
+        # merge.
+        - identifier: return.missing
+        # Upstream reads DOING_AJAX directly instead of wp_doing_ajax().
+        - identifier: phpstanWP.wpConstant.fetch

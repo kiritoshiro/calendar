@@ -19,7 +19,6 @@ const feature = plugin('app/features/mec.php');
 const ix = plugin('app/features/ix.php');
 const buildWorkflow = read('.github/workflows/build-plugin.yml');
 const dashboard = plugin('app/features/mec/dashboard.php');
-const supportPage = plugin('app/features/mec/support-page.php');
 const settings = plugin('app/features/mec/settings.php');
 const base = plugin('app/core/src/Base.php');
 const skin = plugin('app/skins/general_calendar.php');
@@ -32,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.7', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.8', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -62,14 +61,18 @@ assert.doesNotMatch(feature, /webnus\.net\/wp-json\/wninfo|mec-purchase/);
 assert.doesNotMatch(feature, /activate_license|revoke_license|plugin_activation_request/);
 assert.doesNotMatch(dashboard, /notifications\.webnus\.site|mec_custom_msg|mec-pro-notice|youtube\.com|iframe|License Activation|Change Log/);
 assert.match(dashboard, /Upcoming Events/);
-assert.doesNotMatch(supportPage, /youtube\.com|webnus\.net|Create a Support Ticket|Quick Setup Video|WooCommerce Video/);
+assert.doesNotMatch(dashboard, /youtube\.com|webnus\.net|Create a Support Ticket|Quick Setup Video|WooCommerce Video/);
+assert.match(dashboard, /System Information/);
+assert.match(dashboard, /Debug Log/);
+assert.match(dashboard, /is_readable\(\$log_file\)/);
+assert.match(dashboard, /mec-download-log-file=1/);
+assert.doesNotMatch(feature, /MEC-support|support_menu|support_page|display_support/);
+assert.doesNotMatch(factory, /MEC-support/);
+assert.equal(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'app', 'features', 'mec', 'support-page.php')), false, 'the standalone support page must stay removed');
 assert.doesNotMatch(ix, /include_meetup_api|MEC-f-calendar-import|MEC-meetup-import|MEC-thirdparty|MEC-test-data|MEC-export|MEC-import|sync_f_import|sync_meetup_import/);
 for (const removed of ['app/features/mec/wizard.php', 'app/features/ix/export.php', 'app/features/ix/import.php', 'app/features/ix/import_f_calendar.php', 'app/features/ix/import_meetup.php', 'app/features/ix/thirdparty.php', 'app/features/ix/test_data.php']) {
     assert.match(buildWorkflow, new RegExp(`--exclude='${removed.replaceAll('/', '\\/')}'`));
 }
-assert.match(supportPage, /System Information/);
-assert.match(supportPage, /Debug Log/);
-assert.match(supportPage, /is_readable\(\$log_file\)/);
 assert.doesNotMatch(settings.slice(0, 1000), /mec_custom_msg/);
 assert.doesNotMatch(base, /marketing_notice|Tracking\\PostHog|Tracking\\Consent|Tracking\\Snapshot/);
 
