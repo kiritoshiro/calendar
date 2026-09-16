@@ -4,6 +4,7 @@
 
 - Moved System Information and Debug Log onto the M.E. Calendar dashboard.
 - Removed the standalone Support submenu, page template, and related admin-screen wiring.
+- Fixed an undefined language variable and an undeclared load-more property in the general calendar skin.
 
 ## 7.35.1.7
 

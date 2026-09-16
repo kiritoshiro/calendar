@@ -26,6 +26,7 @@ Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar 
 = 7.35.1.8 =
 * Moved System Information and Debug Log into the M.E. Calendar view.
 * Removed the separate Support submenu and page.
+* Fixed PHP warnings raised by the general calendar skin on every calendar request.
 
 = 7.35.1.7 =
 * Removed the Setup Wizard and restricted Import / Export actions to Google Calendar.
