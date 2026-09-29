@@ -1,0 +1,10 @@
+{
+  "category": "WordPress calendar plugin",
+  "source_paths": [
+    "modern-events-calendar-lite"
+  ],
+  "semgrep_rules": [
+    "p/php",
+    "p/javascript"
+  ]
+}
