@@ -23,6 +23,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Set up PHP 8.4
@@ -71,6 +72,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Set up PHP 8.4
@@ -133,7 +135,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   semgrep:
-    name: Semgrep PHP vulnerability scan
+    name: Semgrep PHP vulnerability report (legacy advisory)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -142,9 +144,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install Semgrep
-        run: pipx install semgrep
+        run: pipx install semgrep==1.178.0
 
       - name: Scan shipped plugin code
         shell: bash
@@ -170,9 +174,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install zizmor
-        run: pipx install zizmor
+        run: pipx install zizmor==1.30.1
 
       - name: Audit GitHub Actions workflows
         id: zizmor
