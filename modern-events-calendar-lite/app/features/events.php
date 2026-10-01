@@ -3576,7 +3576,7 @@ class MEC_feature_events extends MEC_base
                 return false;
         }
 
-        wp_redirect('edit.php?post_type=' . $this->main->get_main_post_type());
+        wp_safe_redirect('edit.php?post_type=' . $this->main->get_main_post_type());
         exit;
     }
 
@@ -3815,7 +3815,7 @@ class MEC_feature_events extends MEC_base
         // Duplicate
         $new_post_id = $this->main->duplicate($id);
 
-        wp_redirect('post.php?post=' . $new_post_id . '&action=edit');
+        wp_safe_redirect('post.php?post=' . $new_post_id . '&action=edit');
         exit;
     }
 
