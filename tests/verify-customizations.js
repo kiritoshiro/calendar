@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.9', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.10', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -146,4 +146,16 @@ assert.match(factory, /if \(\$general_calendar\) wp_enqueue_script\('mec-general
 assert.match(factory, /if \(\$general_calendar\) wp_enqueue_style\('mec-general-calendar-style'\);/);
 assert.match(factory, /apply_filters\('mec_frontend_assets_needed'/);
 assert.match(skinsLibrary, /MEC_factory::mark_rendered\(\$this->skin\);/);
+
+// Unused libraries, the upstream update checker and unused locales stay out of
+// the repository; unminified stylesheets stay out of the package.
+for (const removed of ['app/api/Twilio', 'app/api/TFPDF', 'app/api/Stripe', 'app/api/Campaign_Monitor', 'app/api/XLSX', 'app/api/Meetup', 'app/api/addons-api', 'app/core/puc']) {
+    assert.equal(fs.existsSync(path.join(root, 'modern-events-calendar-lite', removed)), false, `${removed} must stay removed`);
+}
+const languages = fs.readdirSync(path.join(root, 'modern-events-calendar-lite', 'languages')).sort();
+assert.deepEqual(languages, ['index.html', 'modern-events-calendar-lite-en_US.mo', 'modern-events-calendar-lite-en_US.po', 'modern-events-calendar-lite-lt_LT.po', 'modern-events-calendar-lite-ru_RU.mo', 'modern-events-calendar-lite-ru_RU.po', 'modern-events-calendar-lite.pot']);
+for (const css of ['frontend', 'backend', 'a11y', 'a11y-backend']) {
+    assert.match(buildWorkflow, new RegExp(`--exclude='assets\\/css\\/${css}\\.css'`));
+    assert.ok(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'assets', 'css', `${css}.min.css`)), `${css}.min.css must exist`);
+}
 console.log('Customization checks passed.');
