@@ -346,7 +346,7 @@ class Terms {
         ?>
         <div class="mec-import-<?php echo $taxonomy ?>s">
             <h3><?php echo sprintf(__('Import %s CSV File', 'mec-organizer'), ucfirst( $tax )); ?></h3>
-            <form id="mec_import_csv_<?php echo $taxonomy ?>_form" action="<?php echo \MEC\Base::get_main()->get_full_url(); ?>" method="POST" enctype="multipart/form-data">
+            <form id="mec_import_csv_<?php echo $taxonomy ?>_form" action="<?php echo esc_url(\MEC\Base::get_main()->get_full_url()); ?>" method="POST" enctype="multipart/form-data">
                 <div class="mec-form-row">
                     <p>
 						<?php

@@ -75,6 +75,10 @@ class MEC_feature_fes extends MEC_base
      */
     public function current_user_can_submit_event()
     {
+        // adventistai.lt: the FES nonces are printed on every calendar page, so
+        // logged-out visitors are refused unless guest submission is enabled.
+        if (!$this->guest_submission_allowed()) return false;
+
         $capability = true;
         $user = wp_get_current_user();
 
@@ -104,6 +108,16 @@ class MEC_feature_fes extends MEC_base
     /**
      * @return bool
      */
+    public function guest_submission_allowed()
+    {
+        if (is_user_logged_in()) return true;
+
+        return isset($this->settings['fes_guest_status']) && $this->settings['fes_guest_status'] && $this->settings['fes_guest_status'] != '0';
+    }
+
+    /**
+     * @return bool
+     */
     public function validate_fes_term_creation_request()
     {
         $nonce = isset($_REQUEST['fes_nonce']) ? sanitize_text_field(wp_unslash($_REQUEST['fes_nonce'])) : '';
@@ -123,8 +137,9 @@ class MEC_feature_fes extends MEC_base
         $original_post_id = $this->main->get_original_event($post_id);
         if (current_user_can('edit_post', $original_post_id)) return true;
 
+        // Guests have user ID 0, which must not match events without an author.
         $post = get_post($post_id);
-        if (isset($post->post_author) && (int) $post->post_author === get_current_user_id()) return true;
+        if (isset($post->post_author) && get_current_user_id() && (int) $post->post_author === get_current_user_id()) return true;
 
         return false;
     }
@@ -740,6 +755,8 @@ class MEC_feature_fes extends MEC_base
         // Verify that the nonce is valid.
         if (!wp_verify_nonce(sanitize_text_field($_POST['_wpnonce']), 'mec_fes_upload_featured_image')) $this->main->response(['success' => 0, 'code' => 'NONCE_IS_INVALID']);
 
+        if (!$this->current_user_can_submit_event()) $this->main->response(['success' => 0, 'code' => 'NO_ACCESS', 'message' => esc_html__("Sorry! You don't have access to submit events.", 'modern-events-calendar-lite')]);
+
         // Include the function
         if (!function_exists('wp_handle_upload')) require_once ABSPATH . 'wp-admin/includes/file.php';
 
@@ -789,6 +806,8 @@ class MEC_feature_fes extends MEC_base
 
         // Verify that the nonce is valid.
         if (!wp_verify_nonce(sanitize_text_field($_POST['_wpnonce']), 'mec_fes_form')) $this->main->response(['success' => 0, 'code' => 'NONCE_IS_INVALID']);
+
+        if (!$this->current_user_can_submit_event()) $this->main->response(['success' => 0, 'message' => esc_html__("Sorry! You don't have access to submit events.", 'modern-events-calendar-lite'), 'code' => 'NO_ACCESS']);
 
         $raw_mec = isset($_POST['mec']) && is_array($_POST['mec']) ? wp_unslash($_POST['mec']) : [];
         $mec = isset($_POST['mec']) ? $this->main->sanitize_deep_array($_POST['mec']) : [];

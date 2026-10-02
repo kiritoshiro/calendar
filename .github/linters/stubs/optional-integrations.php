@@ -15,6 +15,14 @@ namespace Elementor {
     }
 }
 
+namespace MEC_Advanced_Organizer\Core\Lib {
+    // MEC Advanced Organizer add-on (single event organizer links)
+    class MEC_Advanced_Organizer_Lib_Skin
+    {
+        public function single_page_url($organizer_id) {}
+    }
+}
+
 namespace {
     // BuddyPress
     function bp_activity_set_action($component_id, $type, $description, $format_callback = false, $label = false, $context = array()) {}

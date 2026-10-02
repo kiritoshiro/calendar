@@ -960,6 +960,14 @@ class MEC_skin_single extends MEC_skins
             wp_die(esc_html__('Event not found.', 'modern-events-calendar-lite'));
         }
 
+        // adventistai.lt: this AJAX action is public, so render only events the
+        // visitor could open anyway (no drafts, private, password-protected or other post types).
+        $viewable = is_post_publicly_viewable($post) ? !post_password_required($post) : current_user_can('read_post', $post->ID);
+        if($post->post_type !== $this->main->get_main_post_type() || !$viewable)
+        {
+            wp_die(esc_html__('Event not found.', 'modern-events-calendar-lite'), '', ['response' => 404]);
+        }
+
         if($occurrence !== '' && !$this->is_valid_occurrence_request($id, $occurrence, $occurrence_time))
         {
             wp_die(esc_html__('Event not found.', 'modern-events-calendar-lite'), '', ['response' => 404]);
@@ -1137,7 +1145,7 @@ class MEC_skin_single extends MEC_skins
      */
     public function found_value($k, $arr = [])
     {
-        $dummy = new Mec_Single_Widget();
+        $dummy = new MEC_single_widget();
         $status = $dummy->is_enabled($k);
 
         // Legacy Return!

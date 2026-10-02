@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.10', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.11', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -172,4 +172,18 @@ for (const css of ['frontend', 'backend', 'a11y', 'a11y-backend']) {
     assert.match(buildWorkflow, new RegExp(`--exclude='assets\\/css\\/${css}\\.css'`));
     assert.ok(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'assets', 'css', `${css}.min.css`)), `${css}.min.css must exist`);
 }
+
+// Public-input audit (7.35.1.11): visitor values in the search form are
+// escaped, guests need guest submission enabled, and public endpoints only
+// expose events a visitor could already open.
+for (const key of ['s', 'address', 'event-cost-min', 'event-cost-max']) {
+    assert.doesNotMatch(skinsLibrary, new RegExp(`value="' \\. \\(\\$this->atts\\['${key}'\\]`), `search field ${key} must be escaped`);
+}
+const fesFeature = plugin('app/features/fes.php');
+assert.match(fesFeature, /if \(!\$this->guest_submission_allowed\(\)\) return false;/);
+assert.match(fesFeature, /get_current_user_id\(\) && \(int\) \$post->post_author === get_current_user_id\(\)/);
+assert.equal((fesFeature.match(/if \(!\$this->current_user_can_submit_event\(\)\) \$this->main->response/g) || []).length, 2, 'the event form and image upload must check submission access');
+assert.match(plugin('app/features/events.php'), /if \(!is_user_logged_in\(\) and \(!isset\(\$this->settings\['fes_guest_status'\]\)/);
+assert.match(plugin('app/skins/single.php'), /\$viewable = is_post_publicly_viewable\(\$post\)/);
+assert.match(plugin('app/libraries/main.php'), /get_post_meta\(\(int\) \$book_id, 'mec_event_id', true\) === \(int\) \$event->ID/);
 console.log('Customization checks passed.');

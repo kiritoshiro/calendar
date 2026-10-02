@@ -4584,6 +4584,16 @@ class MEC_main extends MEC_base
 
             if ($key != md5($book_id)) wp_die(__('Request is not valid.', 'modern-events-calendar-lite'), esc_html__('iCal export stopped!', 'modern-events-calendar-lite'), ['back_link' => true]);
 
+            // adventistai.lt: the key is only md5(book_id), so anyone can build it.
+            // Export only a published event that the booking really belongs to.
+            $event = get_post((int) $id);
+            $is_valid = (
+                $event && $event->post_type === $this->get_main_post_type() && $event->post_status === 'publish' && !post_password_required($event)
+                && get_post_type((int) $book_id) === $this->get_book_post_type()
+                && (int) get_post_meta((int) $book_id, 'mec_event_id', true) === (int) $event->ID
+            );
+            if (!$is_valid) wp_die(esc_html__('Request is not valid.', 'modern-events-calendar-lite'), esc_html__('iCal export stopped!', 'modern-events-calendar-lite'), ['back_link' => true]);
+
             $occurrence = isset($_GET['occurrence']) ? sanitize_text_field($_GET['occurrence']) : '';
 
             $events = $this->ical_single_email($id, $book_id, $occurrence);

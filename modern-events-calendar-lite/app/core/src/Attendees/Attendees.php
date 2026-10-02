@@ -41,18 +41,18 @@ class Attendees extends Singleton{
 
                         if( is_array( $v ) && !isset( $v['compare'] ) ){
 
-                            $v = is_array($v) ? "'" . implode("','",$v) . "'" : $v;
+                            $v = "'" . implode("','", array_map('esc_sql', is_array($v) ? $v : array_map('trim', explode(',', (string) $v)))) . "'";
                             $where .= " AND `{$k}` IN (".$v.")";
                         }elseif( is_array( $v ) && isset( $v['compare'] ) ){
 
-                            $compare = isset( $v['compare'] ) ? $v['compare'] : 'IN';
+                            $compare = isset( $v['compare'] ) && in_array( strtoupper( $v['compare'] ), ['IN', 'NOT IN'], true ) ? strtoupper( $v['compare'] ) : 'IN';
                             $v = isset( $v['value'] ) ? $v['value'] : false;
                             if( !$v ){
 
                                 break;
                             }
 
-                            $v = is_array($v) ? "'" . implode("','",$v) . "'" : $v;
+                            $v = "'" . implode("','", array_map('esc_sql', is_array($v) ? $v : array_map('trim', explode(',', (string) $v)))) . "'";
                             $where .= " AND `{$k}` {$compare} (".$v.")";
                         } else {
 
