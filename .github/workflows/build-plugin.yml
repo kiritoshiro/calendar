@@ -6,14 +6,16 @@ on:
 permissions:
   contents: read
 jobs:
+  # Keep ./ for the reusable workflows until actionlint accepts $/
+  # (rhysd/actionlint#711); job-level calls already run the caller's commit.
   cybersecurity:
     permissions:
       contents: read
-    uses: ./.github/workflows/cybersecurity.yml
+    uses: ./.github/workflows/cybersecurity.yml # zizmor: ignore[self-repository]
   security-and-regression:
     permissions:
       contents: read
-    uses: ./.github/workflows/plugin-checks.yml
+    uses: ./.github/workflows/plugin-checks.yml # zizmor: ignore[self-repository]
   package:
     permissions:
       contents: write
