@@ -4,7 +4,7 @@ Tags: calendar, events, google calendar
 Requires at least: 6.6
 Tested up to: 7.0.2
 Requires PHP: 8.4
-Stable tag: 7.35.1.9
+Stable tag: 7.35.1.10
 License: GPLv2 or later
 
 Focused calendar build maintained by adventistai.lt.
@@ -23,6 +23,12 @@ Booking, attendees, payments, WooCommerce, SMS, PDF invoices, non-Google importe
 Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar → Import / Export. For private updates define ADVENTISTAI_CALENDAR_GITHUB_TOKEN in wp-config.php with repository read access.
 
 == Changelog ==
+= 7.35.1.10 =
+* Faster pages: with assets in the footer, calendar files load only on pages that show a calendar.
+* The General Calendar library loads only where that view is shown.
+* Removed unused libraries, the old update checker and unused translations.
+* Fixed "MS Excel Export" in the Events list failing with a PHP error.
+
 = 7.35.1.9 =
 * Fixed update checks never running: a GitHub token is no longer required.
 * Fixed unauthenticated release downloads receiving JSON instead of the plugin ZIP.
