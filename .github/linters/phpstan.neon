@@ -13,6 +13,7 @@ parameters:
         - ../../modern-events-calendar-lite
     scanFiles:
         - stubs/optional-integrations.php
+        - stubs/removed-features.php
 
     ignoreErrors:
         # Upstream methods document a return type and then fall through without

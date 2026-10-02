@@ -149,9 +149,12 @@ assert.match(skinsLibrary, /MEC_factory::mark_rendered\(\$this->skin\);/);
 
 // Unused libraries, the upstream update checker and unused locales stay out of
 // the repository; unminified stylesheets stay out of the package.
-for (const removed of ['app/api/Twilio', 'app/api/TFPDF', 'app/api/Stripe', 'app/api/Campaign_Monitor', 'app/api/XLSX', 'app/api/Meetup', 'app/api/addons-api', 'app/core/puc']) {
+for (const removed of ['app/api/Twilio', 'app/api/TFPDF', 'app/api/Stripe', 'app/api/Campaign_Monitor', 'app/api/Meetup', 'app/api/addons-api', 'app/core/puc']) {
     assert.equal(fs.existsSync(path.join(root, 'modern-events-calendar-lite', removed)), false, `${removed} must stay removed`);
 }
+// The Events list offers "MS Excel Export"; its writer must ship.
+assert.ok(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'app', 'api', 'XLSX', 'xlsxwriter.class.php')), 'the XLSX writer must stay');
+assert.doesNotMatch(buildWorkflow, /--exclude='app\/api\/XLSX\/'/);
 const languages = fs.readdirSync(path.join(root, 'modern-events-calendar-lite', 'languages')).sort();
 assert.deepEqual(languages, ['index.html', 'modern-events-calendar-lite-en_US.mo', 'modern-events-calendar-lite-en_US.po', 'modern-events-calendar-lite-lt_LT.po', 'modern-events-calendar-lite-ru_RU.mo', 'modern-events-calendar-lite-ru_RU.po', 'modern-events-calendar-lite.pot']);
 for (const css of ['frontend', 'backend', 'a11y', 'a11y-backend']) {

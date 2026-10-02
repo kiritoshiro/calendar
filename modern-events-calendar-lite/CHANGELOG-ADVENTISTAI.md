@@ -6,10 +6,11 @@
 - The General Calendar library (about 300 KB) loads only where the General Calendar view is shown.
 - The filter `mec_frontend_assets_needed` forces the assets on when needed.
 - Removed unused code from the repository:
-  - the Twilio, Stripe, TFPDF, Campaign Monitor, XLSX, Meetup and add-on catalogue libraries (the package already left them out);
+  - the Twilio, Stripe, TFPDF, Campaign Monitor, Meetup and add-on catalogue libraries (the package already left them out);
   - the original plugin's update checker (`app/core/puc`), which nothing loaded;
   - 14 unused translation languages.
 - The package also leaves out the unminified `frontend.css`, `backend.css`, `a11y.css` and `a11y-backend.css`. Only the `.min` files are loaded.
+- Fixed "MS Excel Export" in the Events list. The package had left out its XLSX writer (52 KB), so the export ended in a PHP error. The writer now ships.
 
 ## 7.35.1.9
 
