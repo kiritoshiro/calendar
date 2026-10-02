@@ -166,6 +166,8 @@ for (const file of ['app/features/events.php', 'app/features/mec.php', 'app/libr
 // The Events list offers "MS Excel Export"; its writer must ship.
 assert.ok(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'app', 'api', 'XLSX', 'xlsxwriter.class.php')), 'the XLSX writer must stay');
 assert.doesNotMatch(buildWorkflow, /--exclude='app\/api\/XLSX\/'/);
+// Vendored libraries' GitHub templates are not shipped.
+assert.match(buildWorkflow, /--exclude='\.github\/'/);
 const languages = fs.readdirSync(path.join(root, 'modern-events-calendar-lite', 'languages')).sort();
 assert.deepEqual(languages, ['index.html', 'modern-events-calendar-lite-en_US.mo', 'modern-events-calendar-lite-en_US.po', 'modern-events-calendar-lite-lt_LT.po', 'modern-events-calendar-lite-ru_RU.mo', 'modern-events-calendar-lite-ru_RU.po', 'modern-events-calendar-lite.pot']);
 for (const css of ['frontend', 'backend', 'a11y', 'a11y-backend']) {
