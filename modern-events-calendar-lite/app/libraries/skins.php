@@ -330,6 +330,9 @@ class MEC_skins extends MEC_base
             return '';
         }
 
+        // Tell the footer asset loader this page shows MEC output
+        MEC_factory::mark_rendered($this->skin);
+
         // Include needed assets for loading single event details page
         if ($this->sed_method === 'm1') $this->main->load_sed_assets($this->settings);
 

@@ -22,6 +22,35 @@ class MEC_factory extends MEC_base
     public static $params = [];
 
     /**
+     * Shortcode tags registered through shortcode(). adventistai.lt: used to
+     * tell whether the current page shows any MEC output.
+     * @var array
+     */
+    private static $shortcode_tags = [];
+
+    /**
+     * Whether MEC rendered output on this request, and which skins.
+     * @var bool
+     */
+    private static $rendered = false;
+
+    /**
+     * @var array
+     */
+    private static $rendered_skins = [];
+
+    /**
+     * Records that MEC output was rendered on this request.
+     * @param string $skin Skin name, when a skin rendered it.
+     * @return void
+     */
+    public static function mark_rendered($skin = '')
+    {
+        self::$rendered = true;
+        if (is_string($skin) && $skin !== '') self::$rendered_skins[$skin] = true;
+    }
+
+    /**
      * Constructor method
      * @author Webnus <info@webnus.net>
      */
@@ -494,6 +523,13 @@ class MEC_factory extends MEC_base
      */
     public function load_frontend_assets()
     {
+        // adventistai.lt: with "assets in footer" this runs at wp_footer, after
+        // the page body is rendered, so skip pages that show no MEC output and
+        // load the General Calendar library only where that skin is used.
+        $late = doing_action('wp_footer');
+        if ($late && !$this->frontend_assets_needed()) return;
+        $general_calendar = !$late || isset(self::$rendered_skins['general_calendar']);
+
         if ($this->should_include_assets())
         {
             // Styling
@@ -522,7 +558,7 @@ class MEC_factory extends MEC_base
             wp_enqueue_style('mec-select2-style');
 
             // General Calendar
-            wp_enqueue_script('mec-general-calendar-script');
+            if ($general_calendar) wp_enqueue_script('mec-general-calendar-script');
 
             // Include MEC frontend script files
             wp_enqueue_script('mec-tooltip-script');
@@ -605,8 +641,33 @@ class MEC_factory extends MEC_base
             wp_enqueue_style('mec-lity-style');
 
             // General Calendar
-            wp_enqueue_style('mec-general-calendar-style');
+            if ($general_calendar) wp_enqueue_style('mec-general-calendar-style');
         }
+    }
+
+    /**
+     * Whether the current page needs MEC's frontend assets. Reliable only
+     * from wp_footer, once the page body has been rendered.
+     * @return boolean
+     */
+    public function frontend_assets_needed()
+    {
+        $post_type = $this->main->get_main_post_type();
+        $taxonomies = array_filter([
+            'mec_category',
+            'mec_label',
+            'mec_location',
+            'mec_organizer',
+            'mec_speaker',
+            apply_filters('mec_taxonomy_tag', ''),
+        ]);
+
+        $needed = self::$rendered
+            || is_singular([$post_type, 'mec_calendars'])
+            || is_post_type_archive($post_type)
+            || is_tax($taxonomies);
+
+        return (bool) apply_filters('mec_frontend_assets_needed', $needed);
     }
 
     /**
@@ -889,6 +950,19 @@ class MEC_factory extends MEC_base
 
         // Add it to WordPress shortcodes
         add_shortcode($shortcode, $function);
+
+        // Note when one of these shortcodes is rendered, so the footer
+        // asset loader knows the page needs MEC's scripts and styles.
+        if (!count(self::$shortcode_tags))
+        {
+            add_filter('pre_do_shortcode_tag', static function ($return, $tag)
+            {
+                if (isset(self::$shortcode_tags[$tag])) self::mark_rendered();
+                return $return;
+            }, 10, 2);
+        }
+
+        self::$shortcode_tags[$shortcode] = true;
         return true;
     }
 
