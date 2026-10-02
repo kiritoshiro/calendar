@@ -468,7 +468,7 @@ $this->getFactory()->params('footer', function() use($main_page, $wizard_page, $
                 {
                     type: "POST",
                     url: ajaxurl,
-                    data: "action=mec_popup_event_category&category="+category,
+                    data: "action=mec_popup_event_category&_mecnonce="+encodeURIComponent(jQuery("#_mecnonce").val())+"&category="+encodeURIComponent(category),
                     dataType: "json",
                     success: function(data)
                     {

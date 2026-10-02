@@ -101,6 +101,10 @@ class MEC_feature_occurrences extends MEC_base
         // Request is invalid!
         if(!trim($occurrence_id)) $this->main->response(array('success'=>0, 'code'=>'ID_IS_INVALID'));
 
+        // adventistai.lt: the nonce is not tied to an event; check the event this occurrence belongs to.
+        $occurrence = $this->get_data($occurrence_id);
+        if(!is_array($occurrence) || !isset($occurrence['post_id']) || !current_user_can('edit_post', (int) $occurrence['post_id'])) $this->main->response(array('success'=>0, 'code'=>'NO_ACCESS'));
+
         $this->db->q("DELETE FROM `#__mec_occurrences` WHERE `id`='".$this->db->escape($occurrence_id)."'");
 
         $this->main->response(array('success'=>1));
@@ -115,15 +119,21 @@ class MEC_feature_occurrences extends MEC_base
         if(!wp_verify_nonce(sanitize_text_field($_POST['_wpnonce']), 'mec_occurrences_add')) $this->main->response(array('success'=>0, 'code'=>'NONCE_IS_INVALID'));
 
         $date = isset($_POST['date']) ? sanitize_text_field($_POST['date']) : '';
-        $id = isset($_POST['id']) ? sanitize_text_field($_POST['id']) : '';
+        $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+
+        // adventistai.lt: both values went into the SQL unescaped. They are a post ID
+        // and a "start:end" timestamp pair, so integers only.
+        $dates = explode(':', $date);
+        $occurrence = (int) $dates[0];
 
         // Date is invalid!
-        if(!trim($date) or !trim($id)) $this->main->response(array('success'=>0, 'code'=>'DATE_OR_ID_IS_INVALID'));
+        if(!$occurrence or $id <= 0) $this->main->response(array('success'=>0, 'code'=>'DATE_OR_ID_IS_INVALID'));
 
-        $dates = explode(':', $date);
+        // The nonce is not tied to an event; check this one.
+        if(!current_user_can('edit_post', $id)) $this->main->response(array('success'=>0, 'code'=>'NO_ACCESS'));
 
         // Add Occurrence
-        $occurrence_id = $this->db->q("INSERT INTO `#__mec_occurrences` (`post_id`,`occurrence`,`params`) VALUES ('".$id."','".$dates[0]."','".json_encode(array())."')", 'insert');
+        $occurrence_id = $this->db->q($this->db->prepare("INSERT INTO `#__mec_occurrences` (`post_id`,`occurrence`,`params`) VALUES (%d, %d, %s)", $id, $occurrence, json_encode(array())), 'insert');
 
         $success = 1;
 
@@ -481,8 +491,8 @@ class MEC_feature_occurrences extends MEC_base
 
             if($status === 'EventCancelled' && trim($bookings_status))
             {
-                $timestamp = $this->db->select("SELECT occurrence FROM `#__mec_occurrences` WHERE `id`='".esc_sql($occurrence['id'])."'", 'loadResult');
-                $bookings = $this->main->get_bookings($post_id, $timestamp);
+                $timestamp = $this->db->select("SELECT occurrence FROM `#__mec_occurrences` WHERE `id`='".esc_sql($occurrence['id'])."' AND `post_id`='".((int) $post_id)."'", 'loadResult');
+                $bookings = $timestamp ? $this->main->get_bookings($post_id, $timestamp) : [];
 
                 $occ_data = $this->get_data($occurrence['id']);
 
@@ -500,8 +510,9 @@ class MEC_feature_occurrences extends MEC_base
             }
 
 
-            // Save Occurrence
-            $this->db->q("UPDATE `#__mec_occurrences` SET `params`='".json_encode($occurrence, JSON_UNESCAPED_UNICODE)."' WHERE `id`='".$this->db->escape($occurrence['id'])."'");
+            // Save Occurrence (adventistai.lt: escape the JSON, which can contain quotes, and only
+            // touch occurrences of the event being saved; the IDs come from the request)
+            $this->db->q("UPDATE `#__mec_occurrences` SET `params`='".$this->db->escape(json_encode($occurrence, JSON_UNESCAPED_UNICODE))."' WHERE `id`='".$this->db->escape($occurrence['id'])."' AND `post_id`='".((int) $post_id)."'");
         }
 
         $organizer_ids = array_unique($organizer_ids);
@@ -673,7 +684,7 @@ class MEC_feature_occurrences extends MEC_base
             $params = json_decode($o['params'], true);
             $params['id'] = (string) $new_id;
 
-            $occ->db->q("UPDATE `#__mec_occurrences` SET `params`='".json_encode($params)."' WHERE `id`='".esc_sql($new_id)."'");
+            $occ->db->q("UPDATE `#__mec_occurrences` SET `params`='".esc_sql(json_encode($params))."' WHERE `id`='".esc_sql($new_id)."'");
         }
     }
 }

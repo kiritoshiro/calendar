@@ -289,6 +289,11 @@ class MEC_feature_report extends MEC_base
 
     public function attendees()
     {
+        // adventistai.lt: attendee names and e-mails are for report users only,
+        // as in report_event_dates().
+        if (!current_user_can('mec_report')) $this->main->response(['success' => 0, 'code' => 'ADMIN_ONLY']);
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_REQUEST['nonce'] ?? '')), 'mec_settings_nonce')) $this->main->response(['success' => 0, 'code' => 'NONCE_IS_INVALID']);
+
         $id = isset($_POST['id']) ? sanitize_text_field($_POST['id']) : 0;
 
         $occurrence = isset($_POST['occurrence']) ? sanitize_text_field($_POST['occurrence']) : null;
