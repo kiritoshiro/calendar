@@ -83,7 +83,9 @@ jobs:
           set -euo pipefail
           tag="v$VERSION"
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" "$ARCHIVE" --clobber
+            # Never replace a published package: sites that already installed
+            # this version would keep different code under the same number.
+            echo "::notice::$tag is already released; its package is left unchanged. Bump the plugin version to publish this commit."
           else
             gh release create "$tag" "$ARCHIVE" --title "Calendar $VERSION" --notes "Slim adventistai.lt calendar build with Google Calendar integration."
           fi

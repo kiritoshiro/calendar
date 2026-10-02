@@ -587,7 +587,7 @@ class MEC_feature_mec extends MEC_base
         // Duplicate Shortcode
         $new_post_id = $this->main->duplicate_post($id);
 
-        wp_redirect('post.php?post=' . $new_post_id . '&action=edit');
+        wp_safe_redirect(admin_url('post.php?post=' . $new_post_id . '&action=edit'));
         exit;
     }
 
@@ -2118,7 +2118,7 @@ class MEC_feature_mec extends MEC_base
         {
             update_option('mec_constantcontact_refresh_token', $refresh_token, 'no');
 
-            wp_redirect(admin_url('admin.php?page=MEC-settings&tab=MEC-integrations#constantcontact_option'));
+            wp_safe_redirect(admin_url('admin.php?page=MEC-settings&tab=MEC-integrations#constantcontact_option'));
             exit;
         }
     }

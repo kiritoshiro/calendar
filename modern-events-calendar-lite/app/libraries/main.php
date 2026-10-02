@@ -6190,8 +6190,8 @@ class MEC_main extends MEC_base
         // Delete the option to don't do it always
         delete_option('mec_activation_redirect');
 
-        // Redirect to MEC Dashboard
-        wp_redirect(admin_url('/admin.php?page=MEC-wizard'));
+        // Redirect to MEC Dashboard (adventistai.lt: the setup wizard is removed)
+        wp_safe_redirect(admin_url('admin.php?page=mec-intro'));
         exit;
     }
 

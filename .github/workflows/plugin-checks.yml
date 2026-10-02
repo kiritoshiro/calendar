@@ -91,7 +91,6 @@ jobs:
 
   wordpress-security:
     name: WordPress Plugin Check security review (legacy baseline)
-    continue-on-error: true
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -100,22 +99,17 @@ jobs:
         with:
           persist-credentials: false
 
+      # The imported upstream tree carries thousands of findings, so the
+      # official check always reports some. Its outcome alone is not the gate;
+      # the baseline comparison below fails only on findings a change adds.
       - name: Run official WordPress Plugin Check security checks
         id: wordpress-check
+        continue-on-error: true
         uses: WordPress/plugin-check-action@10857da14b6c2246d15402b3e69f777edcf8c12e # v1.1.9
         with:
           build-dir: ./modern-events-calendar-lite
           categories: security
 
-      - name: Summarize WordPress security review
-        if: always()
+      - name: Compare with the legacy baseline
         shell: bash
-        env:
-          CHECK_OUTCOME: ${{ steps.wordpress-check.outcome }}
-        run: |
-          echo '### WordPress Plugin Check' >> "$GITHUB_STEP_SUMMARY"
-          if [ "$CHECK_OUTCOME" = 'success' ]; then
-            echo 'No blocking result was returned by the WordPress security checks.' >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo 'Plugin Check reported security findings or a checker error. The legacy scan is advisory while existing findings are reduced; PHP 8.4 regression and Trivy checks remain blocking.' >> "$GITHUB_STEP_SUMMARY"
-          fi
+        run: python3 .github/linters/plugin-check-baseline.py "$RUNNER_TEMP/plugin-check-results.txt" .github/linters/plugin-check-baseline.json

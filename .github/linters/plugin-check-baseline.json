@@ -1,0 +1,1206 @@
+{
+ "app/addons/ACF.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/KC.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/PMP.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/TNP.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/VC.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/avada.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/avada/preview.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/beaver.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/divi.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/divi/includes/Divi.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/divi/includes/MECShortcodesForDivi.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/divi/includes/loader.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/divi/includes/modules/MECShortcodes/MECShortcodes.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/elementor.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/elementor/shortcode.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/learndash.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/mec-beaver-builder/includes/frontend.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/mec-beaver-builder/mec-beaver-builder.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/tnp/simple/block-empty.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/tnp/simple/block-full.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 12,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/tnp/simple/block-left.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 6,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/tnp/simple/block-right.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 6,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/tnp/simple/block.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/addons/tnp/simple/options.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Auth/Abstract.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Auth/AppIdentity.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Auth/AssertionCredentials.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Auth/ComputeEngine.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Auth/Exception.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Auth/LoginTicket.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Auth/OAuth2.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 27,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Auth/Simple.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Cache/Apc.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Cache/Exception.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Cache/File.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Cache/Memcache.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Cache/Null.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Client.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Collection.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Http/Batch.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Http/CacheParser.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Http/MediaFileUpload.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Http/REST.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 5,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Http/Request.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/IO/Abstract.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/IO/Curl.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/IO/Exception.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/IO/Stream.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 5,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Logger/Abstract.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Logger/Exception.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Logger/File.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Logger/Null.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Logger/Psr.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Model.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 1
+ },
+ "app/api/Google/Service/Exception.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Service/Resource.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Signer/P12.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Task/Exception.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Task/Retryable.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Task/Runner.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/Verifier/Pem.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/api/Google/autoload.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/controller.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/core/src/Attendees/Attendees.php": {
+  "ERROR PluginCheck.Security.DirectDB.UnescapedDBParameter": 1,
+  "WARNING WordPress.DB.DirectDatabaseQuery.DirectQuery": 5,
+  "WARNING WordPress.DB.DirectDatabaseQuery.NoCaching": 4
+ },
+ "app/core/src/Attendees/AttendeesTable.php": {
+  "WARNING PluginCheck.Security.DirectDB.UnescapedDBParameter": 4,
+  "WARNING WordPress.DB.DirectDatabaseQuery.DirectQuery": 5,
+  "WARNING WordPress.DB.DirectDatabaseQuery.NoCaching": 5,
+  "WARNING WordPress.DB.DirectDatabaseQuery.SchemaChange": 4
+ },
+ "app/core/src/Base.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 5
+ },
+ "app/core/src/BookingForm/Attendees.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 12
+ },
+ "app/core/src/BookingForm/DisplayFields.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 5
+ },
+ "app/core/src/Books/BookingForm.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2
+ },
+ "app/core/src/FES/FormBuilder.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 136,
+  "ERROR WordPress.Security.EscapeOutput.UnsafePrintingFunction": 2
+ },
+ "app/core/src/Forms/DisplayFields.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2
+ },
+ "app/core/src/Forms/SettingsForm.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 8
+ },
+ "app/core/src/ImportExport/Terms.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 15,
+  "ERROR WordPress.Security.EscapeOutput.UnsafePrintingFunction": 1
+ },
+ "app/core/src/Libraries/FlushNotices.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3
+ },
+ "app/core/src/Notifications/template-notification-settings.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4
+ },
+ "app/core/src/SingleBuilder/Widgets/EventAttendees/EventAttendees.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2
+ },
+ "app/core/src/SingleBuilder/Widgets/EventBanner/EventBanner.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1
+ },
+ "app/core/src/SingleBuilder/Widgets/EventCancellationReason/EventCancellationReason.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2
+ },
+ "app/core/src/SingleBuilder/Widgets/EventCategories/EventCategories.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3
+ },
+ "app/core/src/SingleBuilder/Widgets/EventCost/EventCost.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4
+ },
+ "app/core/src/SingleBuilder/Widgets/EventDate/EventDate.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4
+ },
+ "app/core/src/SingleBuilder/Widgets/EventExport/EventExport.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2
+ },
+ "app/core/src/SingleBuilder/Widgets/EventLabels/EventLabels.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1
+ },
+ "app/core/src/SingleBuilder/Widgets/EventLocations/EventLocations.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 7
+ },
+ "app/core/src/SingleBuilder/Widgets/EventMoreInfo/EventMoreInfo.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2
+ },
+ "app/core/src/SingleBuilder/Widgets/EventNextOccurrences/EventNextOccurrences.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2
+ },
+ "app/core/src/SingleBuilder/Widgets/EventOrganizers/EventOrganizers.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 5
+ },
+ "app/core/src/SingleBuilder/Widgets/EventQrCode/EventQrCode.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2
+ },
+ "app/core/src/SingleBuilder/Widgets/EventSocialShare/EventSocialShare.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1
+ },
+ "app/core/src/SingleBuilder/Widgets/EventSpeakers/EventSpeakers.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2
+ },
+ "app/core/src/SingleBuilder/Widgets/EventSponsors/EventSponsors.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2
+ },
+ "app/core/src/SingleBuilder/Widgets/EventTags/EventTags.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1
+ },
+ "app/core/src/SingleBuilder/Widgets/EventTime/EventTime.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1
+ },
+ "app/core/src/SingleBuilder/Widgets/EventWeather/EventWeather.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2
+ },
+ "app/core/src/Tracking/Collector.php": {
+  "WARNING WordPress.DB.DirectDatabaseQuery.DirectQuery": 1,
+  "WARNING WordPress.DB.DirectDatabaseQuery.NoCaching": 1
+ },
+ "app/features/admincalendar.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/adminupcoming.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/appointments.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/archive.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/attendees.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/autoemails.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/booking/calendar_novel.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 15,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/booking/variations.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/bookingcalendar.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/cart.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/cart/cart.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 7,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/cart/checkout.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 12,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/certificates.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/certificates/template.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/colors.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/compatibility.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/contextual.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/dc.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/dlfile.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/emails/details.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/events.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 9,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/faq.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 7,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/feed.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/feed/rss2.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 9,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/fes.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/fes/form.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/fes/list.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 15,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/fes/message.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/hourlyschedule.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/ix.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/ix/export.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/ix/export_g_calendar.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/ix/import.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 6,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/ix/import_f_calendar.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/ix/import_g_calendar.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 6,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/ix/import_meetup.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 5,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/ix/sync.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/ix/test_data.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 10,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/ix/thirdparty.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/labels.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/locations.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/login.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/login/login.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/maintenance.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 24,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/addons.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/booking.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 94,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/dashboard.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/dyncss.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 72,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/fes.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/gateways.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/go-pro.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/ie.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/integrations.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 18,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/messages.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/meta_boxes/display_options.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 290,
+  "ERROR WordPress.Security.EscapeOutput.UnsafePrintingFunction": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/meta_boxes/filter.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/meta_boxes/icons.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/meta_boxes/search_form.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 24,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/meta_boxes/shortcode.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/modules.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 13,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/notifications.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 39,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/regform.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/settings.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 27,
+  "ERROR WordPress.Security.EscapeOutput.UnsafePrintingFunction": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/single.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 32,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/styles.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/styling.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/support.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/webfonts/webfonts.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/mec/wizard.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 9,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/notifications.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/occurrences.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/organizers.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/partial.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/popup.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/popup/event.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 34,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/popup/settings.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 11,
+  "ERROR WordPress.Security.EscapeOutput.UnsafePrintingFunction": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/popup/shortcode.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 72,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/profile.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/profile/message.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/profile/profile.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/report.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/report/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 6,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/restful.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/schema.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 13,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/search.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/search_bar/search_bar.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/search_bar/search_noresult.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/search_bar/search_result.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/sms.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/speakers.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/sponsors.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/tag.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/taxonomies/shortcode.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/taxonomyshortcode.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/update.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/userevents.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/wc.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/webhooks.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/features/webhooks/details.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/appointments.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/base.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/book.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/bookingRecord.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/cache.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/capacity.php": {
+  "ERROR PluginCheck.Security.DirectDB.UnescapedDBParameter": 1,
+  "ERROR missing_direct_file_access_protection": 1,
+  "WARNING PluginCheck.Security.DirectDB.UnescapedDBParameter": 2,
+  "WARNING WordPress.DB.DirectDatabaseQuery.DirectQuery": 9,
+  "WARNING WordPress.DB.DirectDatabaseQuery.NoCaching": 8
+ },
+ "app/libraries/captcha.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/cart.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/db.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/eventFields.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/factory.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 7,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/feed.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/filesystem.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/formBuilder.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/github-updater.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/icons.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/main.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 19,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/meetup.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/notifications.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/parser.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/partial.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/qrcode.php": {
+  "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 3,
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/render.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/restful.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/schedule.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/search.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/skins.php": {
+  "ERROR missing_direct_file_access_protection": 1,
+  "WARNING WordPress.DB.DirectDatabaseQuery.DirectQuery": 1,
+  "WARNING WordPress.DB.DirectDatabaseQuery.NoCaching": 1
+ },
+ "app/libraries/syncSchedule.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/ticketVariations.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/tickets.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 80,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/transaction.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/user.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/walker.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/libraries/wc.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/attendees-list/details.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 5,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/booking/default.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/booking/steps/checkout.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 27,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/booking/steps/form.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/booking/steps/message.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/booking/steps/tickets.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 41,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/countdown/details.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/export/details.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/googlemap/details.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/links/details.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/links/list.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/local-time/details.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 9,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/local-time/type1.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 8,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/local-time/type2.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 9,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/local-time/type3.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 8,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/next-event/details.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/next-event/multiple.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 8,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/progress-bar/single.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/qrcode/details.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/qrcode/invoice.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/speakers/details.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 5,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/sponsors/details.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/weather/darksky.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/weather/details.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/weather/visualcrossing.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/modules/weather/weatherapi.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 7,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/agenda.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/agenda/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 13,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/agenda/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 5,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/available_spot.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/available_spot/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 17,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/carousel.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/carousel/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 85,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/carousel/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/countdown.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/countdown/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 37,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/cover.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/cover/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 38,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/custom.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/custom/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 5,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/custom/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 5,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/daily_view.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/daily_view/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 20,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/daily_view/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 8,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/default_full_calendar.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/default_full_calendar/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 6,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/full_calendar.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/full_calendar/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 40,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/general_calendar.php": {
+  "ERROR PluginCheck.Security.DirectDB.UnescapedDBParameter": 1,
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1,
+  "WARNING WordPress.DB.DirectDatabaseQuery.DirectQuery": 1,
+  "WARNING WordPress.DB.DirectDatabaseQuery.NoCaching": 1
+ },
+ "app/skins/general_calendar/render.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/general_calendar/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 26,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/grid.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/grid/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 153,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/grid/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 5,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/list.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/list/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 139,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/list/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 5,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/map.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/map/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/masonry.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/masonry/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 26,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/masonry/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 6,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/monthly_view.php": {
+  "ERROR PluginCheck.Security.DirectDB.UnescapedDBParameter": 1,
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1,
+  "WARNING WordPress.DB.DirectDatabaseQuery.DirectQuery": 1,
+  "WARNING WordPress.DB.DirectDatabaseQuery.NoCaching": 1
+ },
+ "app/skins/monthly_view/calendar.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 25,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/monthly_view/calendar_admin.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 20,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/monthly_view/calendar_clean.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 24,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/monthly_view/calendar_novel.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 59,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/monthly_view/calendar_simple.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 28,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/monthly_view/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/monthly_view/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 12,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/single.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 97
+ },
+ "app/skins/single/builder.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/single/default.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 64,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/single/divi-builder.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/single/m1.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 60,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/single/m2.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 58,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/single/modern.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 27,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/single/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/slider.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/slider/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 63,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/slider/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/tile.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/tile/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 21,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/tile/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 10,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/timeline.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/timeline/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 27,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/timeline/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 5,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/timetable.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/timetable/classic.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/timetable/clean.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/timetable/modern.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 7,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/timetable/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 40,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/timetable/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 1,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/weekly_view.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/weekly_view/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 23,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/weekly_view/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/yearly_view.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/yearly_view/calendar.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/yearly_view/render.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 15,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/skins/yearly_view/tpl.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 9,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/widgets/MEC.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 11,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/widgets/single.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/widgets/single/default.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 43,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "app/widgets/single/modern.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 37,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "mec-init.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "modern-events-calendar-lite.php": {
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "templates/archive-mec-events.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "templates/single-mec-events.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 3,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "templates/taxonomy-mec-category.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ },
+ "templates/taxonomy-mec_tag.php": {
+  "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 4,
+  "ERROR missing_direct_file_access_protection": 1
+ }
+}
