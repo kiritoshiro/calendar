@@ -4592,7 +4592,7 @@ class MEC_main extends MEC_base
                 && get_post_type((int) $book_id) === $this->get_book_post_type()
                 && (int) get_post_meta((int) $book_id, 'mec_event_id', true) === (int) $event->ID
             );
-            if (!$is_valid) wp_die(__('Request is not valid.', 'modern-events-calendar-lite'), esc_html__('iCal export stopped!', 'modern-events-calendar-lite'), ['back_link' => true]);
+            if (!$is_valid) wp_die(esc_html__('Request is not valid.', 'modern-events-calendar-lite'), esc_html__('iCal export stopped!', 'modern-events-calendar-lite'), ['back_link' => true]);
 
             $occurrence = isset($_GET['occurrence']) ? sanitize_text_field($_GET['occurrence']) : '';
 

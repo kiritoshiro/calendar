@@ -1145,7 +1145,7 @@ class MEC_skin_single extends MEC_skins
      */
     public function found_value($k, $arr = [])
     {
-        $dummy = new Mec_Single_Widget();
+        $dummy = new MEC_single_widget();
         $status = $dummy->is_enabled($k);
 
         // Legacy Return!
