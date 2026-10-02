@@ -4186,6 +4186,9 @@ class MEC_feature_events extends MEC_base
         // Verify that the nonce is valid.
         if (!wp_verify_nonce(sanitize_text_field($_POST['_wpnonce']), 'mec_event_gallery_image_upload')) $this->main->response(['success' => 0, 'code' => 'NONCE_IS_INVALID']);
 
+        // adventistai.lt: logged-out visitors may upload only when guest submission is enabled.
+        if (!is_user_logged_in() and (!isset($this->settings['fes_guest_status']) or !$this->settings['fes_guest_status'] or $this->settings['fes_guest_status'] == '0')) $this->main->response(['success' => 0, 'code' => 'NO_ACCESS']);
+
         $images = isset($_FILES['images']) && is_array($_FILES['images']) ? $_FILES['images'] : [];
 
         // No file

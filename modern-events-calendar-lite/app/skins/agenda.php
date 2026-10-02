@@ -252,7 +252,7 @@ class MEC_skin_agenda extends MEC_skins
             $ex = explode(':', $_REQUEST['mec_next_page']);
 
             if (strtotime($ex[0])) $date = $ex[0];
-            if (isset($ex[1])) $this->offset = $ex[1];
+            if (isset($ex[1])) $this->offset = (int) $ex[1];
         }
 
         return $date;

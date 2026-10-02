@@ -1971,7 +1971,7 @@ class MEC_skins extends MEC_base
                 $output .= '<div class="mec-text-input-search">';
                 if ($display_label == 1) $output .= '<label for="mec_sf_s_' . esc_attr($this->id) . '">' . esc_html($label) . ': </label>';
                 $output .= $this->icons->display('magnifier') . '
-                    <input type="search" value="' . ($this->atts['s'] ?? '') . '" id="mec_sf_s_' . esc_attr($this->id) . '" placeholder="' . esc_attr($placeholder) . '" title="' . esc_attr($placeholder) . '" aria-label="' . esc_attr($label) . '" />
+                    <input type="search" value="' . esc_attr($this->atts['s'] ?? '') . '" id="mec_sf_s_' . esc_attr($this->id) . '" placeholder="' . esc_attr($placeholder) . '" title="' . esc_attr($placeholder) . '" aria-label="' . esc_attr($label) . '" />
                 </div>';
             }
         }
@@ -1985,7 +1985,7 @@ class MEC_skins extends MEC_base
                 $output .= '<div class="mec-text-address-search">';
                 if ($display_label == 1) $output .= '<label for="mec_sf_address_s_' . esc_attr($this->id) . '">' . esc_html($label) . ': </label>';
                 $output .= $this->icons->display('map') . '
-                    <input type="search" value="' . ($this->atts['address'] ?? '') . '" id="mec_sf_address_s_' . esc_attr($this->id) . '" placeholder="' . esc_attr($placeholder) . '" title="' . esc_attr($placeholder) . '" aria-label="' . esc_attr($label) . '" />
+                    <input type="search" value="' . esc_attr($this->atts['address'] ?? '') . '" id="mec_sf_address_s_' . esc_attr($this->id) . '" placeholder="' . esc_attr($placeholder) . '" title="' . esc_attr($placeholder) . '" aria-label="' . esc_attr($label) . '" />
                 </div>';
             }
             else if ($type == 'radius_search')
@@ -1996,7 +1996,7 @@ class MEC_skins extends MEC_base
                 $output .= '<div class="mec-text-address-search">';
                 if ($display_label == 1) $output .= '<label for="mec_sf_address_s_' . esc_attr($this->id) . '">' . esc_html($label) . ': </label>';
                 $output .= $this->icons->display('map') . '
-                    <input type="search" value="' . ($this->atts['address'] ?? '') . '" id="mec_sf_address_s_' . esc_attr($this->id) . '" placeholder="' . esc_attr($placeholder) . '" title="' . esc_attr($placeholder) . '" aria-label="' . esc_attr($label) . '" />
+                    <input type="search" value="' . esc_attr($this->atts['address'] ?? '') . '" id="mec_sf_address_s_' . esc_attr($this->id) . '" placeholder="' . esc_attr($placeholder) . '" title="' . esc_attr($placeholder) . '" aria-label="' . esc_attr($label) . '" />
                     <input type="hidden" value="' . esc_attr($radius_value) . '" id="mec_sf_address_radius_' . esc_attr($this->id) . '" />
                     <input type="hidden" value="m" id="mec_sf_address_radius_unit_' . esc_attr($this->id) . '" />
                 </div>';
@@ -2010,8 +2010,8 @@ class MEC_skins extends MEC_base
                 $output .= '<div class="mec-minmax-event-cost">';
                 if ($display_label == 1) $output .= '<label for="mec_sf_event_cost_min_' . esc_attr($this->id) . '">' . esc_html($label) . ': </label>';
                 $output .= $this->icons->display('credit-card') . '
-                    <input type="number" min="0" step="0.01" value="' . ($this->atts['event-cost-min'] ?? '') . '" id="mec_sf_event_cost_min_' . esc_attr($this->id) . '" class="mec-minmax-price" placeholder="' . esc_attr__('Min Price', 'modern-events-calendar-lite') . '" title="' . esc_attr__('Min Price', 'modern-events-calendar-lite') . '" aria-label="' . esc_attr($this->sf_accessible_label($label, __('minimum price', 'modern-events-calendar-lite'))) . '" />
-                    <input type="number" min="0" step="0.01" value="' . ($this->atts['event-cost-max'] ?? '') . '" id="mec_sf_event_cost_max_' . esc_attr($this->id) . '" class="mec-minmax-price" placeholder="' . esc_attr__('Max Price', 'modern-events-calendar-lite') . '" title="' . esc_attr__('Max Price', 'modern-events-calendar-lite') . '" aria-label="' . esc_attr($this->sf_accessible_label($label, __('maximum price', 'modern-events-calendar-lite'))) . '" />
+                    <input type="number" min="0" step="0.01" value="' . esc_attr($this->atts['event-cost-min'] ?? '') . '" id="mec_sf_event_cost_min_' . esc_attr($this->id) . '" class="mec-minmax-price" placeholder="' . esc_attr__('Min Price', 'modern-events-calendar-lite') . '" title="' . esc_attr__('Min Price', 'modern-events-calendar-lite') . '" aria-label="' . esc_attr($this->sf_accessible_label($label, __('minimum price', 'modern-events-calendar-lite'))) . '" />
+                    <input type="number" min="0" step="0.01" value="' . esc_attr($this->atts['event-cost-max'] ?? '') . '" id="mec_sf_event_cost_max_' . esc_attr($this->id) . '" class="mec-minmax-price" placeholder="' . esc_attr__('Max Price', 'modern-events-calendar-lite') . '" title="' . esc_attr__('Max Price', 'modern-events-calendar-lite') . '" aria-label="' . esc_attr($this->sf_accessible_label($label, __('maximum price', 'modern-events-calendar-lite'))) . '" />
                 </div>';
             }
         }

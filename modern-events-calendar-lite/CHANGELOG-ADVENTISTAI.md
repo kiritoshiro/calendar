@@ -1,5 +1,17 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.11
+
+Security fixes from an audit of everything a logged-out visitor can reach:
+
+- Attribute injection: the search form printed `sf[s]`, `sf[address]` and the price filters from the URL into `value="..."` without escaping. The form passes through `MEC_kses::full`, which removed event handlers, so no script ran, but a crafted link could add `style`, `class` and `data-*` attributes (for example, a full-page overlay). The values are now escaped.
+- Every calendar page gives all visitors the frontend-submission nonces. `current_user_can_submit_event()` returned true for logged-out visitors even with guest submission off, so anyone could upload images (`mec_fes_upload_featured_image`) and create speaker and sponsor terms. Logged-out visitors are now refused unless guest submission is enabled. The event form, the featured-image upload and the event-gallery upload enforce the same rule.
+- The frontend form let a logged-out visitor edit any event whose author is 0, because `0 === 0` matched. Author matching now needs a logged-in user.
+- `mec_load_single_page` (public AJAX) rendered any post ID, including drafts, private and password-protected events. It now renders only events the visitor could open anyway.
+- `?method=ical-email` used `md5(book_id)` as its key, which anyone can compute, and exported any event ID. It now requires a published event that the booking belongs to.
+- Hardening: the "load more" offset is cast to an integer; the unused attendee query builder escapes its `IN` values; the taxonomy import form escapes its URL.
+- All admin redirects use `wp_safe_redirect`. After activation the plugin redirects to its dashboard instead of the removed setup wizard, which showed a "WordPress Error" page.
+
 ## 7.35.1.10
 
 - With "assets in footer", calendar scripts and styles load only on pages that show calendar output, or on event, archive and taxonomy pages. A plain post went from about 1.6 MB of calendar files to none.
