@@ -135,4 +135,15 @@ assert.match(main, /booking_status/);
 const displayOptions = plugin('app/features/mec/meta_boxes/display_options.php');
 assert.equal(displayOptions.includes('assets/img/skins'), false);
 assert.equal(displayOptions.includes('wn-hover-img-sh'), false);
+
+// Footer-loaded frontend assets only on pages that render MEC output, and the
+// General Calendar library only where that skin is used.
+const skinsLibrary = plugin('app/libraries/skins.php');
+assert.match(factory, /public static function mark_rendered\(/);
+assert.match(factory, /add_filter\('pre_do_shortcode_tag'/);
+assert.match(factory, /\$late && !\$this->frontend_assets_needed\(\)\) return;/);
+assert.match(factory, /if \(\$general_calendar\) wp_enqueue_script\('mec-general-calendar-script'\);/);
+assert.match(factory, /if \(\$general_calendar\) wp_enqueue_style\('mec-general-calendar-style'\);/);
+assert.match(factory, /apply_filters\('mec_frontend_assets_needed'/);
+assert.match(skinsLibrary, /MEC_factory::mark_rendered\(\$this->skin\);/);
 console.log('Customization checks passed.');
