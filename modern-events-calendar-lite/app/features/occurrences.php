@@ -133,7 +133,7 @@ class MEC_feature_occurrences extends MEC_base
         if(!current_user_can('edit_post', $id)) $this->main->response(array('success'=>0, 'code'=>'NO_ACCESS'));
 
         // Add Occurrence
-        $occurrence_id = $this->db->q("INSERT INTO `#__mec_occurrences` (`post_id`,`occurrence`,`params`) VALUES ('".$id."','".$occurrence."','".json_encode(array())."')", 'insert');
+        $occurrence_id = $this->db->q($this->db->prepare("INSERT INTO `#__mec_occurrences` (`post_id`,`occurrence`,`params`) VALUES (%d, %d, %s)", $id, $occurrence, json_encode(array())), 'insert');
 
         $success = 1;
 

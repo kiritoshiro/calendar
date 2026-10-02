@@ -202,6 +202,6 @@ assert.doesNotMatch(plugin('app/libraries/factory.php'), /wp_ajax_wizard_import_
 assert.match(plugin('app/features/popup.php'), /current_user_can\(\$taxonomy->cap->edit_terms\)/);
 assert.match(plugin('app/features/popup/event.php'), /_mecnonce="\+encodeURIComponent\(jQuery\("#_mecnonce"\)\.val\(\)\)/);
 const occurrencesFeature = plugin('app/features/occurrences.php');
-assert.doesNotMatch(occurrencesFeature, /VALUES \('"\.\$id\."','"\.\$dates\[0\]/);
+assert.match(occurrencesFeature, /VALUES \(%d, %d, %s\)", \$id, \$occurrence, json_encode\(array\(\)\)\)/);
 assert.match(occurrencesFeature, /SET `params`='"\.\$this->db->escape\(json_encode\(\$occurrence, JSON_UNESCAPED_UNICODE\)\)/);
 console.log('Customization checks passed.');
