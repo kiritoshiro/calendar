@@ -152,6 +152,17 @@ assert.match(skinsLibrary, /MEC_factory::mark_rendered\(\$this->skin\);/);
 for (const removed of ['app/api/Twilio', 'app/api/TFPDF', 'app/api/Stripe', 'app/api/Campaign_Monitor', 'app/api/Meetup', 'app/api/addons-api', 'app/core/puc']) {
     assert.equal(fs.existsSync(path.join(root, 'modern-events-calendar-lite', removed)), false, `${removed} must stay removed`);
 }
+// A published package is never replaced, publishing waits for the security
+// checks, and Plugin Check fails only on findings beyond the legacy baseline.
+const pluginChecks = read('.github/workflows/plugin-checks.yml');
+assert.doesNotMatch(buildWorkflow, /--clobber/);
+assert.match(buildWorkflow, /needs: \[cybersecurity, security-and-regression\]/);
+assert.match(pluginChecks, /plugin-check-baseline\.py "\$RUNNER_TEMP\/plugin-check-results\.txt" \.github\/linters\/plugin-check-baseline\.json/);
+assert.ok(fs.existsSync(path.join(root, '.github', 'linters', 'plugin-check-baseline.json')), 'the Plugin Check baseline must exist');
+for (const file of ['app/features/events.php', 'app/features/mec.php', 'app/libraries/main.php']) {
+    assert.doesNotMatch(plugin(file), /(?<!safe_)wp_redirect\(/, `${file} must use wp_safe_redirect`);
+}
+
 // The Events list offers "MS Excel Export"; its writer must ship.
 assert.ok(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'app', 'api', 'XLSX', 'xlsxwriter.class.php')), 'the XLSX writer must stay');
 assert.doesNotMatch(buildWorkflow, /--exclude='app\/api\/XLSX\/'/);

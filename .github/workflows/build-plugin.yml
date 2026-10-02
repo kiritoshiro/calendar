@@ -4,9 +4,22 @@ on:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
+  # Keep ./ for the reusable workflows until actionlint accepts $/
+  # (rhysd/actionlint#711); job-level calls already run the caller's commit.
+  cybersecurity:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/cybersecurity.yml # zizmor: ignore[self-repository]
+  security-and-regression:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/plugin-checks.yml # zizmor: ignore[self-repository]
   package:
+    permissions:
+      contents: write
+    needs: [cybersecurity, security-and-regression]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -72,7 +85,9 @@ jobs:
           set -euo pipefail
           tag="v$VERSION"
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" "$ARCHIVE" --clobber
+            # Never replace a published package: sites that already installed
+            # this version would keep different code under the same number.
+            echo "::notice::$tag is already released; its package is left unchanged. Bump the plugin version to publish this commit."
           else
             gh release create "$tag" "$ARCHIVE" --title "Calendar $VERSION" --notes "Slim adventistai.lt calendar build with Google Calendar integration."
           fi
