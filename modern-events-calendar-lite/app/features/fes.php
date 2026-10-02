@@ -302,6 +302,14 @@ class MEC_feature_fes extends MEC_base
         }
 
         $event_id = intval(sanitize_text_field($_REQUEST['mec_event_id']));
+
+        // adventistai.lt: fes_nonce is printed on every page, so it proves nothing.
+        // Only people who may edit the event (or its logged-in author) get its bookings.
+        if ($event_id <= 0 || !$this->current_user_can_upsert_event($event_id))
+        {
+            die(json_encode(['ex' => "error"]));
+        }
+
         $timestamp = isset($_REQUEST['timestamp']) ? sanitize_text_field($_REQUEST['timestamp']) : 0;
         $booking_ids = '';
         $type = isset($_REQUEST['type']) ? sanitize_text_field($_REQUEST['type']) : 'csv';

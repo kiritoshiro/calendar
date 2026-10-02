@@ -22,6 +22,7 @@ if(isset($ix_options['google_export_token']) && $ix_options['google_export_token
                 <h3><?php esc_html_e('Add events to Google Calendar', 'modern-events-calendar-lite'); ?></h3>
                 <p class="description"><?php esc_html_e("Add your desired website events to your Google Calendar.", 'modern-events-calendar-lite'); ?> <?php echo sprintf(esc_html__('You should set %s as redirect page in Google App Console.', 'modern-events-calendar-lite'), '<code>'.esc_url($this->main->add_qs_vars(array('mec-ix-action'=>'google-calendar-export-get-token'), $this->main->URL('backend').'admin.php?page=MEC-ix&tab=MEC-g-calendar-export')).'</code>'); ?></p>
                 <form id="mec_g_calendar_export_form_authenticate" action="<?php echo esc_url($this->main->get_full_url()); ?>" method="POST">
+                    <?php wp_nonce_field('mec_ix_g_calendar_export', 'mec_ix_nonce', false); ?>
                     <div class="mec-form-row">
                         <label class="mec-col-3" for="mec_ix_google_export_client_id"><?php esc_html_e('App Client ID', 'modern-events-calendar-lite'); ?></label>
                         <div class="mec-col-4">
@@ -49,6 +50,7 @@ if(isset($ix_options['google_export_token']) && $ix_options['google_export_token
             <?php if($this->action == 'google-calendar-export-start'): ?>
             <div>
                 <form id="mec_g_calendar_export_form_do">
+                    <?php wp_nonce_field('mec_ix_g_calendar_export', 'mec_ix_nonce', false); ?>
                     <ul class="mec-select-deselect-actions" data-for="#mec_export_g_calendar_events">
                         <li data-action="select-all"><?php esc_html_e('Select All', 'modern-events-calendar-lite'); ?></li>
                         <li data-action="deselect-all"><?php esc_html_e('Deselect All', 'modern-events-calendar-lite'); ?></li>

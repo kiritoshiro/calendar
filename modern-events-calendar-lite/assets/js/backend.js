@@ -767,6 +767,7 @@ function mec_event_attendees(ID, occurrence) {
     dataType: "JSON",
     data: {
       action: "mec_attendees",
+      nonce: mec_admin_localize.ajax_nonce,
       id: ID,
       occurrence: occurrence,
     },

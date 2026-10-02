@@ -666,6 +666,14 @@ class MEC_feature_popup extends MEC_base
 
     public function save_category()
     {
+        // adventistai.lt: same nonce as the event popup, and the right to create
+        // categories (editors and administrators by default).
+        $wpnonce = isset($_POST['_mecnonce']) ? sanitize_text_field(wp_unslash($_POST['_mecnonce'])) : '';
+        if (!wp_verify_nonce($wpnonce, 'mec_event_popup')) $this->main->response(['success' => 0, 'code' => 'NONCE_IS_INVALID']);
+
+        $taxonomy = get_taxonomy('mec_category');
+        if (!$taxonomy || !current_user_can($taxonomy->cap->edit_terms)) $this->main->response(['success' => 0, 'code' => 'NO_ACCESS']);
+
         $category = isset($_POST['category']) ? sanitize_text_field($_POST['category']) : '';
 
         $term = term_exists($category, 'mec_category');

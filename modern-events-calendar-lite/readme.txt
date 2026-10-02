@@ -4,7 +4,7 @@ Tags: calendar, events, google calendar
 Requires at least: 6.6
 Tested up to: 7.0.2
 Requires PHP: 8.4
-Stable tag: 7.35.1.11
+Stable tag: 7.35.1.12
 License: GPLv2 or later
 
 Focused calendar build maintained by adventistai.lt.
@@ -23,6 +23,11 @@ Booking, attendees, payments, WooCommerce, SMS, PDF invoices, non-Google importe
 Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar → Import / Export. For private updates define ADVENTISTAI_CALENDAR_GITHUB_TOKEN in wp-config.php with repository read access.
 
 == Changelog ==
+= 7.35.1.12 =
+* Security: logged-in accounts without the right permissions can no longer run the Google Calendar export, read attendee lists, export another event's bookings, import the setup wizard's demo events or create event categories.
+* Running the Google Calendar export before authenticating now shows a message instead of a PHP error.
+* The vendored libraries' GitHub templates are no longer shipped.
+
 = 7.35.1.11 =
 * Security: a crafted link could add styling and other attributes to the calendar search box. The search values are now escaped.
 * Security: logged-out visitors can no longer upload images or add speakers and sponsors unless guest event submission is enabled.

@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.11', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.12', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -188,4 +188,20 @@ assert.equal((fesFeature.match(/if \(!\$this->current_user_can_submit_event\(\)\
 assert.match(plugin('app/features/events.php'), /if \(!is_user_logged_in\(\) and \(!isset\(\$this->settings\['fes_guest_status'\]\)/);
 assert.match(plugin('app/skins/single.php'), /\$viewable = is_post_publicly_viewable\(\$post\)/);
 assert.match(plugin('app/libraries/main.php'), /get_post_meta\(\(int\) \$book_id, 'mec_event_id', true\) === \(int\) \$event->ID/);
+// Logged-in handler audit (7.35.1.12): admin AJAX handlers check capabilities,
+// not only nonces that every page prints.
+const ixFeature = plugin('app/features/ix.php');
+assert.match(ixFeature, /current_user_can\('manage_options'\) \|\| current_user_can\('mec_import_export'\)/);
+assert.equal((ixFeature.match(/\$this->verify_g_calendar_export_request\(\);/g) || []).length, 2, 'both Google export AJAX actions must verify access');
+assert.match(ixFeature, /if \(!\$this->can_manage_g_calendar_export\(\)\) return;/);
+assert.equal((plugin('app/features/ix/export_g_calendar.php').match(/wp_nonce_field\('mec_ix_g_calendar_export', 'mec_ix_nonce', false\)/g) || []).length, 2);
+assert.match(plugin('app/features/report.php'), /public function attendees\(\)\s*\{\s*\/\/[^\n]*\n[^\n]*\n\s*if \(!current_user_can\('mec_report'\)\)/);
+assert.match(plugin('assets/js/backend.js'), /action: "mec_attendees",\s*nonce: mec_admin_localize\.ajax_nonce/);
+assert.match(plugin('app/features/fes.php'), /\$event_id <= 0 \|\| !\$this->current_user_can_upsert_event\(\$event_id\)/);
+assert.doesNotMatch(plugin('app/libraries/factory.php'), /wp_ajax_wizard_import_dummy/);
+assert.match(plugin('app/features/popup.php'), /current_user_can\(\$taxonomy->cap->edit_terms\)/);
+assert.match(plugin('app/features/popup/event.php'), /_mecnonce="\+encodeURIComponent\(jQuery\("#_mecnonce"\)\.val\(\)\)/);
+const occurrencesFeature = plugin('app/features/occurrences.php');
+assert.doesNotMatch(occurrencesFeature, /VALUES \('"\.\$id\."','"\.\$dates\[0\]/);
+assert.match(occurrencesFeature, /SET `params`='"\.\$this->db->escape\(json_encode\(\$occurrence, JSON_UNESCAPED_UNICODE\)\)/);
 console.log('Customization checks passed.');

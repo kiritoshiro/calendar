@@ -1,5 +1,19 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.12
+
+Security fixes from a review of the AJAX actions any logged-in account can call. Items 1-5 were reproduced on 7.35.1.11 with a subscriber and an author account, then re-tested:
+
+1. `mec_ix_add_to_g_calendar` ran the Google Calendar export (optionally with attendees) for any logged-in user. The export and the Google settings save (`mec_ix_g_calendar_authenticate`) now need `manage_options` or `mec_import_export` and a nonce from the Import / Export page. The settings save itself was already protected by `save_ix_options()`.
+2. The OAuth callback (`?mec-ix-action=google-calendar-export-get-token`) exchanged codes for anyone, even logged out. It now needs the same access.
+3. `mec_attendees` returned any event's attendee table. It now needs `mec_report` and the admin nonce, as `report_event_dates` does.
+4. `mec_fes_csv_export` exported any event's bookings, guarded only by `fes_nonce`, which every page prints. It now needs an event the user can edit, or authored while logged in.
+5. `wizard_import_dummy_events` and `_shortcodes` published 5 demo events and 15 calendars per call, with no checks. The wizard is not shipped, so they are no longer registered.
+6. `mec_popup_event_category` created categories for anyone. It now needs the event popup's nonce and the right to create categories (editors and administrators). The category name is now URL-encoded, so names with `&` work.
+7. Hardening, not reachable in this Lite build (the occurrences feature needs Pro): `mec_occurrences_add` put the event ID and date unescaped into SQL, and `save()` updated occurrence rows by ID alone with unescaped JSON. Values are now integers or escaped, rows are limited to the event being saved, and add/delete check `edit_post`.
+- The Google Calendar export no longer fails with a PHP fatal error when run before authenticating.
+- The package no longer ships vendored `.github` folders (PR #10).
+
 ## 7.35.1.11
 
 Security fixes from an audit of everything a logged-out visitor can reach:

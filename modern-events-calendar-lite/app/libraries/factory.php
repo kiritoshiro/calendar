@@ -141,8 +141,9 @@ class MEC_factory extends MEC_base
         $this->action('wp_ajax_mec_save_styling', [$this->main, 'save_options']);
         $this->action('wp_ajax_mec_save_notifications', [$this->main, 'save_notifications']);
         $this->action('wp_ajax_mec_save_messages', [$this->main, 'save_messages']);
-        $this->action('wp_ajax_wizard_import_dummy_events', [$this->main, 'wizard_import_dummy_events']);
-        $this->action('wp_ajax_wizard_import_dummy_shortcodes', [$this->main, 'wizard_import_dummy_shortcodes']);
+        // adventistai.lt: the setup wizard is not shipped, and its demo imports
+        // (wizard_import_dummy_events/_shortcodes) had no capability or nonce
+        // check, so any logged-in account could publish demo events. Not registered.
         $this->action('wp_ajax_wizard_save_weekdays', [$this->main, 'save_wizard_options']);
         $this->action('wp_ajax_wizard_save_slug', [$this->main, 'save_wizard_options']);
         $this->action('wp_ajax_wizard_save_module', [$this->main, 'save_wizard_options']);

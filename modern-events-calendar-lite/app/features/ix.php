@@ -645,8 +645,29 @@ class MEC_feature_ix extends MEC_base
         return ['success' => 1, 'data' => $post_ids];
     }
 
+    /**
+     * adventistai.lt: the Google Calendar export endpoints change site settings
+     * and send events (optionally attendees) out, so they need the same access
+     * as the Import / Export page plus a nonce from that page.
+     * @return bool
+     */
+    private function can_manage_g_calendar_export()
+    {
+        return current_user_can('manage_options') || current_user_can('mec_import_export');
+    }
+
+    private function verify_g_calendar_export_request()
+    {
+        if (!$this->can_manage_g_calendar_export()) $this->main->response(['success' => 0, 'code' => 'NO_ACCESS', 'message' => esc_html__('Sorry, you are not allowed to do that.', 'modern-events-calendar-lite')]);
+
+        $nonce = isset($_POST['mec_ix_nonce']) ? sanitize_text_field(wp_unslash($_POST['mec_ix_nonce'])) : '';
+        if (!wp_verify_nonce($nonce, 'mec_ix_g_calendar_export')) $this->main->response(['success' => 0, 'code' => 'NONCE_IS_INVALID', 'message' => esc_html__('Your session expired. Reload the page and try again.', 'modern-events-calendar-lite')]);
+    }
+
     public function g_calendar_export_authenticate()
     {
+        $this->verify_g_calendar_export_request();
+
         $ix = ((isset($_POST['ix']) and is_array($_POST['ix'])) ? array_map('sanitize_text_field', $_POST['ix']) : []);
 
         $client_id = $ix['google_export_client_id'] ?? null;
@@ -682,6 +703,10 @@ class MEC_feature_ix extends MEC_base
 
     public function g_calendar_export_get_token()
     {
+        // The OAuth callback stores the site's Google tokens; only the people
+        // who manage Import / Export may complete it.
+        if (!$this->can_manage_g_calendar_export()) return;
+
         $code = isset($_GET['code']) ? sanitize_text_field($_GET['code']) : '';
 
         $ix = $this->main->get_ix_options();
@@ -721,6 +746,8 @@ class MEC_feature_ix extends MEC_base
 
     public function g_calendar_export_do()
     {
+        $this->verify_g_calendar_export_request();
+
         $mec_event_ids = ((isset($_POST['mec-events']) and is_array($_POST['mec-events'])) ? array_map('sanitize_text_field', $_POST['mec-events']) : []);
         $export_attendees = (isset($_POST['export_attendees']) ? sanitize_text_field($_POST['export_attendees']) : 0);
 
@@ -733,6 +760,9 @@ class MEC_feature_ix extends MEC_base
         $calendar_id = $ix['google_export_calendar_id'] ?? null;
 
         if (!trim($client_id) or !trim($client_secret) or !trim($calendar_id)) $this->main->response(['success' => 0, 'message' => __('Client App, Client Secret, and Calendar ID are required.', 'modern-events-calendar-lite')]);
+
+        // adventistai.lt: without a stored token setAccessToken(null) threw a fatal error.
+        if (!$token) $this->main->response(['success' => 0, 'message' => esc_html__('Authenticate with Google first, then try again.', 'modern-events-calendar-lite')]);
 
         $client = new Google_Client();
         $client->setApplicationName('Modern Events Calendar');
