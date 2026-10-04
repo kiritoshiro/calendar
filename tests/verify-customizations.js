@@ -156,7 +156,13 @@ for (const removed of ['app/api/Twilio', 'app/api/TFPDF', 'app/api/Stripe', 'app
 // checks, and Plugin Check fails only on findings beyond the legacy baseline.
 const pluginChecks = read('.github/workflows/plugin-checks.yml');
 assert.doesNotMatch(buildWorkflow, /--clobber/);
-assert.match(buildWorkflow, /needs: \[cybersecurity, security-and-regression\]/);
+assert.match(buildWorkflow, /uses: \.\/\.github\/workflows\/security-gate\.yml/);
+assert.match(buildWorkflow, /needs: security-gate\b/);
+const securityGate = read('.github/workflows/security-gate.yml');
+for (const called of ['cybersecurity.yml', 'plugin-checks.yml', 'codeql.yml']) {
+    assert.match(securityGate, new RegExp(`uses: \\./\\.github/workflows/${called.replace('.', '\\.')}`), `the security gate must run ${called}`);
+}
+assert.match(securityGate, /name: All security checks passed/);
 assert.match(pluginChecks, /plugin-check-baseline\.py "\$RUNNER_TEMP\/plugin-check-results\.txt" \.github\/linters\/plugin-check-baseline\.json/);
 assert.ok(fs.existsSync(path.join(root, '.github', 'linters', 'plugin-check-baseline.json')), 'the Plugin Check baseline must exist');
 for (const file of ['app/features/events.php', 'app/features/mec.php', 'app/libraries/main.php']) {
