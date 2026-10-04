@@ -8,18 +8,17 @@ permissions:
 jobs:
   # Keep ./ for the reusable workflows until actionlint accepts $/
   # (rhysd/actionlint#711); job-level calls already run the caller's commit.
-  cybersecurity:
+  # The whole security gate (baseline, security and quality checks, CodeQL)
+  # must pass on this commit before the package is built and published.
+  security-gate:
     permissions:
       contents: read
-    uses: ./.github/workflows/cybersecurity.yml # zizmor: ignore[self-repository]
-  security-and-regression:
-    permissions:
-      contents: read
-    uses: ./.github/workflows/plugin-checks.yml # zizmor: ignore[self-repository]
+      security-events: write
+    uses: ./.github/workflows/security-gate.yml # zizmor: ignore[self-repository]
   package:
     permissions:
       contents: write
-    needs: [cybersecurity, security-and-regression]
+    needs: security-gate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

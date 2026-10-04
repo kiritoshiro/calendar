@@ -1,19 +1,12 @@
 name: Security and quality checks
 
+# Reusable: runs only through security-gate.yml, which owns the triggers,
+# schedule and concurrency.
 on:
-  push:
-  pull_request:
   workflow_call:
-  workflow_dispatch:
-  schedule:
-    - cron: '17 4 * * 1'
 
 permissions:
   contents: read
-
-concurrency:
-  group: security-quality-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   code-quality:
