@@ -29,17 +29,19 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Keep ./ for the reusable workflows until actionlint accepts $/
+  # (rhysd/actionlint#711); job-level calls already run the caller's commit.
   baseline:
     name: Baseline
-    uses: ./.github/workflows/cybersecurity.yml
+    uses: ./.github/workflows/cybersecurity.yml # zizmor: ignore[self-repository]
 
   checks:
     name: Security and quality
-    uses: ./.github/workflows/plugin-checks.yml
+    uses: ./.github/workflows/plugin-checks.yml # zizmor: ignore[self-repository]
 
   codeql:
     name: CodeQL
-    uses: ./.github/workflows/codeql.yml
+    uses: ./.github/workflows/codeql.yml # zizmor: ignore[self-repository]
     permissions:
       contents: read
       security-events: write
