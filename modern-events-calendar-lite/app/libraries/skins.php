@@ -1264,7 +1264,7 @@ class MEC_skins extends MEC_base
         $this->found = $found;
 
         // Has More Events
-        if ($last_timestamp and $last_event_id) $this->has_more_events = (boolean) $this->db->select("SELECT COUNT(id) FROM `#__mec_dates` WHERE `tstart` > " . $last_timestamp . " OR (`tstart` = " . $last_timestamp . " AND `post_id`!='" . $last_event_id . "')", 'loadResult');
+        if ($last_timestamp and $last_event_id) $this->has_more_events = (bool) $this->db->select("SELECT COUNT(id) FROM `#__mec_dates` WHERE `tstart` > " . $last_timestamp . " OR (`tstart` = " . $last_timestamp . " AND `post_id`!='" . $last_event_id . "')", 'loadResult');
 
         /* $event_include=array();
          $occurrences_status = (isset($this->settings['per_occurrences_status']) and $this->settings['per_occurrences_status'] );

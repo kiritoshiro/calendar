@@ -359,7 +359,7 @@ class MEC_skin_tile extends MEC_skins
         $this->found = $found;
 
         // Has More Events
-        if ($last_timestamp and $last_event_id) $this->has_more_events = (boolean) $this->db->select("SELECT COUNT(id) FROM `#__mec_dates` WHERE `tstart` > " . $last_timestamp . " OR (`tstart` = " . $last_timestamp . " AND `post_id`!='" . $last_event_id . "')", 'loadResult');
+        if ($last_timestamp and $last_event_id) $this->has_more_events = (bool) $this->db->select("SELECT COUNT(id) FROM `#__mec_dates` WHERE `tstart` > " . $last_timestamp . " OR (`tstart` = " . $last_timestamp . " AND `post_id`!='" . $last_event_id . "')", 'loadResult');
 
         return $events;
     }

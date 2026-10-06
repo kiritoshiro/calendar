@@ -28,7 +28,7 @@ class MEC_feature_archive extends MEC_base
         $settings = $main->get_settings();
 
         // Sidebar Status
-        $sidebar_status = (boolean) ($settings['archive_sidebar'] ?? 0);
+        $sidebar_status = (bool) ($settings['archive_sidebar'] ?? 0);
 
         if($sidebar_status)
         {
