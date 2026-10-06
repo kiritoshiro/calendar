@@ -1,5 +1,9 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.13
+
+- PHP 8.4 deprecations: `(boolean)` casts in `app/features/archive.php`, `events.php`, `mec.php` (2), `app/libraries/skins.php` and `app/skins/tile.php` are now `(bool)`. The WordPress Playground smoke test added in PR #13 found them in `debug.log`.
+
 ## 7.35.1.12
 
 Security fixes from a review of the AJAX actions any logged-in account can call. Items 1-5 were reproduced on 7.35.1.11 with a subscriber and an author account, then re-tested:
