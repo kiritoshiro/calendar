@@ -287,6 +287,8 @@ class MEC_factory extends MEC_base
         if (is_a($current_screen, '\WP_Screen') && method_exists($current_screen, 'is_block_editor') and $current_screen->is_block_editor())
         {
             $backend_js_dependencies[] = 'wp-blocks';
+            $backend_js_dependencies[] = 'wp-block-editor';
+            $backend_js_dependencies[] = 'wp-element';
         }
 
         $js_dependencies = [
