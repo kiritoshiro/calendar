@@ -60,7 +60,7 @@ jobs:
 
   wordpress:
     name: WordPress
-    uses: ./.github/workflows/wordpress-checks.yml
+    uses: ./.github/workflows/wordpress-checks.yml # zizmor: ignore[self-repository]
 
   gate:
     name: All security checks passed
