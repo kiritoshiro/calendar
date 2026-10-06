@@ -1,0 +1,15 @@
+{
+  "mounts": [
+    {
+      "host": "modern-events-calendar-lite",
+      "vfs": "/wordpress/wp-content/plugins/modern-events-calendar-lite"
+    }
+  ],
+  "plugins": [
+    "modern-events-calendar-lite/modern-events-calendar-lite.php"
+  ],
+  "watch": [
+    "/wordpress/wp-content/plugins/modern-events-calendar-lite/"
+  ],
+  "fixture": "<!-- wp:shortcode -->[MEC]<!-- /wp:shortcode -->"
+}

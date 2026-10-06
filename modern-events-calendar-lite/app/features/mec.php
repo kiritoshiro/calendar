@@ -1878,7 +1878,7 @@ class MEC_feature_mec extends MEC_base
 
             if (isset($post->is_page) && $status_per_page == 0) $status_per_page = 1;
 
-            return (boolean) $status_per_page;
+            return (bool) $status_per_page;
         }
 
         // Turned Off
@@ -1886,7 +1886,7 @@ class MEC_feature_mec extends MEC_base
         // Turned On
         else
         {
-            $status = (boolean) $status_per_page;
+            $status = (bool) $status_per_page;
         }
 
         return $status;

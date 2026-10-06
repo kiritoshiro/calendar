@@ -3754,7 +3754,7 @@ class MEC_feature_events extends MEC_base
             }
 
             $location = $data->locations[$data->meta['mec_location_id']] ?? [];
-            $allday = (boolean) get_post_meta($post_id, 'mec_allday', true);
+            $allday = (bool) get_post_meta($post_id, 'mec_allday', true);
 
             $public = get_post_meta($post_id, 'mec_public', true);
             if (trim($public) === '') $public = 1;
