@@ -1,5 +1,10 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.17
+
+- Lean assets, styles: pages whose only MEC output is the magenda (Weekly View, no search form, LTR) load `assets/css/magenda.min.css` instead of `frontend.min.css` (597 KB) and `iconfonts.css` (48 KB). It holds every magenda rule, the base MEC rules and icon glyphs the magenda uses, and the `@font-face` rules: 23.9 KB, 4.5 KB gzipped. `tests/build-magenda-css.js` builds it from `frontend.min.css` (and `--check` in CI keeps it in step). Computed styles of every magenda element matched the full stylesheet on adventistai.lt's front page (several months, open month picker, selected day, 340 px width). The event popup's page needs the full styles: `mecdata.full_styles` lists both files and `mecSingleEventDisplayer.loadFullStyles()` adds them when a popup opens, or earlier when the pointer or keyboard reaches an event link.
+- Lean assets, scripts (PR #18): on those pages featherlight, flipcount, the tooltip script and frontend.js load with `defer`.
+
 ## 7.35.1.16
 
 - Magenda (Weekly View): with the single event display set to the popup, MEC gives event links `target="m1"`. The magenda had no handler for it, so the browser opened a new window named "m1". A delegated click handler now calls `mecSingleEventDisplayer.getSinglePage()` (MEC's featherlight popup), as the other skins do; Ctrl/Cmd/Shift/Alt/middle-click still open the event page normally. Without featherlight it falls back to the event page in the same tab.

@@ -410,6 +410,8 @@ class MEC_factory extends MEC_base
             'mec-owl-carousel-style' => $this->main->asset('packages/owl-carousel/owl.carousel.min.css'),
             'mec-niceselect-style' => $this->main->asset('css/nice-select.min.css'),
             'mec-frontend-style' => $this->main->asset('css/frontend.min.css'),
+            // adventistai.lt: the rules a magenda-only page uses (tests/build-magenda-css.js).
+            'mec-magenda-style' => $this->main->asset('css/magenda.min.css'),
             'mec-frontend-rtl-style' => $this->main->asset('css/frontend-rtl.min.css'),
             'accessibility' => $this->main->asset('css/a11y.min.css'),
             'mec-tooltip-style' => $this->main->asset('packages/tooltip/tooltip.css'),
@@ -578,6 +580,27 @@ class MEC_factory extends MEC_base
     }
 
     /**
+     * adventistai.lt: URLs (with version) of registered styles, for loading
+     * them later from JavaScript.
+     *
+     * @param array $handles
+     * @return array
+     */
+    private function style_urls(array $handles)
+    {
+        $urls = [];
+        $styles = wp_styles();
+        foreach ($handles as $handle)
+        {
+            if (!isset($styles->registered[$handle]) || !$styles->registered[$handle]->src) continue;
+            $style = $styles->registered[$handle];
+            $urls[] = $style->ver ? add_query_arg('ver', $style->ver, $style->src) : $style->src;
+        }
+
+        return $urls;
+    }
+
+    /**
      * Load MEC frontend assets such as CSS or JavaScript files
      * @author Webnus <info@webnus.net>
      */
@@ -595,6 +618,10 @@ class MEC_factory extends MEC_base
         // The event popup needs featherlight, and flipcount for its countdown.
         $popup = !$lean || self::$rendered_event_popup;
         if (!$popup) wp_dequeue_script('mec-flipcount-script');
+        // On those pages css/magenda.min.css (the ~80 of MEC's 3,700 rules the
+        // magenda uses, ~25 KB) replaces frontend.min.css (640 KB) and
+        // iconfonts.css; the full files load only when an event popup opens.
+        $trimmed = $lean && !is_rtl() && !is_admin();
 
         // Weekly View initializes from its rendered markup on DOM ready, so
         // its footer scripts can defer together. Keep legacy skins and editor
@@ -694,6 +721,7 @@ class MEC_factory extends MEC_base
                 'a11y_search_query' => __(' for "%s"', 'modern-events-calendar-lite'),
                 'a11y_search_address' => __(' near "%s"', 'modern-events-calendar-lite'),
                 'a11y_calendar_dialog' => __('Calendar date picker', 'modern-events-calendar-lite'),
+                'full_styles' => $trimmed ? $this->style_urls(['mec-font-icons', 'mec-frontend-style']) : [],
             ]);
 
             // Localize Some Strings
@@ -703,27 +731,11 @@ class MEC_factory extends MEC_base
             $this->getCaptcha()->assets();
 
             // Include MEC frontend CSS files
-            wp_enqueue_style('mec-font-icons');
-            if (!is_rtl())
+            if ($trimmed) wp_enqueue_style('mec-magenda-style');
+            else
             {
-                // Only select the smaller bundle after all page skins are known.
-                // Keep the full stylesheet for previews, mixed layouts and sites
-                // with custom skin extensions that opt out through this filter.
-                $weekly_css = $lean && !is_admin()
-                    && !wp_style_is('mec-frontend-style', 'enqueued')
-                    && !wp_style_is('mec-frontend-style', 'done')
-                    && is_readable(MEC_ABSPATH . 'assets/css/weekly-view.min.css')
-                    && apply_filters('mec_weekly_view_css', true);
-                if ($weekly_css)
-                {
-                    // Preserve the handle, dependencies and inline styling.
-                    $styles = wp_styles();
-                    if (isset($styles->registered['mec-frontend-style']))
-                    {
-                        $styles->registered['mec-frontend-style']->src = $this->main->asset('css/weekly-view.min.css');
-                    }
-                }
-                wp_enqueue_style('mec-frontend-style');
+                wp_enqueue_style('mec-font-icons');
+                if (!is_rtl()) wp_enqueue_style('mec-frontend-style');
             }
             if (isset($styling['accessibility']) && $styling['accessibility']) wp_enqueue_style('accessibility');
 

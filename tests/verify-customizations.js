@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.16', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.17', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -156,6 +156,15 @@ assert.match(factory, /if \(\$popup\) wp_enqueue_script\('featherlight'\);/);
 assert.match(skinsLibrary, /MEC_factory::mark_event_popup\(\);/);
 assert.match(read('modern-events-calendar-lite/assets/js/frontend.js'), /\.mec-magenda a\[data-event-id\]\[target="m1"\]/);
 assert.match(factory, /if \(!\$lean && !defined\("SHOW_CT_BUILDER"\)\) wp_enqueue_script\('jquery-ui-datepicker'\);/);
+
+// Those pages load the trimmed magenda stylesheet; the popup adds the full one.
+assert.match(factory, /'mec-magenda-style' => \$this->main->asset\('css\/magenda\.min\.css'\)/);
+assert.match(factory, /\$trimmed = \$lean && !is_rtl\(\) && !is_admin\(\);/);
+assert.match(factory, /if \(\$trimmed\) wp_enqueue_style\('mec-magenda-style'\);/);
+assert.match(factory, /'full_styles' => \$trimmed \? \$this->style_urls\(\['mec-font-icons', 'mec-frontend-style'\]\) : \[\]/);
+assert.match(frontendJs, /mecSingleEventDisplayer\.loadFullStyles\(\);\s+if \(jQuery\('\.mec-modal-result'\)/);
+const magendaCss = plugin('assets/css/magenda.min.css');
+assert.ok(magendaCss.length < 40000 && /\.mec-magenda\s*\{[^}]*position:\s*relative/.test(magendaCss) && /@font-face\s*\{[^}]*simple-line-icons/.test(magendaCss), 'magenda.min.css holds the magenda styles and the icon font');
 assert.match(factory, /\|\| self::\$rendered_search_form\) return false;/);
 assert.match(skinsLibrary, /private function note_search_form\(\$html\)/);
 assert.match(skinsLibrary, /strpos\(\$html, 'mec-search-form'\) !== false\) MEC_factory::mark_rendered\(\$this->skin, true\);/);
