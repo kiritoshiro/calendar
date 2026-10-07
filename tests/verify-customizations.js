@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.18', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.19', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -181,6 +181,11 @@ for (const removed of ['app/api/Twilio', 'app/api/TFPDF', 'app/api/Stripe', 'app
 // checks, and Plugin Check fails only on findings beyond the legacy baseline.
 const pluginChecks = read('.github/workflows/plugin-checks.yml');
 assert.doesNotMatch(buildWorkflow, /--clobber/);
+// The package's scripts are minified with the pinned esbuild; sources stay readable.
+assert.match(buildWorkflow, /npm ci --ignore-scripts/);
+assert.match(buildWorkflow, /node scripts\/minify-package-js\.cjs "\$stage\/modern-events-calendar-lite"/);
+assert.equal(JSON.parse(read('package.json')).devDependencies.esbuild, '0.28.2');
+assert.ok(read('modern-events-calendar-lite/assets/js/frontend.js').includes('\n    getSinglePage: function'), 'frontend.js stays readable in the repository');
 assert.match(buildWorkflow, /uses: \.\/\.github\/workflows\/security-gate\.yml/);
 assert.match(buildWorkflow, /needs: security-gate\b/);
 const securityGate = read('.github/workflows/security-gate.yml');

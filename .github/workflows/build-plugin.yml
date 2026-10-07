@@ -25,6 +25,12 @@ jobs:
         with:
           persist-credentials: false
       - run: node tests/verify-customizations.js
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      # esbuild, pinned in package-lock.json; used only to minify the package.
+      - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Read plugin version
         id: meta
         shell: bash
@@ -67,6 +73,9 @@ jobs:
             app/features/ix/test_data.php; do
             test ! -e "$stage/modern-events-calendar-lite/$removed"
           done
+          # Minify the plugin's unminified scripts in the package only; the
+          # repository keeps the readable sources.
+          node scripts/minify-package-js.cjs "$stage/modern-events-calendar-lite"
           cd "$stage"
           zip -qr "$GITHUB_WORKSPACE/$ARCHIVE" modern-events-calendar-lite
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
