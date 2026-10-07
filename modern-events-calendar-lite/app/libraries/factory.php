@@ -52,6 +52,21 @@ class MEC_factory extends MEC_base
     private static $rendered_search_form = false;
 
     /**
+     * Whether a rendered skin opens events in MEC's popup (sed method "m1").
+     * @var bool
+     */
+    private static $rendered_event_popup = false;
+
+    /**
+     * Records that a rendered skin opens events in MEC's popup.
+     * @return void
+     */
+    public static function mark_event_popup()
+    {
+        self::$rendered_event_popup = true;
+    }
+
+    /**
      * adventistai.lt: skins whose output needs only jQuery, the tooltip
      * library (a dependency of frontend.js) and frontend.js. The Weekly View
      * is the "magenda" month grid + agenda: its own code in frontend.js uses
@@ -577,7 +592,9 @@ class MEC_factory extends MEC_base
         // Only the magenda (Weekly View) on this page: skip the libraries it does
         // not use (search, carousel, lightboxes, countdown, event form).
         $lean = $late && $this->lean_assets_only();
-        if ($lean) wp_dequeue_script('mec-flipcount-script');
+        // The event popup needs featherlight, and flipcount for its countdown.
+        $popup = !$lean || self::$rendered_event_popup;
+        if (!$popup) wp_dequeue_script('mec-flipcount-script');
 
         if ($this->should_include_assets())
         {
@@ -599,10 +616,10 @@ class MEC_factory extends MEC_base
             include_once(ABSPATH . 'wp-admin/includes/plugin.php');
             if (is_plugin_active('elementor/elementor.php') && class_exists('\Elementor\Plugin') && \Elementor\Plugin::$instance->preview->is_preview_mode()) $this->main->load_isotope_assets();
 
+            if ($popup) wp_enqueue_script('featherlight');
             if (!$lean)
             {
                 wp_enqueue_script('mec-typekit-script');
-                wp_enqueue_script('featherlight');
 
                 // Include Select2
                 wp_enqueue_script('mec-select2-script');
@@ -681,7 +698,7 @@ class MEC_factory extends MEC_base
 
             wp_enqueue_style('mec-tooltip-style');
             wp_enqueue_style('mec-tooltip-shadow-style');
-            if (!$lean) wp_enqueue_style('featherlight', $this->main->asset('packages/featherlight/featherlight.css'));
+            if ($popup) wp_enqueue_style('featherlight', $this->main->asset('packages/featherlight/featherlight.css'));
 
             // Include "Right to Left" CSS file
             if (is_rtl()) wp_enqueue_style('mec-frontend-rtl-style');

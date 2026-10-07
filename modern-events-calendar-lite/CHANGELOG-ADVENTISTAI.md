@@ -1,5 +1,10 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.16
+
+- Magenda (Weekly View): with the single event display set to the popup, MEC gives event links `target="m1"`. The magenda had no handler for it, so the browser opened a new window named "m1". A delegated click handler now calls `mecSingleEventDisplayer.getSinglePage()` (MEC's featherlight popup), as the other skins do; Ctrl/Cmd/Shift/Alt/middle-click still open the event page normally. Without featherlight it falls back to the event page in the same tab.
+- Lean assets: when a rendered skin uses the popup, featherlight (JS and CSS) and flipcount are kept.
+
 ## 7.35.1.15
 
 - Assets: when assets load in the footer and a page's only MEC output is the magenda (Weekly View) without a search form, MEC no longer loads jquery.typewatch, featherlight, select2, the jQuery UI datepicker, events.js, lity, colorbrightness, owl carousel or flipcount. The magenda's code in frontend.js uses none of them, and its event links are plain links. That page now loads 7 MEC files instead of 19. Other skins, search forms, other MEC shortcodes and event, archive and taxonomy pages keep the full set. A search form is detected from the rendered output, because `sf_status` is on by default even with no search fields.

@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.15', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.16', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -151,7 +151,10 @@ assert.match(skinsLibrary, /MEC_factory::mark_rendered\(\$this->skin\);/);
 // skip the libraries it does not use.
 assert.match(factory, /private const LEAN_SKINS = \['weekly_view'\];/);
 assert.match(factory, /\$lean = \$late && \$this->lean_assets_only\(\);/);
-assert.match(factory, /if \(\$lean\) wp_dequeue_script\('mec-flipcount-script'\);/);
+assert.match(factory, /\$popup = !\$lean \|\| self::\$rendered_event_popup;/);
+assert.match(factory, /if \(\$popup\) wp_enqueue_script\('featherlight'\);/);
+assert.match(skinsLibrary, /MEC_factory::mark_event_popup\(\);/);
+assert.match(read('modern-events-calendar-lite/assets/js/frontend.js'), /\.mec-magenda a\[data-event-id\]\[target="m1"\]/);
 assert.match(factory, /if \(!\$lean && !defined\("SHOW_CT_BUILDER"\)\) wp_enqueue_script\('jquery-ui-datepicker'\);/);
 assert.match(factory, /\|\| self::\$rendered_search_form\) return false;/);
 assert.match(skinsLibrary, /private function note_search_form\(\$html\)/);
