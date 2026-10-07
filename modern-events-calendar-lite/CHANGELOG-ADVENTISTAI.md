@@ -1,5 +1,9 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.18
+
+- Trimmed magenda stylesheet, safety guards from PR #20: the full `frontend.min.css` (and `iconfonts.css`) stay when `mec-frontend-style` was already queued or printed, when `assets/css/magenda.min.css` is unreadable, or when the `mec_weekly_view_css` filter returns false. PR #20's alternative 48.6 KB bundle and its PostCSS tooling were not adopted; `docs/weekly-view-css.md` describes the kept approach.
+
 ## 7.35.1.17
 
 - Lean assets, styles: pages whose only MEC output is the magenda (Weekly View, no search form, LTR) load `assets/css/magenda.min.css` instead of `frontend.min.css` (597 KB) and `iconfonts.css` (48 KB). It holds every magenda rule, the base MEC rules and icon glyphs the magenda uses, and the `@font-face` rules: 23.9 KB, 4.5 KB gzipped. `tests/build-magenda-css.js` builds it from `frontend.min.css` (and `--check` in CI keeps it in step). Computed styles of every magenda element matched the full stylesheet on adventistai.lt's front page (several months, open month picker, selected day, 340 px width). The event popup's page needs the full styles: `mecdata.full_styles` lists both files and `mecSingleEventDisplayer.loadFullStyles()` adds them when a popup opens, or earlier when the pointer or keyboard reaches an event link.

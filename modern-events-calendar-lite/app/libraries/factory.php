@@ -621,7 +621,14 @@ class MEC_factory extends MEC_base
         // On those pages css/magenda.min.css (the ~80 of MEC's 3,700 rules the
         // magenda uses, ~25 KB) replaces frontend.min.css (640 KB) and
         // iconfonts.css; the full files load only when an event popup opens.
-        $trimmed = $lean && !is_rtl() && !is_admin();
+        // Guards from PR #20: keep the full stylesheet when it was already
+        // queued or printed (another plugin or skin needs it), when the trimmed
+        // file is missing, and for sites that opt out through the filter.
+        $trimmed = $lean && !is_rtl() && !is_admin()
+            && !wp_style_is('mec-frontend-style', 'enqueued')
+            && !wp_style_is('mec-frontend-style', 'done')
+            && is_readable(MEC_ABSPATH . 'assets/css/magenda.min.css')
+            && apply_filters('mec_weekly_view_css', true);
 
         // Weekly View initializes from its rendered markup on DOM ready, so
         // its footer scripts can defer together. Keep legacy skins and editor
