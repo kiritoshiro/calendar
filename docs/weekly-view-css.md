@@ -1,25 +1,26 @@
-# Weekly View stylesheet
+# Weekly View (magenda) stylesheet
 
-Public pages rendered with only Weekly View (the magenda month grid and day agenda), without a search form or other MEC shortcode, can load `assets/css/weekly-view.min.css` instead of the full frontend stylesheet. This uses the existing footer-time skin detector. Event pages, archives/taxonomies, mixed calendars, editor previews, RTL pages and early/head loading retain their current full stylesheet. An already queued or printed full stylesheet is respected.
+Public pages whose only MEC output is the magenda (Weekly View) without a search form load `assets/css/magenda.min.css` (about 24 KB, 4.5 KB gzipped) instead of `frontend.min.css` (597 KB) and `iconfonts.css` (48 KB). The footer-time skin detector (`lean_assets_only()`) decides this after the page has rendered. Event pages, archives/taxonomies, mixed calendars, search forms, editor previews, RTL pages and head loading keep the full stylesheets.
 
-The `mec-frontend-style` handle remains the same, including dependencies, version and inline CSS. Only its registered source URL changes after page rendering identifies an eligible request. Tooltip/icon/Featherlight assets retain their existing loaders. Every shared rule, single-event/popup module, animation, font definition and Weekly View state stays in the generated bundle; only selectors requiring another listing layout, search/FES form or Lity are omitted. Classes inside functional pseudo-classes are conservatively retained. This does not purge against a homepage DOM snapshot.
+The trimmed file holds every rule that mentions `mec-magenda` (in all states), the base MEC rules the magenda uses (`ANCHORS` in `tests/build-magenda-css.js`), icon glyphs and the `@font-face` rules. The event popup's page needs the full styles: `mecdata.full_styles` lists both full files and `mecSingleEventDisplayer.loadFullStyles()` adds them when a popup opens, or earlier when the pointer or keyboard reaches an event link.
 
-The generated file is committed and ships in the ordinary plugin package. When changing `frontend.min.css` or the layout exclusions:
+The full stylesheet is kept (the trimmed one is not used) when:
 
-```sh
-npm ci --ignore-scripts
-npm run build:weekly-css
-npm run check:weekly-css
-```
-
-CI verifies that the file is reproducible and audits the development-only parser dependencies. It does not run Node or generate CSS on the WordPress site. The full stylesheet remains the source and fallback.
-
-Custom skin extensions can preserve the full CSS with:
+- `mec-frontend-style` was already queued or printed on the page, for example by another plugin or skin;
+- `assets/css/magenda.min.css` is missing or unreadable;
+- a site opts out:
 
 ```php
 add_filter('mec_weekly_view_css', '__return_false');
 ```
 
-Before extending the exclusions, compare real WordPress output with the full stylesheet at mobile/tablet/desktop widths, including dark mode, popups, month/year pickers, day selection, AJAX loading/empty states and keyboard controls. Check full/mixed/search/RTL/editor fallbacks and custom inline styles. A shared class can appear in Weekly View even when its name suggests another skin: `mec-event-list-weekly-date` is one example.
+When `frontend.min.css` or the magenda styles change, rebuild and commit the file; CI fails while it is out of date:
 
-Current gzip measurement at the default Node compression level: 87,427 bytes for the full file and 48,613 bytes for Weekly View, about 44% less. Production Brotli/gzip settings and PageSpeed results may differ; no deployed performance score is implied.
+```sh
+node tests/build-magenda-css.js
+node tests/build-magenda-css.js --check
+```
+
+Before adding anchors, compare computed styles with the full stylesheet on a magenda page: several months, month and year pickers, a selected day, an empty month, phone and desktop widths, and an event popup.
+
+History: PR #19 introduced the trimmed file and on-demand popup styles (7.35.1.17). PR #20 proposed a larger conservative bundle (48.6 KB gzipped, popup styles included, PostCSS build); the two were reconciled by keeping #19's file and adopting #20's guards and opt-out filter (7.35.1.18).
