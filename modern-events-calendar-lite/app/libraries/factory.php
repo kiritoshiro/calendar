@@ -40,14 +40,56 @@ class MEC_factory extends MEC_base
     private static $rendered_skins = [];
 
     /**
+     * MEC shortcode tags rendered on this request, and whether a skin
+     * rendered a search form.
+     * @var array
+     */
+    private static $rendered_tags = [];
+
+    /**
+     * @var bool
+     */
+    private static $rendered_search_form = false;
+
+    /**
+     * adventistai.lt: skins whose output needs only jQuery, the tooltip
+     * library (a dependency of frontend.js) and frontend.js. The Weekly View
+     * is the "magenda" month grid + agenda: its own code in frontend.js uses
+     * none of MEC's other libraries, and its event links are plain links.
+     * @var string[]
+     */
+    private const LEAN_SKINS = ['weekly_view'];
+
+    /**
      * Records that MEC output was rendered on this request.
      * @param string $skin Skin name, when a skin rendered it.
+     * @param bool $search_form Whether that skin showed a search form.
      * @return void
      */
-    public static function mark_rendered($skin = '')
+    public static function mark_rendered($skin = '', $search_form = false)
     {
         self::$rendered = true;
         if (is_string($skin) && $skin !== '') self::$rendered_skins[$skin] = true;
+        if ($search_form) self::$rendered_search_form = true;
+    }
+
+    /**
+     * Whether, from wp_footer, the page shows only lean skins (no search form,
+     * no other MEC shortcode, not an event, archive or MEC taxonomy page), so
+     * MEC's other libraries can be left out.
+     * @return boolean
+     */
+    public function lean_assets_only()
+    {
+        if (!self::$rendered_skins || self::$rendered_search_form) return false;
+        if (array_diff(array_keys(self::$rendered_skins), self::LEAN_SKINS)) return false;
+        if (array_diff(array_keys(self::$rendered_tags), ['MEC'])) return false;
+
+        $post_type = $this->main->get_main_post_type();
+        if (is_singular([$post_type, 'mec_calendars']) || is_post_type_archive($post_type)) return false;
+        if (is_tax(['mec_category', 'mec_label', 'mec_location', 'mec_organizer', 'mec_speaker'])) return false;
+
+        return (bool) apply_filters('mec_lean_assets_only', true);
     }
 
     /**
@@ -532,6 +574,10 @@ class MEC_factory extends MEC_base
         $late = doing_action('wp_footer');
         if ($late && !$this->frontend_assets_needed()) return;
         $general_calendar = !$late || isset(self::$rendered_skins['general_calendar']);
+        // Only the magenda (Weekly View) on this page: skip the libraries it does
+        // not use (search, carousel, lightboxes, countdown, event form).
+        $lean = $late && $this->lean_assets_only();
+        if ($lean) wp_dequeue_script('mec-flipcount-script');
 
         if ($this->should_include_assets())
         {
@@ -545,7 +591,7 @@ class MEC_factory extends MEC_base
             wp_enqueue_script('jquery');
 
             // Include jQuery date picker
-            if (!defined("SHOW_CT_BUILDER")) wp_enqueue_script('jquery-ui-datepicker');
+            if (!$lean && !defined("SHOW_CT_BUILDER")) wp_enqueue_script('jquery-ui-datepicker');
 
             // Load Isotope
             if (class_exists('ET_Builder_Element')) $this->main->load_isotope_assets();
@@ -553,12 +599,15 @@ class MEC_factory extends MEC_base
             include_once(ABSPATH . 'wp-admin/includes/plugin.php');
             if (is_plugin_active('elementor/elementor.php') && class_exists('\Elementor\Plugin') && \Elementor\Plugin::$instance->preview->is_preview_mode()) $this->main->load_isotope_assets();
 
-            wp_enqueue_script('mec-typekit-script');
-            wp_enqueue_script('featherlight');
+            if (!$lean)
+            {
+                wp_enqueue_script('mec-typekit-script');
+                wp_enqueue_script('featherlight');
 
-            // Include Select2
-            wp_enqueue_script('mec-select2-script');
-            wp_enqueue_style('mec-select2-style');
+                // Include Select2
+                wp_enqueue_script('mec-select2-script');
+                wp_enqueue_style('mec-select2-style');
+            }
 
             // General Calendar
             if ($general_calendar) wp_enqueue_script('mec-general-calendar-script');
@@ -567,16 +616,19 @@ class MEC_factory extends MEC_base
             wp_enqueue_script('mec-tooltip-script');
             wp_enqueue_script('mec-frontend-script');
 
-            wp_enqueue_script('mec-events-script');
+            if (!$lean)
+            {
+                wp_enqueue_script('mec-events-script');
 
-            // Include Lity Lightbox
-            wp_enqueue_script('mec-lity-script');
+                // Include Lity Lightbox
+                wp_enqueue_script('mec-lity-script');
 
-            // Include color brightness
-            wp_enqueue_script('mec-colorbrightness-script');
+                // Include color brightness
+                wp_enqueue_script('mec-colorbrightness-script');
 
-            // Include MEC frontend JS libraries
-            wp_enqueue_script('mec-owl-carousel-script');
+                // Include MEC frontend JS libraries
+                wp_enqueue_script('mec-owl-carousel-script');
+            }
 
             if (did_action('elementor/loaded')) $elementor_edit_mode = !\Elementor\Plugin::$instance->editor->is_edit_mode() ? 'no' : 'yes';
             else $elementor_edit_mode = 'no';
@@ -629,7 +681,7 @@ class MEC_factory extends MEC_base
 
             wp_enqueue_style('mec-tooltip-style');
             wp_enqueue_style('mec-tooltip-shadow-style');
-            wp_enqueue_style('featherlight', $this->main->asset('packages/featherlight/featherlight.css'));
+            if (!$lean) wp_enqueue_style('featherlight', $this->main->asset('packages/featherlight/featherlight.css'));
 
             // Include "Right to Left" CSS file
             if (is_rtl()) wp_enqueue_style('mec-frontend-rtl-style');
@@ -641,7 +693,7 @@ class MEC_factory extends MEC_base
             if ($gfonts_status and get_option('mec_gfont')) wp_enqueue_style('mec-custom-google-font');
 
             // Include Lity CSS file
-            wp_enqueue_style('mec-lity-style');
+            if (!$lean) wp_enqueue_style('mec-lity-style');
 
             // General Calendar
             if ($general_calendar) wp_enqueue_style('mec-general-calendar-style');
@@ -960,7 +1012,11 @@ class MEC_factory extends MEC_base
         {
             add_filter('pre_do_shortcode_tag', static function ($return, $tag)
             {
-                if (isset(self::$shortcode_tags[$tag])) self::mark_rendered();
+                if (isset(self::$shortcode_tags[$tag]))
+                {
+                    self::$rendered_tags[$tag] = true;
+                    self::mark_rendered();
+                }
                 return $return;
             }, 10, 2);
         }

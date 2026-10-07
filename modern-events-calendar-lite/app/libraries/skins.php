@@ -337,11 +337,23 @@ class MEC_skins extends MEC_base
         if ($this->sed_method === 'm1') $this->main->load_sed_assets($this->settings);
 
         $custom_output = apply_filters('mec_skin_output_html', null, $this);
-        if (!is_null($custom_output)) return $custom_output;
+        if (!is_null($custom_output)) return $this->note_search_form((string) $custom_output);
 
         ob_start();
         include $this->get_tpl_path();
-        return ob_get_clean();
+        return $this->note_search_form((string) ob_get_clean());
+    }
+
+    /**
+     * adventistai.lt: tells the footer asset loader when the output shows a
+     * search form (sf_status is on by default even with no search fields).
+     * @param string $html
+     * @return string
+     */
+    private function note_search_form($html)
+    {
+        if (strpos($html, 'mec-search-form') !== false) MEC_factory::mark_rendered($this->skin, true);
+        return $html;
     }
 
     /**
