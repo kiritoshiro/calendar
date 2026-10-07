@@ -98,7 +98,8 @@ function keepRule(prelude) {
 }
 
 function build() {
-    const css = fs.readFileSync(source, 'utf8');
+    // Comments go first: one above the magenda styles contains braces.
+    const css = fs.readFileSync(source, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
     const kept = [];
     const keyframes = new Map();
     for (const block of blocks(css)) {
