@@ -4,7 +4,7 @@ Tags: calendar, events, google calendar
 Requires at least: 6.6
 Tested up to: 7.0.2
 Requires PHP: 8.4
-Stable tag: 7.35.1.16
+Stable tag: 7.35.1.17
 License: GPLv2 or later
 
 Focused calendar build maintained by adventistai.lt.
@@ -23,6 +23,9 @@ Booking, attendees, payments, WooCommerce, SMS, PDF invoices, non-Google importe
 Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar → Import / Export. For private updates define ADVENTISTAI_CALENDAR_GITHUB_TOKEN in wp-config.php with repository read access.
 
 == Changelog ==
+= 7.35.1.17 =
+* Faster pages with only the agenda calendar (Weekly View): they load a small stylesheet with just the agenda's styles (about 25 KB instead of 640 KB, 5 KB compressed) and no icon-font stylesheet; the full styles load when an event popup opens. The agenda's scripts also no longer hold up the page.
+
 = 7.35.1.16 =
 * Agenda calendar (Weekly View): when events are set to open in a popup, they now open in the popup on the same page instead of a new browser window.
 

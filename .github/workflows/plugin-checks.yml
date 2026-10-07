@@ -47,6 +47,10 @@ jobs:
         run: |
           node --check modern-events-calendar-lite/assets/js/frontend.js
           node --check tests/verify-customizations.js
+          node --check tests/build-magenda-css.js
+
+      - name: Check the trimmed magenda stylesheet is up to date
+        run: node tests/build-magenda-css.js --check
 
       - name: Validate WPML XML configuration
         run: python -c "import xml.etree.ElementTree as ET; ET.parse('modern-events-calendar-lite/wpml-config.xml')"

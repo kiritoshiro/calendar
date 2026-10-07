@@ -99,7 +99,8 @@ function keepRule(prelude) {
 
 function build() {
     // Comments go first: one above the magenda styles contains braces.
-    const css = fs.readFileSync(source, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    // Same output on Windows (CRLF checkouts) and in CI.
+    const css = fs.readFileSync(source, 'utf8').replace(/\r\n/g, '\n').replace(/\/\*[\s\S]*?\*\//g, '');
     const kept = [];
     const keyframes = new Map();
     for (const block of blocks(css)) {
@@ -122,7 +123,7 @@ function build() {
 
 const css = build();
 if (process.argv.includes('--check')) {
-    const current = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : '';
+    const current = fs.existsSync(target) ? fs.readFileSync(target, 'utf8').replace(/\r\n/g, '\n') : '';
     if (current !== css) {
         console.error('magenda.min.css is out of date: run node tests/build-magenda-css.js');
         process.exit(1);
