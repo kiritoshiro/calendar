@@ -26477,7 +26477,7 @@ body.rtl .mec-wrap {
     text-align: center;
     font-size: 11px;
     font-weight: 700;
-    color: #9ca3af;
+    color: #646b78; /* 5.1:1 on the header row (WCAG AA) */
     padding: 6px 0;
     text-transform: uppercase;
 }
@@ -26528,7 +26528,7 @@ body.rtl .mec-wrap {
     background: color-mix(in srgb, var(--magenda-accent) 8%, #fff) !important;
 }
 
-.mec-magenda-day-pad { color: #c3c8d1 !important; }
+.mec-magenda-day-pad { color: #676e7a !important; } /* other-month days: 5.1:1 on white, 4.6:1 on Saturday tints */
 
 .mec-magenda-day-num {
     font-size: inherit;
@@ -26552,7 +26552,7 @@ body.rtl .mec-wrap {
 }
 
 .mec-magenda-day-pad.mec-magenda-day-has-events .mec-magenda-day-count {
-    background: #c3c8d1;
+    background: #676e7a;
 }
 
 /* Saturday column tint. Placed before the today/active rules below so

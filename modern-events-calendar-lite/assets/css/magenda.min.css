@@ -127,7 +127,7 @@
     text-align: center;
     font-size: 11px;
     font-weight: 700;
-    color: #9ca3af;
+    color: #646b78; 
     padding: 6px 0;
     text-transform: uppercase;
 }.mec-magenda-weekdays .mec-magenda-weekday-saturday{
@@ -167,7 +167,7 @@
     border: 0 !important;
     box-shadow: none !important;
     background: color-mix(in srgb, var(--magenda-accent) 8%, #fff) !important;
-}.mec-magenda-day-pad{ color: #c3c8d1 !important; }.mec-magenda-day-num{
+}.mec-magenda-day-pad{ color: #676e7a !important; }.mec-magenda-day-num{
     font-size: inherit;
     font-weight: inherit;
     line-height: 1;
@@ -185,7 +185,7 @@
     font-weight: 700;
     line-height: 1;
 }.mec-magenda-day-pad.mec-magenda-day-has-events .mec-magenda-day-count{
-    background: #c3c8d1;
+    background: #676e7a;
 }.mec-magenda-day-saturday{
     background: color-mix(in srgb, var(--magenda-accent) 8%, #fff) !important;
 }.mec-magenda-day-saturday.mec-magenda-day-pad{
