@@ -7883,6 +7883,25 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
             closePickers($root);
             loadMonth($root, parseInt($(this).data('year'), 10), month);
         });
+
+        // When the calendar's single event display is the popup, MEC gives the
+        // event links target="m1". The magenda has no handler of its own, so
+        // the browser opened a new window named "m1" instead. Open MEC's popup
+        // (as the other skins do); Ctrl/Cmd/Shift/middle-click still open the
+        // event page in a new tab.
+        $(document).on('click', '.mec-magenda a[data-event-id][target="m1"]', function (e) {
+            if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button !== 0) return;
+            var href = $(this).attr('href') || '';
+            e.preventDefault();
+            if (typeof mecSingleEventDisplayer === 'undefined' || typeof $.featherlight !== 'function') {
+                window.location.href = href;
+                return;
+            }
+            var query = href.indexOf('?') === -1 ? '' : href.slice(href.indexOf('?') + 1);
+            var params = new URLSearchParams(query);
+            var ajaxUrl = $(this).closest('.mec-magenda').data('ajax-url') || (window.mecdata && mecdata.ajax_url);
+            mecSingleEventDisplayer.getSinglePage($(this).data('event-id'), params.get('occurrence'), params.get('time'), ajaxUrl, 'm1', 0);
+        });
     });
 
 })(jQuery);

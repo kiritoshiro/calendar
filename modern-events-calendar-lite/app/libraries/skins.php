@@ -334,7 +334,11 @@ class MEC_skins extends MEC_base
         MEC_factory::mark_rendered($this->skin);
 
         // Include needed assets for loading single event details page
-        if ($this->sed_method === 'm1') $this->main->load_sed_assets($this->settings);
+        if ($this->sed_method === 'm1')
+        {
+            $this->main->load_sed_assets($this->settings);
+            MEC_factory::mark_event_popup();
+        }
 
         $custom_output = apply_filters('mec_skin_output_html', null, $this);
         if (!is_null($custom_output)) return $this->note_search_form((string) $custom_output);
