@@ -8,7 +8,7 @@ const selectorParser = require('postcss-selector-parser');
 
 const root = path.resolve(__dirname, '..');
 const dir = path.join(root, 'modern-events-calendar-lite/assets/css');
-const source = fs.readFileSync(path.join(dir, 'frontend.min.css'), 'utf8');
+const source = fs.readFileSync(path.join(dir, 'frontend.min.css'), 'utf8').replace(/\r\n/g, '\n');
 // These roots belong to other listing/calendar skins. Generic event classes,
 // all single-event/modal modules, and Weekly View states are deliberately kept.
 const otherLayouts = [
@@ -61,7 +61,7 @@ for (let pass = 0; pass < 3; pass++) css.walkAtRules(rule => {
 const output = '/*! Generated from frontend.min.css by scripts/build-weekly-css.cjs; do not edit. */\n' + css.toString() + '\n';
 const target = path.join(dir, 'weekly-view.min.css');
 if (process.argv.includes('--check')) {
-    if (!fs.existsSync(target) || fs.readFileSync(target, 'utf8') !== output) {
+    if (!fs.existsSync(target) || fs.readFileSync(target, 'utf8').replace(/\r\n/g, '\n') !== output) {
         console.error('Weekly View CSS is stale. Run npm run build:weekly-css.');
         process.exitCode = 1;
     }

@@ -22,4 +22,4 @@ add_filter('mec_weekly_view_css', '__return_false');
 
 Before extending the exclusions, compare real WordPress output with the full stylesheet at mobile/tablet/desktop widths, including dark mode, popups, month/year pickers, day selection, AJAX loading/empty states and keyboard controls. Check full/mixed/search/RTL/editor fallbacks and custom inline styles. A shared class can appear in Weekly View even when its name suggests another skin: `mec-event-list-weekly-date` is one example.
 
-Current gzip measurement at the default Node compression level: 87,454 bytes for the full file and 48,640 bytes for Weekly View, about 44% less. Production Brotli/gzip settings and PageSpeed results may differ; no deployed performance score is implied.
+Current gzip measurement at the default Node compression level: 87,427 bytes for the full file and 48,613 bytes for Weekly View, about 44% less. Production Brotli/gzip settings and PageSpeed results may differ; no deployed performance score is implied.
