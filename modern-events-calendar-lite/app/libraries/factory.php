@@ -704,7 +704,27 @@ class MEC_factory extends MEC_base
 
             // Include MEC frontend CSS files
             wp_enqueue_style('mec-font-icons');
-            if (!is_rtl()) wp_enqueue_style('mec-frontend-style');
+            if (!is_rtl())
+            {
+                // Only select the smaller bundle after all page skins are known.
+                // Keep the full stylesheet for previews, mixed layouts and sites
+                // with custom skin extensions that opt out through this filter.
+                $weekly_css = $lean && !is_admin()
+                    && !wp_style_is('mec-frontend-style', 'enqueued')
+                    && !wp_style_is('mec-frontend-style', 'done')
+                    && is_readable(MEC_ABSPATH . 'assets/css/weekly-view.min.css')
+                    && apply_filters('mec_weekly_view_css', true);
+                if ($weekly_css)
+                {
+                    // Preserve the handle, dependencies and inline styling.
+                    $styles = wp_styles();
+                    if (isset($styles->registered['mec-frontend-style']))
+                    {
+                        $styles->registered['mec-frontend-style']->src = $this->main->asset('css/weekly-view.min.css');
+                    }
+                }
+                wp_enqueue_style('mec-frontend-style');
+            }
             if (isset($styling['accessibility']) && $styling['accessibility']) wp_enqueue_style('accessibility');
 
             wp_enqueue_style('mec-tooltip-style');

@@ -1,0 +1,12 @@
+{
+  "name": "adventistai-calendar-assets",
+  "private": true,
+  "scripts": {
+    "build:weekly-css": "node scripts/build-weekly-css.cjs",
+    "check:weekly-css": "node scripts/build-weekly-css.cjs --check"
+  },
+  "devDependencies": {
+    "postcss": "8.5.28",
+    "postcss-selector-parser": "7.1.6"
+  }
+}
