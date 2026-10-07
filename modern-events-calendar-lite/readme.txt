@@ -24,6 +24,7 @@ Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar 
 
 == Changelog ==
 = 7.35.1.19 =
+* Agenda calendar: weekday letters and the days of the previous and next month are darker, so they are readable (WCAG AA contrast).
 * Smaller downloads: the calendar's scripts are minified in the plugin package (for example the main front-end script is about 28 KB compressed instead of 41 KB).
 
 = 7.35.1.18 =

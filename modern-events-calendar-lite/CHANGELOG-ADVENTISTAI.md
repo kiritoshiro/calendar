@@ -2,6 +2,7 @@
 
 ## 7.35.1.19
 
+- Magenda contrast (WCAG AA, flagged by PageSpeed): weekday letters #9ca3af → #646b78 (2.4:1 → 5.1:1) and other-month day numbers and their event-count badges #c3c8d1 → #676e7a (1.7:1 → 5.1:1 on white, 4.6:1 on the Saturday tints), in `frontend.css`/`frontend.min.css`; `magenda.min.css` regenerated.
 - Release package: `scripts/minify-package-js.cjs` minifies every `assets/**/*.js` that is not already `*.min.js` inside the staged package with esbuild 0.28.2 (pinned in `package-lock.json`, installed with `npm ci --ignore-scripts`; build tooling only, not shipped). Whitespace, syntax and local names only; top-level globals such as `mecSingleEventDisplayer` and the syntax level are unchanged, and each result is parsed once. 19 scripts, 1,115,355 → 706,950 bytes; `frontend.js` 27.8 KB gzipped (PageSpeed listed 40.7 KB), `flipcount.js` 3.8 KB, `featherlight.js` 3.6 KB. The repository keeps the readable sources.
 
 ## 7.35.1.18
