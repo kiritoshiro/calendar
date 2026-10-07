@@ -1,7 +1,23 @@
 // MEC Single Event Displayer
 var mecSingleEventDisplayer =
 {
+    // adventistai.lt: pages that show only the magenda get a trimmed
+    // stylesheet (css/magenda.min.css). The popup's event page needs MEC's
+    // full styles; mecdata.full_styles lists them, loaded once on demand.
+    loadFullStyles: function () {
+        var urls = (typeof mecdata !== 'undefined' && mecdata.full_styles) ? mecdata.full_styles : [];
+        for (var i = 0; i < urls.length; i++) {
+            if (document.querySelector('link[data-mec-full-style="' + i + '"]')) continue;
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = urls[i];
+            link.setAttribute('data-mec-full-style', String(i));
+            document.head.appendChild(link);
+        }
+    },
+
     getSinglePage: function (id, occurrence, time, ajaxurl, layout, image_popup) {
+        mecSingleEventDisplayer.loadFullStyles();
         if (jQuery('.mec-modal-result').length === 0) jQuery('.mec-wrap').append('<div class="mec-modal-result"></div>');
         jQuery('.mec-modal-result').addClass('mec-modal-preloader');
 
@@ -7901,6 +7917,12 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
             var params = new URLSearchParams(query);
             var ajaxUrl = $(this).closest('.mec-magenda').data('ajax-url') || (window.mecdata && mecdata.ajax_url);
             mecSingleEventDisplayer.getSinglePage($(this).data('event-id'), params.get('occurrence'), params.get('time'), ajaxUrl, 'm1', 0);
+        });
+
+        // Start loading the popup's full styles when a pointer or the keyboard
+        // reaches an event link, so they are usually ready before the click.
+        $(document).one('mouseover focusin touchstart', '.mec-magenda a[data-event-id][target="m1"]', function () {
+            if (typeof mecSingleEventDisplayer !== 'undefined') mecSingleEventDisplayer.loadFullStyles();
         });
     });
 
