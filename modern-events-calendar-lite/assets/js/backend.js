@@ -1277,10 +1277,14 @@ function mec_send_email_check_all(Context) {
   if (typeof mec_admin_localize !== "undefined")
     items = JSON.parse(mec_admin_localize.mce_items);
 
-  // Block Editor
+  // Block Editor. Block API 3 (the iframed editor) needs the edit view wrapped
+  // in useBlockProps(); the saved shortcode is unchanged, so existing posts
+  // still validate. Older editors without useBlockProps keep API 1.
+  var useBlockProps = wp && wp.blockEditor && wp.blockEditor.useBlockProps;
   if (items && wp && wp.blocks) {
     items.shortcodes.forEach(function (e, i) {
       wp.blocks.registerBlockType(`mec/blockeditor-${i}`, {
+        apiVersion: useBlockProps && wp.element ? 3 : 1,
         title: items.shortcodes[i]["PN"]
           .toLowerCase()
           .replace(/(^([a-zA-Z\p{M}]))|([ -][a-zA-Z\p{M}])/g, function (s) {
@@ -1289,7 +1293,10 @@ function mec_send_email_check_all(Context) {
         icon: "calendar-alt",
         category: "mec.block.category",
         edit: function () {
-          return `[MEC id="${items.shortcodes[i]["ID"]}"]`;
+          var shortcode = `[MEC id="${items.shortcodes[i]["ID"]}"]`;
+          return useBlockProps && wp.element
+            ? wp.element.createElement("div", useBlockProps(), shortcode)
+            : shortcode;
         },
         save: function () {
           return `[MEC id="${items.shortcodes[i]["ID"]}"]`;
