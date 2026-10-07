@@ -1,5 +1,9 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.14
+
+- Block editor: the `mec/blockeditor-N` shortcode blocks register with block API 3 and wrap their edit view in `useBlockProps()`, so WordPress 6.9+ no longer logs "Block with API version 2 or lower is deprecated" for each of them. The saved shortcode is unchanged; the script also depends on `wp-block-editor` and `wp-element` in the block editor.
+
 ## 7.35.1.13
 
 - PHP 8.4 deprecations: `(boolean)` casts in `app/features/archive.php`, `events.php`, `mec.php` (2), `app/libraries/skins.php` and `app/skins/tile.php` are now `(bool)`. The WordPress Playground smoke test added in PR #13 found them in `debug.log`.
