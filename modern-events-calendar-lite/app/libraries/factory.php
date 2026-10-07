@@ -596,6 +596,17 @@ class MEC_factory extends MEC_base
         $popup = !$lean || self::$rendered_event_popup;
         if (!$popup) wp_dequeue_script('mec-flipcount-script');
 
+        // Weekly View initializes from its rendered markup on DOM ready, so
+        // its footer scripts can defer together. Keep legacy skins and editor
+        // previews on their existing timing; they can emit inline initializers.
+        if ($lean && !is_admin())
+        {
+            foreach (['featherlight', 'mec-flipcount-script', 'mec-tooltip-script', 'mec-frontend-script'] as $handle)
+            {
+                wp_script_add_data($handle, 'strategy', 'defer');
+            }
+        }
+
         if ($this->should_include_assets())
         {
             // Styling
