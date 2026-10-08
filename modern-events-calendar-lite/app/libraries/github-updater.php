@@ -44,7 +44,20 @@ final class MEC_Adventistai_GitHub_Updater
         add_filter('http_request_args', array($this, 'authorize_github_request'), 20, 2);
         add_filter('upgrader_source_selection', array($this, 'select_plugin_source'), 5, 4);
         add_action('delete_site_transient_update_plugins', array($this, 'clear_cache'));
+        add_action('load-update-core.php', array($this, 'force_check'), 9);
         add_action('admin_notices', array($this, 'token_notice'));
+    }
+
+    /**
+     * "Check again" on Dashboard → Updates (force-check=1) only forces
+     * WordPress' core check. Drop the plugin update data (which also clears
+     * this updater's cache, see clear_cache) before wp_update_plugins runs at
+     * priority 10, so a release published minutes ago is found at once.
+     */
+    public function force_check()
+    {
+        if(empty($_GET['force-check']) || !current_user_can('update_plugins')) return; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only cache refresh.
+        delete_site_transient('update_plugins');
     }
 
     /**
