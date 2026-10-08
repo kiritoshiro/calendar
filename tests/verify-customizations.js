@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.19', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.20', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -46,6 +46,9 @@ assert.match(updater, /plugins_api/);
 assert.match(updater, /upgrader_source_selection/);
 assert.match(updater, /select_plugin_source'\), 5, 4/);
 assert.match(updater, /mec_adventistai_github_update_v2/);
+assert.match(updater, /add_action\('load-update-core\.php', array\(\$this, 'force_check'\), 9\);/, '"Check again" must refresh before wp_update_plugins (priority 10)');
+assert.match(updater, /empty\(\$_GET\['force-check'\]\) \|\| !current_user_can\('update_plugins'\)/);
+assert.match(updater, /delete_site_transient\('update_plugins'\);/);
 assert.match(updater, /\$release_version === \$version/);
 assert.match(updater, /Authorization'\] = 'Bearer ' \./);
 assert.match(updater, /REMOTE_PLUGIN_FILE = 'modern-events-calendar-lite\/modern-events-calendar-lite\.php'/);

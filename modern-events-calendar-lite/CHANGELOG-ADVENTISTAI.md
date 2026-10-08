@@ -1,5 +1,9 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.20
+
+- Updates: "Check again" on Dashboard → Updates (`update-core.php?force-check=1`) now finds a new GitHub release at once. WordPress' button only forces its own core check, and the plugin check reused WordPress' update data (re-checked at most once a minute there) and this updater's 6-hour release cache. `force_check()` on `load-update-core.php` priority 9 (before `wp_update_plugins` at 10) deletes the `update_plugins` transient for users who can update plugins, which also clears this updater's cache through `clear_cache()`.
+
 ## 7.35.1.19
 
 - Magenda contrast (WCAG AA, flagged by PageSpeed): weekday letters #9ca3af → #646b78 (2.4:1 → 5.1:1) and other-month day numbers and their event-count badges #c3c8d1 → #676e7a (1.7:1 → 5.1:1 on white, 4.6:1 on the Saturday tints), in `frontend.css`/`frontend.min.css`; `magenda.min.css` regenerated.
