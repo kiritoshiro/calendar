@@ -7,6 +7,7 @@
     url('../fonts/fontawesome-webfont.woff?v=4.2.0') format('woff'),
     url('../fonts/fontawesome-webfont.ttf?v=4.2.0') format('truetype'),
     url('../fonts/fontawesome-webfont.svg?v=4.2.0#fontawesomeregular') format('svg');
+  font-display: swap;
 }
 
 @font-face {
@@ -17,6 +18,7 @@
     url('../fonts/Simple-Line-Icons.woff2') format('woff2'),
     url('../fonts/Simple-Line-Icons.woff') format('woff'),
     url('../fonts/Simple-Line-Icons.svg?#simple-line-icons') format('svg');
+  font-display: swap;
 }
 
 
