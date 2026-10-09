@@ -1,5 +1,9 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.21
+
+- Icon fonts (PageSpeed "Font display", ~130 ms): every `@font-face` for Simple Line Icons (and FontAwesome in `iconfonts.css`) gets `font-display: swap`, in `frontend.css`/`frontend.min.css`, the RTL pair and `iconfonts.css`; `magenda.min.css` regenerated with `tests/build-magenda-css.js`. Lighthouse/DevTools only accept `swap` or `optional`; `optional` could leave the magenda arrows without icons on a slow first visit.
+
 ## 7.35.1.20
 
 - Updates: "Check again" on Dashboard → Updates (`update-core.php?force-check=1`) now finds a new GitHub release at once. WordPress' button only forces its own core check, and the plugin check reused WordPress' update data (re-checked at most once a minute there) and this updater's 6-hour release cache. `force_check()` on `load-update-core.php` priority 9 (before `wp_update_plugins` at 10) deletes the `update_plugins` transient for users who can update plugins, which also clears this updater's cache through `clear_cache()`.
