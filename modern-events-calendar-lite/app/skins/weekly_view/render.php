@@ -51,7 +51,7 @@ $reason_for_cancellation = $this->skin_options['reason_for_cancellation'] ?? fal
                         <div class="mec-event-time mec-color"><?php echo $this->icons->display('clock-o'); ?> <?php echo esc_html($start_time.(trim($end_time) ? ' - '.$end_time : '')); ?></div>
                         <?php endif; ?>
 
-                        <h4 class="mec-event-title"><?php echo MEC_kses::element($this->display_link($event)); ?><?php echo MEC_kses::embed($this->display_custom_data($event)); ?><?php echo MEC_kses::element($this->main->get_flags($event).$event_color.$this->main->get_normal_labels($event, $display_label).$this->main->display_cancellation_reason($event, $reason_for_cancellation)); ?><?php do_action('mec_shortcode_virtual_badge', $event->data->ID ); ?></h4>
+                        <h3 class="mec-event-title"><?php echo MEC_kses::element($this->display_link($event)); ?><?php echo MEC_kses::embed($this->display_custom_data($event)); ?><?php echo MEC_kses::element($this->main->get_flags($event).$event_color.$this->main->get_normal_labels($event, $display_label).$this->main->display_cancellation_reason($event, $reason_for_cancellation)); ?><?php do_action('mec_shortcode_virtual_badge', $event->data->ID ); ?></h3>
                         <?php if($this->localtime) echo MEC_kses::full($this->main->module('local-time.type3', array('event' => $event))); ?>
                         <div class="mec-event-detail"><div class="mec-event-loc-place"><?php echo (isset($location['name']) ? esc_html($location['name']) : ''); ?></div></div>
                         <?php echo MEC_kses::element($this->display_categories($event)); ?>
@@ -65,7 +65,7 @@ $reason_for_cancellation = $this->skin_options['reason_for_cancellation'] ?? fal
     </li>
     <?php elseif(!isset($has_events[$week])): $has_events[$week] = 'printed'; ?>
     <li class="mec-weekly-view-date-events mec-util-hidden mec-calendar-day-events mec-clear mec-weekly-view-week-<?php echo esc_attr($this->id); ?>-<?php echo date('Ym', strtotime($date)).$week; ?>" id="mec_weekly_view_date_events<?php echo esc_attr($this->id); ?>_<?php echo date('Ymd', strtotime($date)); ?>" data-week-number="<?php echo esc_attr($week); ?>">
-        <article class="mec-event-article"><h4 class="mec-event-title"><?php esc_html_e('No Events', 'modern-events-calendar-lite'); ?></h4><div class="mec-event-detail"></div></article>
+        <article class="mec-event-article"><h3 class="mec-event-title"><?php esc_html_e('No Events', 'modern-events-calendar-lite'); ?></h3><div class="mec-event-detail"></div></article>
     </li>
     <?php endif; ?>
     <?php endforeach; ?>

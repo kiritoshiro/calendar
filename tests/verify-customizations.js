@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.21', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.22', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -170,6 +170,13 @@ assert.match(factory, /if \(\$trimmed\) wp_enqueue_style\('mec-magenda-style'\);
 assert.match(factory, /'full_styles' => \$trimmed \? \$this->style_urls\(\['mec-font-icons', 'mec-frontend-style'\]\) : \[\]/);
 assert.match(frontendJs, /mecSingleEventDisplayer\.loadFullStyles\(\);\s+if \(jQuery\('\.mec-modal-result'\)/);
 const magendaCss = plugin('assets/css/magenda.min.css');
+// Event titles sit under the calendar's hidden h2, so heading levels do not skip.
+const weeklyRender = plugin('app/skins/weekly_view/render.php');
+assert.ok(!/<h4 class="mec-event-title"/.test(weeklyRender) && (weeklyRender.match(/<h3 class="mec-event-title">/g) || []).length === 2, 'Weekly View event titles are h3');
+assert.match(plugin('app/skins/weekly_view.php'), /<h2 class="mec-magenda-sr-title"><\?php echo esc_html\(\$calendar_heading\); \?><\/h2>/);
+// The agenda's clock is an SVG mask, so the icon font is not downloaded for it.
+assert.match(plugin('assets/css/magenda.min.css'), /\.mec-magenda \.mec-sl-clock-o\s*\{\s*font-family:\s*inherit !important;?\s*\}/);
+assert.match(plugin('assets/css/magenda.min.css'), /\.mec-magenda \.mec-magenda-sr-title\s*\{[^}]*clip:\s*rect\(0, 0, 0, 0\)/);
 assert.ok(magendaCss.length < 40000 && /\.mec-magenda\s*\{[^}]*position:\s*relative/.test(magendaCss) && /@font-face\s*\{[^}]*simple-line-icons/.test(magendaCss), 'magenda.min.css holds the magenda styles and the icon font');
 assert.match(factory, /\|\| self::\$rendered_search_form\) return false;/);
 assert.match(skinsLibrary, /private function note_search_form\(\$html\)/);

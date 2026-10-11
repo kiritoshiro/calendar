@@ -625,5 +625,33 @@
 }
 
 .mec-magenda-agenda .mec-event-footer { display: none; }
+
+/* The calendar's heading is for screen readers only. */
+.mec-magenda .mec-magenda-sr-title {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* The clock is the only icon the agenda shows. Drawn as an SVG mask in the
+   text colour, it no longer needs the 30 KB simple-line-icons font, which
+   pages then do not download. */
+.mec-magenda .mec-sl-clock-o { font-family: inherit !important; }
+.mec-magenda .mec-sl-clock-o:before {
+    content: "" !important;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -.125em;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6.5V12l3.5 2'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6.5V12l3.5 2'/%3E%3C/svg%3E") center / contain no-repeat;
+}
 .mec-ymtabs .mec-skin-monthly-view-month-navigator-container .mec-month-navigator{border:0;border-top:1px dotted rgba(0,0,0,.12);border-radius:0}.mec-ymtabs-gcal-navigator{display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;border-top:1px dotted rgba(0,0,0,.12);padding:10px 14px}.mec-ymtabs-gcal-title{font-size:16px;font-weight:700;margin:0 10px;color:#1f2937}@media (max-width:600px){.mec-ymtabs-gcal-title{font-size:14px;margin:0 4px}}.mec-gCalendar #mec-gCalendar-wrap .fc-header-toolbar.fc-toolbar{border:0;border-radius:0;padding:0;margin:0 0 10px;position:relative;flex-wrap:wrap}.mec-gCalendar #mec-gCalendar-wrap .fc-header-toolbar.fc-toolbar:empty{display:none;margin:0}
 .mec-ymtabs-gcal-title{position:relative}.mec-ymtabs-gcal-title button{margin:0!important;padding:0!important;border:0!important;outline:0!important;box-shadow:none!important;background:0 0!important;cursor:pointer}.mec-ymtabs-gcal-title i{color:#a1a2a3;cursor:pointer;margin-left:2px;margin-right:0;font-size:14px}

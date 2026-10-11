@@ -1,5 +1,10 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.22
+
+- Simple Line Icons (Lighthouse "Network dependency tree": `Simple-Line-Icons.woff2`, 30 KB, end of a ~1.07 s chain): the clock (`.mec-sl-clock-o`) is the only icon the magenda agenda shows, so inside `.mec-magenda` it is drawn as an SVG mask in `currentColor` and its element no longer uses the icon font. Pages whose only MEC output is the magenda then never download the font. Added to the magenda section of `frontend.css`/`frontend.min.css`; `magenda.min.css` regenerated.
+- Heading order (Lighthouse "Heading elements are not in a sequentially-descending order"): Weekly View event titles were `<h4>` straight after the page's `<h1>`/`<h2>`. `weekly_view/render.php` prints them as `<h3>` (same computed style on adventistai.lt), and `magenda_render_shell()` starts the calendar with a visually hidden `<h2 class="mec-magenda-sr-title">` ("Renginių kalendorius" in Lithuanian, "Events calendar" otherwise).
+
 ## 7.35.1.21
 
 - Icon fonts (PageSpeed "Font display", ~130 ms): every `@font-face` for Simple Line Icons (and FontAwesome in `iconfonts.css`) gets `font-display: swap`, in `frontend.css`/`frontend.min.css`, the RTL pair and `iconfonts.css`; `magenda.min.css` regenerated with `tests/build-magenda-css.js`. Lighthouse/DevTools only accept `swap` or `optional`; `optional` could leave the magenda arrows without icons on a slow first visit.
