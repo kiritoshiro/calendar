@@ -4,7 +4,7 @@ Tags: calendar, events, google calendar
 Requires at least: 6.6
 Tested up to: 7.0.2
 Requires PHP: 8.4
-Stable tag: 7.35.1.21
+Stable tag: 7.35.1.22
 License: GPLv2 or later
 
 Focused calendar build maintained by adventistai.lt.
@@ -23,6 +23,10 @@ Booking, attendees, payments, WooCommerce, SMS, PDF invoices, non-Google importe
 Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar → Import / Export. For private updates define ADVENTISTAI_CALENDAR_GITHUB_TOKEN in wp-config.php with repository read access.
 
 == Changelog ==
+= 7.35.1.22 =
+* Speed: the agenda's clock icon is drawn without the 30 KB icon font, so pages showing only the calendar widget no longer download it.
+* Accessibility: the calendar has a heading for screen readers, and its event titles are level-3 headings, so the page's heading order no longer skips a level.
+
 = 7.35.1.21 =
 * Speed: the calendar icon font no longer holds back text rendering (font-display: swap, flagged by PageSpeed).
 

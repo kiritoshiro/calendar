@@ -26669,3 +26669,31 @@ body.rtl .mec-wrap {
 }
 
 .mec-magenda-agenda .mec-event-footer { display: none; }
+
+/* The calendar's heading is for screen readers only. */
+.mec-magenda .mec-magenda-sr-title {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* The clock is the only icon the agenda shows. Drawn as an SVG mask in the
+   text colour, it no longer needs the 30 KB simple-line-icons font, which
+   pages then do not download. */
+.mec-magenda .mec-sl-clock-o { font-family: inherit !important; }
+.mec-magenda .mec-sl-clock-o:before {
+    content: "" !important;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -.125em;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6.5V12l3.5 2'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6.5V12l3.5 2'/%3E%3C/svg%3E") center / contain no-repeat;
+}

@@ -572,6 +572,9 @@ class MEC_skin_weekly_view extends MEC_skins
         // time range like "14:00 - 16:00".
         $all_day_label = trim(wp_strip_all_tags($this->main->m('all_day', esc_html__('All Day', 'modern-events-calendar-lite'))));
         $today_word    = (strpos(get_locale(), 'lt') === 0) ? 'Šiandien' : __('Today', 'modern-events-calendar-lite');
+        // Read by screen readers only: gives the event titles (h3) a heading
+        // to sit under, whatever the page's own headings are.
+        $calendar_heading = (strpos(get_locale(), 'lt') === 0) ? 'Renginių kalendorius' : __('Events calendar', 'modern-events-calendar-lite');
 
         $atts_qs = http_build_query(array('atts' => $this->atts), '', '&');
 
@@ -588,6 +591,8 @@ class MEC_skin_weekly_view extends MEC_skins
              data-cur-month="<?php echo esc_attr(sprintf('%02d', $month)); ?>"
              data-all-day-label="<?php echo esc_attr($all_day_label); ?>"
              data-today-word="<?php echo esc_attr($today_word); ?>">
+
+            <h2 class="mec-magenda-sr-title"><?php echo esc_html($calendar_heading); ?></h2>
 
             <div class="mec-magenda-header">
                 <button type="button" class="mec-magenda-nav mec-magenda-prev" aria-label="<?php esc_attr_e('Previous month', 'modern-events-calendar-lite'); ?>">&#8249;</button>
