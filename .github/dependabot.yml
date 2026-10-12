@@ -16,7 +16,7 @@ updates:
   cooldown:
     default-days: 7
 - package-ecosystem: composer
-  directory: /.github/linters
+  directory: /tools/linters
   # A PHP_CodeSniffer 4 update cannot be resolved here: wp-coding-standards/wpcs
   # 3.x requires ^3.13.5 and phpcompatibility/php-compatibility 9.3.5 (pulled
   # in by PHPCompatibilityWP) ^2.3 || ^3.0.2, so each weekly run ended as a
