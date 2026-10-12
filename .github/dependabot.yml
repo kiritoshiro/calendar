@@ -17,6 +17,13 @@ updates:
     default-days: 7
 - package-ecosystem: composer
   directory: /.github/linters
+  # WPCS 3.x (and PHPCompatibilityWP) only support PHP_CodeSniffer 3.x, so a
+  # PHPCS 4 update cannot be resolved and failed the whole Dependabot run.
+  # Patch and minor 3.x updates still come through.
+  ignore:
+  - dependency-name: squizlabs/php_codesniffer
+    update-types:
+    - version-update:semver-major
   schedule:
     interval: weekly
     day: monday
