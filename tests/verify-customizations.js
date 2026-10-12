@@ -203,7 +203,7 @@ for (const called of ['cybersecurity.yml', 'plugin-checks.yml', 'codeql.yml']) {
     assert.match(securityGate, new RegExp(`uses: \\./\\.github/workflows/${called.replace('.', '\\.')}`), `the security gate must run ${called}`);
 }
 assert.match(securityGate, /name: All security checks passed/);
-assert.match(pluginChecks, /plugin-check-baseline\.py "\$RUNNER_TEMP\/plugin-check-results\.txt" \.github\/linters\/plugin-check-baseline\.json/);
+assert.match(pluginChecks, /plugin-check-baseline\.py "\$RUNNER_TEMP\/plugin-check-results\.txt" tools\/linters\/plugin-check-baseline\.json/);
 assert.ok(fs.existsSync(path.join(root, '.github', 'linters', 'plugin-check-baseline.json')), 'the Plugin Check baseline must exist');
 for (const file of ['app/features/events.php', 'app/features/mec.php', 'app/libraries/main.php']) {
     assert.doesNotMatch(plugin(file), /(?<!safe_)wp_redirect\(/, `${file} must use wp_safe_redirect`);
