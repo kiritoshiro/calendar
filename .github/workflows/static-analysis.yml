@@ -34,13 +34,13 @@ jobs:
           tools: none
 
       - name: Install analysis tooling
-        run: composer install --working-dir=.github/linters --no-interaction --no-progress
+        run: composer install --working-dir=tools/linters --no-interaction --no-progress
 
       - name: List the files this fork maintains
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t files < <(bash .github/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
+          mapfile -t files < <(bash tools/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
           if [ "${#files[@]}" -eq 0 ]; then
             echo 'No fork-maintained PHP files were found; the import commit lookup is wrong.'
             exit 1
@@ -53,16 +53,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t files < <(bash .github/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
-          php .github/linters/vendor/bin/phpcs --standard=.github/linters/phpcs-compatibility.xml --report=full -- "${files[@]}"
+          mapfile -t files < <(bash tools/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
+          php tools/linters/vendor/bin/phpcs --standard=tools/linters/phpcs-compatibility.xml --report=full -- "${files[@]}"
 
       - name: PHPStan bug analysis
         if: ${{ !cancelled() }}
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t files < <(bash .github/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
-          php .github/linters/vendor/bin/phpstan analyse --configuration=.github/linters/phpstan.neon --no-progress --memory-limit=3G -- "${files[@]}"
+          mapfile -t files < <(bash tools/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
+          php tools/linters/vendor/bin/phpstan analyse --configuration=tools/linters/phpstan.neon --no-progress --memory-limit=3G -- "${files[@]}"
 
   wordpress-standards:
     name: WordPress security and efficiency review (advisory)
@@ -83,14 +83,14 @@ jobs:
           tools: none
 
       - name: Install analysis tooling
-        run: composer install --working-dir=.github/linters --no-interaction --no-progress
+        run: composer install --working-dir=tools/linters --no-interaction --no-progress
 
       - name: Review escaping, queries and dead code
         id: review
         shell: bash
         run: |
           set -uo pipefail
-          mapfile -t files < <(bash .github/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
+          mapfile -t files < <(bash tools/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
           if [ "${#files[@]}" -eq 0 ]; then
             echo 'No fork-maintained PHP files were found; the import commit lookup is wrong.'
             exit 1
@@ -98,7 +98,7 @@ jobs:
           # GitHub runs `shell: bash` with -e, so errexit has to go before a
           # command whose nonzero exit is the result we want to inspect.
           set +e
-          php .github/linters/vendor/bin/phpcs --standard=.github/linters/phpcs-wordpress.xml --report=summary --report-source -- "${files[@]}" | tee phpcs-review.txt
+          php tools/linters/vendor/bin/phpcs --standard=tools/linters/phpcs-wordpress.xml --report=summary --report-source -- "${files[@]}" | tee phpcs-review.txt
           status="${PIPESTATUS[0]}"
           # 0 clean, 1 warnings, 2 errors. Anything higher means phpcs itself
           # could not run, which must fail the job rather than report nothing.

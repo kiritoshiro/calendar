@@ -115,4 +115,4 @@ jobs:
 
       - name: Compare with the legacy baseline
         shell: bash
-        run: python3 .github/linters/plugin-check-baseline.py "$RUNNER_TEMP/plugin-check-results.txt" .github/linters/plugin-check-baseline.json
+        run: python3 tools/linters/plugin-check-baseline.py "$RUNNER_TEMP/plugin-check-results.txt" tools/linters/plugin-check-baseline.json
