@@ -78,7 +78,7 @@ jobs:
           node scripts/minify-package-js.cjs "$stage/modern-events-calendar-lite"
           cd "$stage"
           zip -qr "$GITHUB_WORKSPACE/$ARCHIVE" modern-events-calendar-lite
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: modern-events-calendar-lite-${{ steps.meta.outputs.version }}
           path: ${{ steps.meta.outputs.archive }}
