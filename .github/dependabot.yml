@@ -17,6 +17,15 @@ updates:
     default-days: 7
 - package-ecosystem: composer
   directory: /.github/linters
+  # A PHP_CodeSniffer 4 update cannot be resolved here: wp-coding-standards/wpcs
+  # 3.x requires ^3.13.5 and phpcompatibility/php-compatibility 9.3.5 (pulled
+  # in by PHPCompatibilityWP) ^2.3 || ^3.0.2, so each weekly run ended as a
+  # failed job (2026-10-12). Patch and minor 3.x updates still come through.
+  # Remove this rule once both WPCS and php-compatibility accept PHPCS 4.
+  ignore:
+  - dependency-name: squizlabs/php_codesniffer
+    update-types:
+    - version-update:semver-major
   schedule:
     interval: weekly
     day: monday
