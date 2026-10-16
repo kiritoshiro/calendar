@@ -332,5 +332,6 @@ for (const key of ['event_id', 'year', 'month']) {
 }
 assert.match(plugin('app/features/report.php'), /if \(\$event_id !== 'none'\) \$event_id = absint\(\$event_id\);/);
 assert.match(plugin('app/addons/divi/includes/MECShortcodesForDivi.php'), /\$post_id = absint\(\$_POST\['shortcode_id'\] \?\? 0\);/);
-assert.match(ixFeature, /`meta_value`='" \. \$this->db->escape\(\$gcal_id\) \. "'/);
+assert.match(ixFeature, /\$wpdb->prepare\("SELECT `post_id` FROM `\{\$wpdb->postmeta\}` WHERE `meta_value`=%s AND `meta_key`='mec_gcal_id'", \$gcal_id\)/);
+assert.match(ixFeature, /\$wpdb->prepare\("SELECT `dstart` FROM `\{\$wpdb->prefix\}mec_dates` WHERE `post_id`=%d/);
 console.log('Customization checks passed.');

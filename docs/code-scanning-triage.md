@@ -24,7 +24,7 @@ Upstream's `daily_view.php` (WordPress.org trunk) sets `$this->id = $this->atts[
 - `bookingcalendar.php` (#52): public `mec_booking_calendar_load_month` concatenated `event_id`, `year` and `month` into SQL, protected only by WordPress' magic quotes. Now `absint()` + `checkdate()`. The file is excluded from the release ZIP, so this is source hygiene.
 - `report.php` (#76, #77): `report_event_dates` (capability + nonce) put `event_id` into SQL and an inline `onchange`; now `absint()` (`none` kept).
 - Divi preview (#12, `manage_options`): `absint()` on `shortcode_id`.
-- Google import (#60, #61): Google event ID escaped in the lookup query, post ID cast.
+- Google import (#60, #61): both lookups use `$wpdb->prepare()` (`%s` for the Google event ID, `%d` for the post ID).
 
 ## Recommendation for the rest
 

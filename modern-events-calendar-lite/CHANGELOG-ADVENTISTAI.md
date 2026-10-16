@@ -3,7 +3,7 @@
 ## 7.35.1.24
 
 - Reflected XSS (found while triaging the code-scanning backlog; reproduced logged out in WordPress Playground): `wp_ajax_nopriv_mec_full_calendar_switch_skin` passes request `atts` to the skins and echoes HTML, and the daily view prints the skin id inside a JavaScript identifier (`var mec_daily_view_init_<id> = function()`), where `esc_js()` does not help, so a crafted `atts[instance_id]` in a logged-out link ran script. `MEC_skins::get_skin_dom_id()` now keeps only `[A-Za-z0-9_]` of `instance_id`/`id` (shortcode ids such as `mec1` are unchanged).
-- Hardening, same triage: `mec_booking_calendar_load_month` (public in the source, but `bookingcalendar.php` is excluded from the release ZIP) casts `event_id`, `year` and `month` with `absint()` before they reach its SQL and checks the month with `checkdate()` (the string was only protected by WordPress' magic quotes); the attendee report's `report_event_dates` casts `event_id` (it reached SQL and an inline `onchange`); the Divi shortcode preview casts `shortcode_id`; the Google import escapes the event's Google ID in its lookup query.
+- Hardening, same triage: `mec_booking_calendar_load_month` (public in the source, but `bookingcalendar.php` is excluded from the release ZIP) casts `event_id`, `year` and `month` with `absint()` before they reach its SQL and checks the month with `checkdate()` (the string was only protected by WordPress' magic quotes); the attendee report's `report_event_dates` casts `event_id` (it reached SQL and an inline `onchange`); the Divi shortcode preview casts `shortcode_id`; the Google import's two lookups use `$wpdb->prepare()` (`%s` Google event ID, `%d` post ID).
 
 ## 7.35.1.23
 

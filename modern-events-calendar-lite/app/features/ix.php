@@ -588,7 +588,8 @@ class MEC_feature_ix extends MEC_base
                 ],
             ];
 
-            $post_id = $this->db->select("SELECT `post_id` FROM `#__postmeta` WHERE `meta_value`='" . $this->db->escape($gcal_id) . "' AND `meta_key`='mec_gcal_id'", 'loadResult');
+            global $wpdb;
+            $post_id = $wpdb->get_var($wpdb->prepare("SELECT `post_id` FROM `{$wpdb->postmeta}` WHERE `meta_value`=%s AND `meta_key`='mec_gcal_id'", $gcal_id));
 
             // Imported From Google
             if (!post_exists($title, $description, '', $this->main->get_main_post_type())) $args['meta']['mec_imported_from_google'] = 1;
@@ -604,7 +605,7 @@ class MEC_feature_ix extends MEC_base
             if ($organizer_id) wp_set_object_terms($post_id, (int) $organizer_id, 'mec_organizer');
 
             // MEC Dates
-            $dates = $this->db->select("SELECT `dstart` FROM `#__mec_dates` WHERE `post_id`='" . ((int) $post_id) . "' ORDER BY `tstart` ASC LIMIT 50", 'loadColumn');
+            $dates = $wpdb->get_col($wpdb->prepare("SELECT `dstart` FROM `{$wpdb->prefix}mec_dates` WHERE `post_id`=%d ORDER BY `tstart` ASC LIMIT 50", $post_id));
 
             // Event Instances
             $instances = $service->events->instances($calendar_id, $gcal_id, ['maxResults' => 50]);
