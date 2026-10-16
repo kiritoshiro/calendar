@@ -7663,6 +7663,9 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
 
     // Fetched months are reused for this long (prefetch, prev/next, pickers).
     var MONTH_CACHE_TTL = 10 * 60 * 1000;
+    // A cached page is hours old at most, so the browser's date is only
+    // trusted up to this many days after the page's own.
+    var MAX_TODAY_LAG_DAYS = 2;
 
     function pad(n) { return (n < 10 ? '0' : '') + n; }
 
@@ -7686,6 +7689,24 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
         } catch (e) {
             return '';
         }
+    }
+
+    /**
+     * The date to treat as today: the browser's site date when it is 1 to
+     * MAX_TODAY_LAG_DAYS days after the page's, else the page's (a slow or
+     * far-off browser clock can't move it).
+     */
+    function currentToday(pageToday, liveToday) {
+        var re = /^(\d{4})-(\d{2})-(\d{2})$/;
+        var page = re.exec(pageToday || '');
+        var live = re.exec(liveToday || '');
+        if (!page || !live) return pageToday;
+        var days = (Date.UTC(+live[1], live[2] - 1, +live[3]) - Date.UTC(+page[1], page[2] - 1, +page[3])) / 86400000;
+        return (days > 0 && days <= MAX_TODAY_LAG_DAYS) ? liveToday : pageToday;
+    }
+
+    function saveData() {
+        return !!(navigator.connection && navigator.connection.saveData);
     }
 
     /**
@@ -7880,6 +7901,21 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
         else window.setTimeout(callback, 1500);
     }
 
+    /** Runs callback once, when el first enters the viewport; never without IntersectionObserver. */
+    function whenVisible(el, callback) {
+        if (!window.IntersectionObserver) return;
+        var observer = new IntersectionObserver(function (entries) {
+            for (var i = 0; i < entries.length; i++) {
+                if (entries[i].isIntersecting && entries[i].intersectionRatio > 0) {
+                    observer.disconnect();
+                    callback();
+                    return;
+                }
+            }
+        }, { threshold: 0.1 });
+        observer.observe(el);
+    }
+
     /** Builds a month/year picker the first time it is opened. */
     function buildPicker($root, which) {
         var $picker = $root.find('.mec-magenda-picker-' + which);
@@ -7968,37 +8004,46 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
             var $root = $(this);
 
             // A cached copy of the page carries the day it was made on. If
-            // the site's date has moved on since, use the real today (only
-            // ever forward, so a slow browser clock can't move it back); the
-            // page's agenda starts at its own date, so it still has today.
-            var today = String($root.data('today') || '');
-            var liveToday = siteToday($root.data('timezone'), Date.now());
-            if (/^\d{4}-\d{2}-\d{2}$/.test(liveToday) && liveToday > today) {
-                $root.data('today', liveToday);
+            // the site's date has moved on since, use the real today (see
+            // currentToday()); the page's agenda starts at its own date, so
+            // it still has today.
+            var pageToday = String($root.data('today') || '');
+            var today = currentToday(pageToday, siteToday($root.data('timezone'), Date.now()));
+            var shownYear = parseInt($root.data('cur-year'), 10);
+            var shownMonth = parseInt($root.data('cur-month'), 10);
+            var year = shownYear;
+            var month = shownMonth;
+            if (today !== pageToday) {
+                $root.data('today', today);
                 $root.find('.mec-magenda-day-today').removeClass('mec-magenda-day-today');
-                $root.find('.mec-magenda-day[data-date="' + liveToday + '"]').addClass('mec-magenda-day-today');
+                $root.find('.mec-magenda-day[data-date="' + today + '"]').addClass('mec-magenda-day-today');
                 // The page always opens on the month of its own today.
-                $root.data('cur-year', liveToday.slice(0, 4));
-                $root.data('cur-month', liveToday.slice(5, 7));
+                // cur-year/cur-month follow once showMonth() shows it.
+                year = parseInt(today.slice(0, 4), 10);
+                month = parseInt(today.slice(5, 7), 10);
             }
 
             // The surrounding page may be cached while event occurrences are
             // updated independently. Refresh the visible month through the
             // same live endpoint used by the arrows so the first render and
             // every later navigation always use one complete data source.
-            // Then, once the browser is idle, fetch the months either side
-            // so the arrows show them at once.
-            var year = parseInt($root.data('cur-year'), 10);
-            var month = parseInt($root.data('cur-month'), 10);
+            // Then, once the calendar is on screen and the browser is idle,
+            // fetch the months either side so the arrows show them at once
+            // (these requests are not cached, so not for unseen calendars).
             if (!isNaN(year) && !isNaN(month)) {
                 loadMonth($root, year, month).always(function () {
-                    if (navigator.connection && navigator.connection.saveData) return;
-                    whenIdle(function () {
-                        prefetchMonth($root, -1);
-                        prefetchMonth($root, 1);
+                    if (saveData()) return;
+                    whenVisible($root[0], function () {
+                        whenIdle(function () {
+                            prefetchMonth($root, -1);
+                            prefetchMonth($root, 1);
+                        });
                     });
                 });
-                selectDay($root, defaultDayFor($root, year, month));
+                // Until a new month arrives, keep the page's own day selected
+                // in the month still shown.
+                var sameMonth = year === shownYear && month === shownMonth;
+                selectDay($root, sameMonth ? defaultDayFor($root, year, month) : pageToday);
             }
         });
 
@@ -8018,8 +8063,10 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
             loadMonth($root, target[0], target[1]);
         });
 
-        // Further months load when the pointer or keyboard reaches an arrow.
+        // Further months load when the pointer or keyboard reaches an arrow
+        // (not with Save-Data; a click still loads its month).
         $(document).on('mouseenter focusin', '.mec-magenda-prev, .mec-magenda-next', function () {
+            if (saveData()) return;
             prefetchMonth($(this).closest('.mec-magenda'), $(this).hasClass('mec-magenda-prev') ? -1 : 1);
         });
 

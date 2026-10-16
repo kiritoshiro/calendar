@@ -147,8 +147,15 @@ assert.match(frontendJs, /\$root\.find\('\.mec-magenda-agenda \.mec-weekly-view-
 assert.match(frontendJs, /if \(hit && Date\.now\(\) - hit\.at < MONTH_CACHE_TTL\) return hit\.request;/);
 assert.match(miniAgendaInit, /whenIdle\(function \(\) \{\s*prefetchMonth\(\$root, -1\);\s*prefetchMonth\(\$root, 1\);/, 'neighbouring months are prefetched when idle');
 assert.match(frontendJs, /window\.requestIdleCallback\(callback, \{ timeout: 3000 \}\);\s*else window\.setTimeout\(callback, 1500\);/);
-assert.match(frontendJs, /\$\(document\)\.on\('mouseenter focusin', '\.mec-magenda-prev, \.mec-magenda-next'/, 'arrows prefetch on hover and focus');
-assert.match(miniAgendaInit, /liveToday > today/, 'a cached page only moves today forward');
+assert.match(miniAgendaInit, /if \(saveData\(\)\) return;\s*whenVisible\(\$root\[0\], function \(\) \{\s*whenIdle\(function \(\) \{/, 'the idle prefetch waits until the calendar is on screen, and not with Save-Data');
+assert.match(frontendJs, /if \(!window\.IntersectionObserver\) return;/, 'no idle prefetch without IntersectionObserver');
+assert.match(frontendJs, /observer\.disconnect\(\);\s*callback\(\);/, 'the visibility prefetch runs once per calendar');
+assert.match(frontendJs, /\}, \{ threshold: 0\.1 \}\);/);
+assert.match(frontendJs, /\$\(document\)\.on\('mouseenter focusin', '\.mec-magenda-prev, \.mec-magenda-next', function \(\) \{\s*if \(saveData\(\)\) return;\s*prefetchMonth\(/, 'arrows prefetch on hover and focus, not with Save-Data');
+assert.match(miniAgendaInit, /var today = currentToday\(pageToday, siteToday\(\$root\.data\('timezone'\), Date\.now\(\)\)\);/);
+assert.doesNotMatch(miniAgendaInit, /\$root\.data\('cur-(year|month)',/, 'the shown month changes only in showMonth()');
+assert.match(miniAgendaInit, /year = parseInt\(today\.slice\(0, 4\), 10\);\s*month = parseInt\(today\.slice\(5, 7\), 10\);/, 'a new month is passed to loadMonth() directly');
+assert.match(miniAgendaInit, /selectDay\(\$root, sameMonth \? defaultDayFor\(\$root, year, month\) : pageToday\);/, 'the page day stays selected until a new month is shown');
 
 // siteToday() works out the site's date in the browser for a cached page.
 const extractFunction = (source, name) => {
@@ -169,6 +176,20 @@ assert.equal(siteToday('+00:00', Date.UTC(2026, 11, 31, 23, 59)), '2026-12-31');
 assert.equal(siteToday('Europe/Vilnius', Date.UTC(2026, 9, 31, 22, 30)), '2026-11-01', 'zone names follow daylight saving (EET after 25 October)');
 assert.equal(siteToday('Europe/Vilnius', Date.UTC(2026, 9, 16, 20, 59)), '2026-10-16');
 assert.equal(siteToday('Not/AZone', Date.UTC(2026, 9, 16)), '', 'an unknown zone falls back to the page date');
+
+// currentToday() only moves a cached page's today 1-2 days forward.
+const maxLag = /var MAX_TODAY_LAG_DAYS = (\d+);/.exec(frontendJs);
+assert.ok(maxLag && maxLag[1] === '2', 'MAX_TODAY_LAG_DAYS is 2');
+const currentToday = vm.runInNewContext(`var MAX_TODAY_LAG_DAYS = ${maxLag[1]};\n${extractFunction(frontendJs, 'currentToday')}\ncurrentToday`, { Date });
+assert.equal(currentToday('2026-10-16', '2026-10-16'), '2026-10-16');
+assert.equal(currentToday('2026-10-16', '2026-10-17'), '2026-10-17');
+assert.equal(currentToday('2026-10-31', '2026-11-02'), '2026-11-02', 'two days on, across a month');
+assert.equal(currentToday('2026-12-31', '2027-01-01'), '2027-01-01', 'across a year');
+assert.equal(currentToday('2026-10-16', '2026-10-19'), '2026-10-16', 'more than two days ahead is not trusted');
+assert.equal(currentToday('2026-10-16', '2027-10-16'), '2026-10-16');
+assert.equal(currentToday('2026-10-16', '2026-10-15'), '2026-10-16', 'never moves back');
+assert.equal(currentToday('2026-10-16', ''), '2026-10-16', 'no browser date keeps the page date');
+assert.equal(currentToday('', '2026-10-16'), '', 'no page date is left alone');
 
 assert.ok(updater.includes("'requires_php' => '8.4'"));
 assert.match(updater, /\/releases\/latest/);
