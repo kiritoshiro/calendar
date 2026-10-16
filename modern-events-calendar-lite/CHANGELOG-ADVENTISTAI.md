@@ -1,6 +1,6 @@
 # adventistai.lt fork changelog
 
-## [Unreleased]
+## 7.35.1.23
 
 - Magenda DOM size (Lighthouse "Optimize DOM size": on the front page the calendar was 375 elements / 69 KB, with all 16 October events, 11 of them past, and two hidden pickers): the page's agenda starts at today. `weekly_view/tpl.php` sets `magenda_agenda_from` to the site's date for the page render only (not for the `mec_weekly_view_load_month` reply, and not for `show_only_past_events` calendars), and `weekly_view/render.php` skips earlier days. The grid's per-day counts are unchanged. Under page caching (Cloudflare) that date can only fall behind, so a cached page still holds today's events. The client then moves "today" forward: `data-timezone` (`wp_timezone_string()`) gives it the site's date, which is used only when it is 1–2 days after the page's (a cache keeps a page for hours; a wrong browser clock can't move it further or back). A new month is then loaded straight away; `cur-year`/`cur-month` change only once it is shown, so if that request fails the page's month and its day stay as they are.
 - The month and year pickers (2 + 25 elements) are no longer printed. `frontend.js` builds them in the same place when a label is first opened, using `data-month-names`.
