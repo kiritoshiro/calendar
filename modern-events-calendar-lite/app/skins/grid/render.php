@@ -350,7 +350,7 @@ if(isset($this->map_on_top) and $this->map_on_top and isset($map_events) and !em
                 });
             } else {
                 initWhenVisible(function(){
-                    var jsonPush = gmapSkin('.json_encode($events_data).', "'.$this->id.'");
+                    var jsonPush = gmapSkin('.json_encode($events_data).', "'.esc_js($this->id).'");
                     var mecmap = $(containerSelector).mecGoogleMaps({
                         id: "'.esc_js($this->id).'",
                         autoinit: false,

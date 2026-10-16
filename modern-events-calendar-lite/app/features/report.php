@@ -234,7 +234,9 @@ class MEC_feature_report extends MEC_base
         if (!current_user_can('mec_report')) $this->main->response(['success' => 0, 'code' => 'ADMIN_ONLY']);
         if (!wp_verify_nonce(sanitize_text_field($_REQUEST['nonce']), 'mec_settings_nonce')) exit();
 
-        $event_id = sanitize_text_field($_POST['event_id']);
+        // adventistai.lt: an event ID (or "none"); it reaches SQL and an inline onchange handler.
+        $event_id = sanitize_text_field(wp_unslash($_POST['event_id'] ?? ''));
+        if ($event_id !== 'none') $event_id = absint($event_id) ?: 'none';
 
         $booking_options = get_post_meta($event_id, 'mec_booking', true);
         $bookings_all_occurrences = $booking_options['bookings_all_occurrences'] ?? 0;

@@ -189,19 +189,37 @@ class MEC_skins extends MEC_base
     /**
      * Unique id for HTML and JS (#mec_skin_*, search form bindings). Calendar settings stay in $this->atts['id'].
      *
+     * adventistai.lt: AJAX views such as the public mec_full_calendar_switch_skin take their atts
+     * from the request, and the daily view prints this id inside a JavaScript identifier, where
+     * esc_js() does not help. Only characters valid in both an HTML id and a JS identifier are kept.
+     *
      * @return int|string
      */
     public function get_skin_dom_id()
     {
         if (!empty($this->atts['instance_id'])) {
-            return $this->atts['instance_id'];
+            $id = $this->sanitize_skin_dom_id($this->atts['instance_id']);
+            if ($id !== '') return $id;
         }
 
         if (isset($this->atts['id']) && $this->atts['id'] !== '' && $this->atts['id'] !== null) {
-            return $this->atts['id'];
+            $id = $this->sanitize_skin_dom_id($this->atts['id']);
+            if ($id !== '') return $id;
         }
 
         return mt_rand(100, 999);
+    }
+
+    /**
+     * @param mixed $id
+     * @return int|string
+     */
+    private function sanitize_skin_dom_id($id)
+    {
+        if (is_int($id)) return $id;
+        if (!is_scalar($id)) return '';
+
+        return preg_replace('/[^A-Za-z0-9_]/', '', (string) $id);
     }
 
     /**
