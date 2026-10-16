@@ -12,7 +12,7 @@ add_filter( 'et_builder_load_actions', 'MECDIVI_et_builder_load_actions' );
 if(! function_exists( 'MECDIVI_load_mec_shortcode' )) {
 function MECDIVI_load_mec_shortcode() {
         if(!current_user_can('manage_options')) return;
-        $post_id = sanitize_text_field($_POST['shortcode_id']);
+        $post_id = absint($_POST['shortcode_id'] ?? 0);
  		echo do_shortcode( '[MEC id="'.$post_id.'"]' );
         wp_die();
     }
