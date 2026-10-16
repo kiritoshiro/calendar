@@ -3,11 +3,19 @@ name: Calendar CodeQL configuration
 # CodeQL has no PHP analyser, so it covers the JavaScript this plugin ships and
 # the workflows that build and publish it. PHP is handled by PHPStan, PHPCS and
 # Semgrep in the static analysis workflow.
+#
+# security-extended, not security-and-quality: the quality queries only ever
+# reported style notes in upstream Modern Events Calendar code that this fork
+# does not edit (80 alerts, see docs/code-scanning-triage.md).
 queries:
-  - uses: security-and-quality
+  - uses: security-extended
 
 paths-ignore:
   # Minified bundles analyse poorly and are not edited here.
   - '**/*.min.js'
   - '**/*.pkgd.js'
   - 'modern-events-calendar-lite/assets/js/date.format.min.js'
+  # Third-party libraries shipped as is (featherlight, marker clusterer, ...).
+  - 'modern-events-calendar-lite/assets/packages/**'
+  # Bundles a full copy of jQuery ahead of the countdown code.
+  - 'modern-events-calendar-lite/assets/js/flipcount-divi.js'
