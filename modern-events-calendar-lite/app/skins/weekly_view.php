@@ -14,6 +14,12 @@ class MEC_skin_weekly_view extends MEC_skins
     public $skin = 'weekly_view';
 
     /**
+     * First day the agenda prints ('Y-m-d'); empty prints every day
+     * @var string
+     */
+    public $magenda_agenda_from = '';
+
+    /**
      * Constructor method
      * @author Webnus <info@webnus.net>
      */
@@ -562,9 +568,12 @@ class MEC_skin_weekly_view extends MEC_skins
 
         $month_full = wp_date('F', strtotime($this->start_date));
 
-        $today         = current_time('Y-m-d');
-        $today_in_view = ((int) date('Y', strtotime($today)) === $year && (int) date('n', strtotime($today)) === $month);
-        $default_day   = $today_in_view ? $today : sprintf('%04d-%02d-01', $year, $month);
+        $today = current_time('Y-m-d');
+
+        // The month and year pickers are built by frontend.js when first
+        // opened; it only needs the month names.
+        $month_names = array();
+        for ($m = 1; $m <= 12; $m++) $month_names[] = $this->magenda_short_month_label($m, wp_date('F', mktime(0, 0, 0, $m, 1, $year)));
 
         // The exact "All Day" label MEC itself would print (respects any
         // admin override of that message), so the client-side "Šiandien"
@@ -586,9 +595,10 @@ class MEC_skin_weekly_view extends MEC_skins
              data-ajax-url="<?php echo esc_url(admin_url('admin-ajax.php')); ?>"
              data-fdow="0"
              data-today="<?php echo esc_attr($today); ?>"
-             data-default-day="<?php echo esc_attr($default_day); ?>"
+             data-timezone="<?php echo esc_attr(wp_timezone_string()); ?>"
              data-cur-year="<?php echo esc_attr($year); ?>"
              data-cur-month="<?php echo esc_attr(sprintf('%02d', $month)); ?>"
+             data-month-names="<?php echo esc_attr(wp_json_encode($month_names)); ?>"
              data-all-day-label="<?php echo esc_attr($all_day_label); ?>"
              data-today-word="<?php echo esc_attr($today_word); ?>">
 
@@ -599,20 +609,6 @@ class MEC_skin_weekly_view extends MEC_skins
                 <button type="button" class="mec-magenda-label mec-magenda-month-label" data-open="month"><?php echo esc_html($month_full); ?></button>
                 <button type="button" class="mec-magenda-label mec-magenda-year-label" data-open="year"><?php echo esc_html($year); ?></button>
                 <button type="button" class="mec-magenda-nav mec-magenda-next" aria-label="<?php esc_attr_e('Next month', 'modern-events-calendar-lite'); ?>">&#8250;</button>
-            </div>
-
-            <div class="mec-magenda-picker mec-magenda-picker-month" hidden>
-                <?php for ($m = 1; $m <= 12; $m++):
-                    $m_label = wp_date('F', mktime(0, 0, 0, $m, 1, $year));
-                ?>
-                <button type="button" class="mec-magenda-picker-item<?php echo ($m === $month) ? ' mec-magenda-picker-item-active' : ''; ?>" data-month="<?php echo esc_attr(sprintf('%02d', $m)); ?>"><?php echo esc_html($this->magenda_short_month_label($m, $m_label)); ?></button>
-                <?php endfor; ?>
-            </div>
-
-            <div class="mec-magenda-picker mec-magenda-picker-year" hidden>
-                <?php for ($y = $year - 6; $y <= $year + 6; $y++): ?>
-                <button type="button" class="mec-magenda-picker-item<?php echo ($y === $year) ? ' mec-magenda-picker-item-active' : ''; ?>" data-year="<?php echo esc_attr($y); ?>"><?php echo esc_html($y); ?></button>
-                <?php endfor; ?>
             </div>
 
             <div class="mec-magenda-weekdays">
