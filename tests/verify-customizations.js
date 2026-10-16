@@ -130,6 +130,46 @@ const miniAgendaInit = frontendJs.slice(miniAgendaInitStart, miniAgendaInitEnd);
 assert.ok(miniAgendaInitStart >= 0 && miniAgendaInitEnd > miniAgendaInitStart, 'mini calendar initializer not found');
 assert.match(miniAgendaInit, /loadMonth\(\$root, year, month\)/, 'mini calendar must refresh its visible month on initial load');
 
+// Lean first render: the page's agenda starts at today, the pickers are built
+// on first open, and nearby months are prefetched into memory.
+const weeklyTpl = plugin('app/skins/weekly_view/tpl.php');
+const weeklyRenderFile = plugin('app/skins/weekly_view/render.php');
+assert.match(weeklyTpl, /\$this->magenda_agenda_from = \(empty\(\$this->atts\['return_items'\]\) && !\$this->show_only_expired_events\) \? current_time\('Y-m-d'\) : '';/, 'only the page render (not AJAX, not past-only calendars) starts at today');
+assert.ok(weeklyTpl.indexOf('$this->magenda_agenda_from =') < weeklyTpl.indexOf('include $render_path;'), 'the agenda start is set before render.php runs');
+assert.match(weeklyRenderFile, /if\(\$this->magenda_agenda_from !== '' and \$date < \$this->magenda_agenda_from\)\s*\{\s*if\(!count\(\$events\) and !isset\(\$has_events\[\$week\]\)\) \$has_events\[\$week\] = 'printed';\s*continue;\s*\}/, 'earlier days are skipped but keep the week placeholder rule');
+assert.doesNotMatch(weeklySkin, /mec-magenda-picker/, 'the month and year pickers are not printed by PHP');
+assert.match(weeklySkin, /data-month-names="<\?php echo esc_attr\(wp_json_encode\(\$month_names\)\); \?>"/);
+assert.match(weeklySkin, /data-timezone="<\?php echo esc_attr\(wp_timezone_string\(\)\); \?>"/);
+assert.match(frontendJs, /function buildPicker\(\$root, which\)/);
+assert.match(frontendJs, /var \$picker = buildPicker\(\$root, which\);/, 'a label click builds its picker');
+assert.match(frontendJs, /createHTMLDocument\(''\)/, 'month replies are parsed in an inert document');
+assert.match(frontendJs, /\$root\.find\('\.mec-magenda-agenda \.mec-weekly-view-dates-events'\)\.html\(days\[dateStr\] \|\| ''\);/, 'only the selected day is in the DOM once a month is loaded');
+assert.match(frontendJs, /if \(hit && Date\.now\(\) - hit\.at < MONTH_CACHE_TTL\) return hit\.request;/);
+assert.match(miniAgendaInit, /whenIdle\(function \(\) \{\s*prefetchMonth\(\$root, -1\);\s*prefetchMonth\(\$root, 1\);/, 'neighbouring months are prefetched when idle');
+assert.match(frontendJs, /window\.requestIdleCallback\(callback, \{ timeout: 3000 \}\);\s*else window\.setTimeout\(callback, 1500\);/);
+assert.match(frontendJs, /\$\(document\)\.on\('mouseenter focusin', '\.mec-magenda-prev, \.mec-magenda-next'/, 'arrows prefetch on hover and focus');
+assert.match(miniAgendaInit, /liveToday > today/, 'a cached page only moves today forward');
+
+// siteToday() works out the site's date in the browser for a cached page.
+const extractFunction = (source, name) => {
+    const start = source.indexOf(`function ${name}(`);
+    assert.ok(start >= 0, `${name}() not found`);
+    let depth = 0;
+    for (let i = source.indexOf('{', start); i < source.length; i++) {
+        if (source[i] === '{') depth++;
+        else if (source[i] === '}' && --depth === 0) return source.slice(start, i + 1);
+    }
+    throw new Error(`${name}() is not closed`);
+};
+const vm = require('node:vm');
+const siteToday = vm.runInNewContext(`${extractFunction(frontendJs, 'pad')}\n${extractFunction(frontendJs, 'siteToday')}\nsiteToday`, { Intl, Date });
+assert.equal(siteToday('+03:00', Date.UTC(2026, 9, 16, 21, 30)), '2026-10-17');
+assert.equal(siteToday('-05:00', Date.UTC(2026, 9, 16, 21, 30)), '2026-10-16');
+assert.equal(siteToday('+00:00', Date.UTC(2026, 11, 31, 23, 59)), '2026-12-31');
+assert.equal(siteToday('Europe/Vilnius', Date.UTC(2026, 9, 31, 22, 30)), '2026-11-01', 'zone names follow daylight saving (EET after 25 October)');
+assert.equal(siteToday('Europe/Vilnius', Date.UTC(2026, 9, 16, 20, 59)), '2026-10-16');
+assert.equal(siteToday('Not/AZone', Date.UTC(2026, 9, 16)), '', 'an unknown zone falls back to the page date');
+
 assert.ok(updater.includes("'requires_php' => '8.4'"));
 assert.match(updater, /\/releases\/latest/);
 assert.match(updater, /application\/octet-stream/);

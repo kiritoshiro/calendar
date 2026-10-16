@@ -17,6 +17,14 @@ $reason_for_cancellation = $this->skin_options['reason_for_cancellation'] ?? fal
         {
             foreach($this->weeks[$week] as $weekday) if(isset($this->events[$weekday]) and count($this->events[$weekday])) $has_events[$week] = true;
         }
+
+        // Days before the agenda's first day are left out, but still take the
+        // week's "No Events" placeholder, as they do in the full list.
+        if($this->magenda_agenda_from !== '' and $date < $this->magenda_agenda_from)
+        {
+            if(!count($events) and !isset($has_events[$week])) $has_events[$week] = 'printed';
+            continue;
+        }
     ?>
     <?php if(count($events)): ?>
     <li class="mec-weekly-view-date-events mec-util-hidden mec-calendar-day-events mec-clear mec-weekly-view-week-<?php echo esc_attr($this->id); ?>-<?php echo esc_attr($this->year.$this->month.$week); ?>" id="mec_weekly_view_date_events<?php echo esc_attr($this->id); ?>_<?php echo date('Ymd', strtotime($date)); ?>" data-week-number="<?php echo esc_attr($week); ?>">

@@ -7661,25 +7661,67 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
 (function ($) {
     'use strict';
 
+    // Fetched months are reused for this long (prefetch, prev/next, pickers).
+    var MONTH_CACHE_TTL = 10 * 60 * 1000;
+
     function pad(n) { return (n < 10 ? '0' : '') + n; }
 
-    /** Shows the given date's pre-rendered <li> in the agenda panel, hides the rest. */
+    /**
+     * "YYYY-MM-DD" in the site's timezone (WordPress' wp_timezone_string():
+     * a zone name or "+03:00"), or '' if the browser can't tell.
+     */
+    function siteToday(timezone, now) {
+        var offset = /^([+-])(\d{2}):(\d{2})$/.exec(timezone || '');
+        if (offset) {
+            var minutes = (offset[1] === '-' ? -1 : 1) * (parseInt(offset[2], 10) * 60 + parseInt(offset[3], 10));
+            var d = new Date(now + minutes * 60000);
+            return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate());
+        }
+        try {
+            var parts = {};
+            new Intl.DateTimeFormat('en-US', { timeZone: timezone || undefined, year: 'numeric', month: '2-digit', day: '2-digit' })
+                .formatToParts(new Date(now))
+                .forEach(function (part) { parts[part.type] = part.value; });
+            return (parts.year && parts.month && parts.day) ? parts.year + '-' + parts.month + '-' + parts.day : '';
+        } catch (e) {
+            return '';
+        }
+    }
+
+    /**
+     * Shows the given date's <li> in the agenda panel. Once a month's data
+     * is loaded, only the selected day is in the DOM (the rest stay in
+     * memory); before that, the page's own list is used, which starts at
+     * today, so an earlier day waits for the month to load.
+     */
     function selectDay($root, dateStr) {
         if (!dateStr) return;
 
         var id = $root.data('mec-id');
         var ymd = dateStr.replace(/-/g, '');
+        var days = $root.data('magenda-days');
 
+        $root.data('magenda-selected', dateStr);
         $root.find('.mec-magenda-day').removeClass('mec-magenda-day-active');
         $root.find('.mec-magenda-day[data-date="' + dateStr + '"]').addClass('mec-magenda-day-active');
 
-        $root.find('.mec-magenda-agenda .mec-weekly-view-date-events').addClass('mec-util-hidden');
-        $root.find('#mec_weekly_view_date_events' + id + '_' + ymd).removeClass('mec-util-hidden');
+        if (days) {
+            $root.find('.mec-magenda-agenda .mec-weekly-view-dates-events').html(days[dateStr] || '');
+        } else {
+            var $li = $root.find('#mec_weekly_view_date_events' + id + '_' + ymd);
+            $root.find('.mec-magenda-agenda .mec-weekly-view-date-events').addClass('mec-util-hidden');
+            $li.removeClass('mec-util-hidden');
+            // loadMonth() selects this day again when the month arrives.
+            if (!$li.length && !$root.hasClass('mec-magenda-loading')) {
+                loadMonth($root, parseInt($root.data('cur-year'), 10), parseInt($root.data('cur-month'), 10));
+            }
+        }
+        relabelToday($root);
     }
 
     /** Default selection: today if the displayed month is the real current month, else the 1st. */
     function defaultDayFor($root, year, month) {
-        var today = $root.data('today'); // "YYYY-MM-DD", fixed at page load
+        var today = $root.data('today'); // "YYYY-MM-DD", set at page load (moved on for a cached page)
         var todayYear = parseInt(today.slice(0, 4), 10);
         var todayMonth = parseInt(today.slice(5, 7), 10);
         return (todayYear === year && todayMonth === month) ? today : (year + '-' + pad(month) + '-01');
@@ -7760,10 +7802,15 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
         });
     }
 
-    /** Pulls {dateStr: count} out of MEC's own returned "month" HTML fragment. */
-    function extractCounts(monthHtml) {
-        var $tmp = $('<div>').html(monthHtml);
-        var counts = {};
+    /**
+     * Reads MEC's returned "month" HTML fragment into {counts: {dateStr:
+     * count}, days: {dateStr: <li> HTML}, label}. Parsed in an inert
+     * document, so a prefetched month's images don't download until shown.
+     */
+    function parseMonth(response) {
+        var doc = document.implementation.createHTMLDocument('');
+        var $tmp = $(doc.createElement('div')).html(response.month);
+        var data = { counts: {}, days: {}, label: '' };
 
         $tmp.find('.mec-weekly-view-date-events').each(function () {
             var m = /_(\d{4})(\d{2})(\d{2})$/.exec(this.id || '');
@@ -7771,81 +7818,188 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
             var dateStr = m[1] + '-' + m[2] + '-' + m[3];
             // Real event cards carry this date badge; the "No Events"
             // placeholder (same <li>/<article> classes) does not.
-            counts[dateStr] = $(this).find('.mec-event-list-weekly-date').length;
+            data.counts[dateStr] = $(this).find('.mec-event-list-weekly-date').length;
+            data.days[dateStr] = $(this).removeClass('mec-util-hidden').prop('outerHTML');
         });
 
-        return counts;
+        if (response.current_month && response.current_month.label) {
+            data.label = response.current_month.label.replace(/^\d{4}\s*/, '');
+        }
+        return data;
     }
 
-    /** Pulls the whole per-day agenda list out of MEC's returned "month" HTML fragment. */
-    function extractAgendaList(monthHtml) {
-        var $tmp = $('<div>').html(monthHtml);
-        var $ul = $tmp.find('.mec-weekly-view-dates-events').first();
-        return $ul.length ? $ul.prop('outerHTML') : '';
+    /**
+     * One request per month, kept in memory for MONTH_CACHE_TTL; returns a
+     * promise of parseMonth()'s result. Failed requests are not kept.
+     */
+    function fetchMonth($root, year, month) {
+        var cache = $root.data('magenda-cache');
+        if (!cache) $root.data('magenda-cache', cache = {});
+
+        var key = year + '-' + pad(month);
+        var hit = cache[key];
+        if (hit && Date.now() - hit.at < MONTH_CACHE_TTL) return hit.request;
+
+        var atts = $root.data('mec-atts') || '';
+        var request = $.ajax({
+            url: $root.data('ajax-url'),
+            type: 'post',
+            dataType: 'json',
+            // Same request MEC's own weekly-view JS sends; the front-end
+            // template's own return_items branch answers it unmodified.
+            data: 'action=mec_weekly_view_load_month&mec_year=' + year + '&mec_month=' + month + '&' + atts + '&apply_sf_date=1'
+        }).then(function (response) {
+            if (!response || typeof response.month === 'undefined') return $.Deferred().reject().promise();
+            return parseMonth(response);
+        });
+
+        cache[key] = { at: Date.now(), request: request };
+        request.fail(function () {
+            if (cache[key] && cache[key].request === request) delete cache[key];
+        });
+        return request;
+    }
+
+    /** The month `delta` months away from the displayed one, as [year, month]. */
+    function shiftMonth($root, delta) {
+        var y = parseInt($root.data('cur-year'), 10);
+        var m = parseInt($root.data('cur-month'), 10) + delta;
+        if (m < 1) { m = 12; y -= 1; }
+        if (m > 12) { m = 1; y += 1; }
+        return [y, m];
+    }
+
+    /** Loads a nearby month into the cache without showing it. */
+    function prefetchMonth($root, delta) {
+        var target = shiftMonth($root, delta);
+        if (!isNaN(target[0]) && !isNaN(target[1])) fetchMonth($root, target[0], target[1]);
+    }
+
+    function whenIdle(callback) {
+        if (window.requestIdleCallback) window.requestIdleCallback(callback, { timeout: 3000 });
+        else window.setTimeout(callback, 1500);
+    }
+
+    /** Builds a month/year picker the first time it is opened. */
+    function buildPicker($root, which) {
+        var $picker = $root.find('.mec-magenda-picker-' + which);
+        if ($picker.length) return $picker;
+
+        var curYear = parseInt($root.data('cur-year'), 10);
+        var curMonth = parseInt($root.data('cur-month'), 10);
+        var i;
+
+        $picker = $('<div class="mec-magenda-picker mec-magenda-picker-' + which + '" hidden></div>');
+        if (which === 'month') {
+            var names = $root.data('month-names') || [];
+            for (i = 1; i <= 12; i++) {
+                $('<button type="button" class="mec-magenda-picker-item"></button>')
+                    .toggleClass('mec-magenda-picker-item-active', i === curMonth)
+                    .attr('data-month', pad(i))
+                    .text(names[i - 1] || pad(i))
+                    .appendTo($picker);
+            }
+        } else {
+            // Six years either side of the current year, as before.
+            var baseYear = parseInt(String($root.data('today')).slice(0, 4), 10) || curYear;
+            for (i = baseYear - 6; i <= baseYear + 6; i++) {
+                $('<button type="button" class="mec-magenda-picker-item"></button>')
+                    .toggleClass('mec-magenda-picker-item-active', i === curYear)
+                    .attr('data-year', i)
+                    .text(i)
+                    .appendTo($picker);
+            }
+        }
+
+        // Same place the server used to print them: month, then year, after the header.
+        var $monthPicker = $root.find('.mec-magenda-picker-month');
+        if (which === 'year' && $monthPicker.length) $monthPicker.after($picker);
+        else $root.find('.mec-magenda-header').after($picker);
+        return $picker;
     }
 
     function closePickers($root) {
         $root.find('.mec-magenda-picker').attr('hidden', true);
     }
 
+    function showMonth($root, year, month, data) {
+        renderGrid($root, year, month, data.counts);
+        $root.data('magenda-days', data.days);
+        $root.find('.mec-magenda-agenda').html('<ul class="mec-weekly-view-dates-events"></ul>');
+
+        $root.data('cur-year', year);
+        $root.data('cur-month', pad(month));
+        $root.find('.mec-magenda-year-label').text(year);
+        if (data.label) $root.find('.mec-magenda-month-label').text(data.label);
+        $root.find('.mec-magenda-picker-month .mec-magenda-picker-item')
+            .removeClass('mec-magenda-picker-item-active')
+            .filter('[data-month="' + pad(month) + '"]')
+            .addClass('mec-magenda-picker-item-active');
+        $root.find('.mec-magenda-picker-year .mec-magenda-picker-item')
+            .removeClass('mec-magenda-picker-item-active')
+            .filter('[data-year="' + year + '"]')
+            .addClass('mec-magenda-picker-item-active');
+
+        // Keep a day the visitor picked while this month was loading.
+        var selected = $root.data('magenda-selected') || '';
+        var inMonth = selected.slice(0, 7) === year + '-' + pad(month);
+        selectDay($root, inMonth ? selected : defaultDayFor($root, year, month));
+    }
+
     function loadMonth($root, year, month) {
         month = ((month - 1 + 12) % 12) + 1;
-        var atts = $root.data('mec-atts') || '';
+        var key = year + '-' + pad(month);
+        var request = fetchMonth($root, year, month);
 
-        $root.addClass('mec-magenda-loading');
+        // Only the last month asked for is shown, whatever order replies arrive in.
+        $root.data('magenda-want', key);
+        if (request.state() === 'pending') $root.addClass('mec-magenda-loading');
 
-        $.ajax({
-            url: $root.data('ajax-url'),
-            type: 'post',
-            dataType: 'json',
-            // Same request MEC's own weekly-view JS sends; the front-end
-            // template's own return_items branch answers it unmodified.
-            data: 'action=mec_weekly_view_load_month&mec_year=' + year + '&mec_month=' + month + '&' + atts + '&apply_sf_date=1',
-            success: function (response) {
-                if (!response || typeof response.month === 'undefined') return;
-
-                var counts = extractCounts(response.month);
-                $root.find('.mec-magenda-agenda').html(extractAgendaList(response.month));
-                renderGrid($root, year, month, counts);
-
-                $root.data('cur-year', year);
-                $root.data('cur-month', pad(month));
-                $root.find('.mec-magenda-year-label').text(year);
-                if (response.current_month && response.current_month.label) {
-                    var monthName = response.current_month.label.replace(/^\d{4}\s*/, '');
-                    $root.find('.mec-magenda-month-label').text(monthName);
-                }
-                $root.find('.mec-magenda-picker-month .mec-magenda-picker-item')
-                    .removeClass('mec-magenda-picker-item-active')
-                    .filter('[data-month="' + pad(month) + '"]')
-                    .addClass('mec-magenda-picker-item-active');
-                $root.find('.mec-magenda-picker-year .mec-magenda-picker-item')
-                    .removeClass('mec-magenda-picker-item-active')
-                    .filter('[data-year="' + year + '"]')
-                    .addClass('mec-magenda-picker-item-active');
-
-                selectDay($root, defaultDayFor($root, year, month));
-                relabelToday($root);
-            },
-            complete: function () {
-                $root.removeClass('mec-magenda-loading');
-            }
+        request.done(function (data) {
+            if ($root.data('magenda-want') === key) showMonth($root, year, month, data);
+        }).always(function () {
+            if ($root.data('magenda-want') === key) $root.removeClass('mec-magenda-loading');
         });
+        return request;
     }
 
     $(function () {
         $('.mec-magenda').each(function () {
             var $root = $(this);
-            selectDay($root, $root.data('default-day'));
-            relabelToday($root);
+
+            // A cached copy of the page carries the day it was made on. If
+            // the site's date has moved on since, use the real today (only
+            // ever forward, so a slow browser clock can't move it back); the
+            // page's agenda starts at its own date, so it still has today.
+            var today = String($root.data('today') || '');
+            var liveToday = siteToday($root.data('timezone'), Date.now());
+            if (/^\d{4}-\d{2}-\d{2}$/.test(liveToday) && liveToday > today) {
+                $root.data('today', liveToday);
+                $root.find('.mec-magenda-day-today').removeClass('mec-magenda-day-today');
+                $root.find('.mec-magenda-day[data-date="' + liveToday + '"]').addClass('mec-magenda-day-today');
+                // The page always opens on the month of its own today.
+                $root.data('cur-year', liveToday.slice(0, 4));
+                $root.data('cur-month', liveToday.slice(5, 7));
+            }
 
             // The surrounding page may be cached while event occurrences are
             // updated independently. Refresh the visible month through the
             // same live endpoint used by the arrows so the first render and
             // every later navigation always use one complete data source.
+            // Then, once the browser is idle, fetch the months either side
+            // so the arrows show them at once.
             var year = parseInt($root.data('cur-year'), 10);
             var month = parseInt($root.data('cur-month'), 10);
-            if (!isNaN(year) && !isNaN(month)) loadMonth($root, year, month);
+            if (!isNaN(year) && !isNaN(month)) {
+                loadMonth($root, year, month).always(function () {
+                    if (navigator.connection && navigator.connection.saveData) return;
+                    whenIdle(function () {
+                        prefetchMonth($root, -1);
+                        prefetchMonth($root, 1);
+                    });
+                });
+                selectDay($root, defaultDayFor($root, year, month));
+            }
         });
 
         $(document).on('click', '.mec-magenda-day', function () {
@@ -7854,25 +8008,26 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
 
         $(document).on('click', '.mec-magenda-prev', function () {
             var $root = $(this).closest('.mec-magenda');
-            var y = parseInt($root.data('cur-year'), 10);
-            var m = parseInt($root.data('cur-month'), 10) - 1;
-            if (m < 1) { m = 12; y -= 1; }
-            loadMonth($root, y, m);
+            var target = shiftMonth($root, -1);
+            loadMonth($root, target[0], target[1]);
         });
 
         $(document).on('click', '.mec-magenda-next', function () {
             var $root = $(this).closest('.mec-magenda');
-            var y = parseInt($root.data('cur-year'), 10);
-            var m = parseInt($root.data('cur-month'), 10) + 1;
-            if (m > 12) { m = 1; y += 1; }
-            loadMonth($root, y, m);
+            var target = shiftMonth($root, 1);
+            loadMonth($root, target[0], target[1]);
+        });
+
+        // Further months load when the pointer or keyboard reaches an arrow.
+        $(document).on('mouseenter focusin', '.mec-magenda-prev, .mec-magenda-next', function () {
+            prefetchMonth($(this).closest('.mec-magenda'), $(this).hasClass('mec-magenda-prev') ? -1 : 1);
         });
 
         $(document).on('click', '.mec-magenda-label', function (e) {
             e.stopPropagation();
             var $root = $(this).closest('.mec-magenda');
             var which = $(this).data('open');
-            var $picker = $root.find('.mec-magenda-picker-' + which);
+            var $picker = buildPicker($root, which);
             var wasOpen = $picker.is(':visible');
             closePickers($root);
             if (!wasOpen) $picker.removeAttr('hidden');

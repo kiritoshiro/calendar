@@ -41,6 +41,12 @@ foreach($this->weeks as $week_number=>$week)
     $weeks .= '</dl>';
 }
 
+// adventistai.lt: the page's agenda starts at today (frontend.js fetches the
+// earlier days of the month when one is selected); the AJAX response keeps
+// every day. Under page caching this date can only be behind the real one,
+// so a cached page still holds today's events.
+$this->magenda_agenda_from = (empty($this->atts['return_items']) && !$this->show_only_expired_events) ? current_time('Y-m-d') : '';
+
 // Generate Events
 ob_start();
 include $render_path;
