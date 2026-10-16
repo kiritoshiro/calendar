@@ -236,7 +236,7 @@ class MEC_feature_report extends MEC_base
 
         // adventistai.lt: an event ID (or "none"); it reaches SQL and an inline onchange handler.
         $event_id = sanitize_text_field(wp_unslash($_POST['event_id'] ?? ''));
-        if ($event_id !== 'none') $event_id = absint($event_id);
+        if ($event_id !== 'none') $event_id = absint($event_id) ?: 'none';
 
         $booking_options = get_post_meta($event_id, 'mec_booking', true);
         $bookings_all_occurrences = $booking_options['bookings_all_occurrences'] ?? 0;

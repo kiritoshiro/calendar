@@ -344,8 +344,9 @@ const bookingCalendar = plugin('app/features/bookingcalendar.php');
 for (const key of ['event_id', 'year', 'month']) {
     assert.match(bookingCalendar, new RegExp(`isset\\(\\$_REQUEST\\['${key}'\\]\\) \\? absint\\(\\$_REQUEST\\['${key}'\\]\\)`), `booking calendar ${key} must be an integer`);
 }
-assert.match(plugin('app/features/report.php'), /if \(\$event_id !== 'none'\) \$event_id = absint\(\$event_id\);/);
+assert.match(plugin('app/features/report.php'), /if \(\$event_id !== 'none'\) \$event_id = absint\(\$event_id\) \?: 'none';/);
+assert.match(plugin('app/skins/grid/render.php'), /gmapSkin\('\.json_encode\(\$events_data\)\.', "'\.esc_js\(\$this->id\)\.'"\)/);
 assert.match(plugin('app/addons/divi/includes/MECShortcodesForDivi.php'), /\$post_id = absint\(\$_POST\['shortcode_id'\] \?\? 0\);/);
-assert.match(ixFeature, /\$wpdb->prepare\("SELECT `post_id` FROM `\{\$wpdb->postmeta\}` WHERE `meta_value`=%s AND `meta_key`='mec_gcal_id'", \$gcal_id\)/);
-assert.match(ixFeature, /\$wpdb->prepare\("SELECT `dstart` FROM `\{\$wpdb->prefix\}mec_dates` WHERE `post_id`=%d/);
+assert.match(ixFeature, /\$this->db->select\(\$wpdb->prepare\("SELECT `post_id` FROM `#__postmeta` WHERE `meta_value`=%s AND `meta_key`='mec_gcal_id'", \$gcal_id\), 'loadResult'\)/);
+assert.match(ixFeature, /\$this->db->select\(\$wpdb->prepare\("SELECT `dstart` FROM `#__mec_dates` WHERE `post_id`=%d ORDER BY `tstart` ASC LIMIT 50", \$post_id\), 'loadColumn'\)/);
 console.log('Customization checks passed.');
