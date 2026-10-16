@@ -1,5 +1,10 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.24
+
+- Reflected XSS (found while triaging the code-scanning backlog; reproduced logged out in WordPress Playground): `wp_ajax_nopriv_mec_full_calendar_switch_skin` passes request `atts` to the skins and echoes HTML, and the daily view prints the skin id inside a JavaScript identifier (`var mec_daily_view_init_<id> = function()`), where `esc_js()` does not help. `?action=mec_full_calendar_switch_skin&skin=daily&atts[instance_id]=1=alert(document.domain)//` ran the script. `MEC_skins::get_skin_dom_id()` now keeps only `[A-Za-z0-9_]` of `instance_id`/`id` (shortcode ids such as `mec1` are unchanged).
+- Hardening, same triage: `mec_booking_calendar_load_month` (public) casts `event_id`, `year` and `month` with `absint()` before they reach its SQL and checks the month with `checkdate()` (the string was only protected by WordPress' magic quotes); the attendee report's `report_event_dates` casts `event_id` (it reached SQL and an inline `onchange`); the Divi shortcode preview casts `shortcode_id`; the Google import escapes the event's Google ID in its lookup query.
+
 ## 7.35.1.23
 
 - Magenda DOM size (Lighthouse "Optimize DOM size": on the front page the calendar was 375 elements / 69 KB, with all 16 October events, 11 of them past, and two hidden pickers): the page's agenda starts at today. `weekly_view/tpl.php` sets `magenda_agenda_from` to the site's date for the page render only (not for the `mec_weekly_view_load_month` reply, and not for `show_only_past_events` calendars), and `weekly_view/render.php` skips earlier days. The grid's per-day counts are unchanged. Under page caching (Cloudflare) that date can only fall behind, so a cached page still holds today's events. The client then moves "today" forward: `data-timezone` (`wp_timezone_string()`) gives it the site's date, which is used only when it is 1–2 days after the page's (a cache keeps a page for hours; a wrong browser clock can't move it further or back). A new month is then loaded straight away; `cur-year`/`cur-month` change only once it is shown, so if that request fails the page's month and its day stay as they are.

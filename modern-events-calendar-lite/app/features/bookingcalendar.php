@@ -69,14 +69,15 @@ class MEC_feature_bookingcalendar extends MEC_base
         // Render
         $render = $this->getRender();
 
-        $event_id = isset($_REQUEST['event_id']) ? sanitize_text_field($_REQUEST['event_id']) : NULL;
+        // adventistai.lt: public action whose values reach SQL below, so they are integers.
+        $event_id = isset($_REQUEST['event_id']) ? absint($_REQUEST['event_id']) : 0;
         $uniqueid = isset($_REQUEST['uniqueid']) ? sanitize_text_field($_REQUEST['uniqueid']) : NULL;
-        $year = isset($_REQUEST['year']) ? sanitize_text_field($_REQUEST['year']) : NULL;
-        $month = isset($_REQUEST['month']) ? sanitize_text_field($_REQUEST['month']) : NULL;
+        $year = isset($_REQUEST['year']) ? absint($_REQUEST['year']) : 0;
+        $month = isset($_REQUEST['month']) ? absint($_REQUEST['month']) : 0;
 
         // Start Date
-        $start = $year.'-'.$month.'-01';
-        if(strtotime($start) < current_time('timestamp')) $start = current_time('Y-m-d');
+        $start = sprintf('%04d-%02d-01', $year, $month);
+        if(!checkdate($month, 1, $year) or strtotime($start) < current_time('timestamp')) $start = current_time('Y-m-d');
 
         // End Date
         $end = date('Y-m-t', strtotime($start));
