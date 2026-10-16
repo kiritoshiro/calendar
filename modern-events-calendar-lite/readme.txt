@@ -24,7 +24,7 @@ Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar 
 
 == Changelog ==
 = 7.35.1.24 =
-* Security: a crafted link to the calendar's view-switching request could run script in a visitor's browser on the site. Fixed, along with stricter number checks in the booking calendar, attendee report, Divi preview and Google import requests.
+* Security: a crafted link to the calendar's view-switching request could run script in a visitor's browser on the site. Fixed, along with stricter number checks in the attendee report, Divi preview and Google import requests.
 
 = 7.35.1.23 =
 * Speed: the calendar widget prints only today's and later events of the month and builds the month/year pickers when opened, so the front page has about 180 fewer elements. Other days and the neighbouring months load from the calendar's own data, the next and previous months in the background once the calendar is on screen.

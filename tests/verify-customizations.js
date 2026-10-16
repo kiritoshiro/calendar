@@ -321,8 +321,8 @@ assert.match(occurrencesFeature, /VALUES \(%d, %d, %s\)", \$id, \$occurrence, js
 assert.match(occurrencesFeature, /SET `params`='"\.\$this->db->escape\(json_encode\(\$occurrence, JSON_UNESCAPED_UNICODE\)\)/);
 // Code-scanning triage (7.35.1.24): the public mec_full_calendar_switch_skin
 // took atts[instance_id] from the request, and the daily view prints the skin
-// id inside a JS identifier (var mec_daily_view_init_<id>), so esc_js() let
-// "1=alert(1)//" run. The id keeps only [A-Za-z0-9_].
+// id inside a JS identifier (var mec_daily_view_init_<id>), where esc_js()
+// does not stop an injected expression. The id keeps only [A-Za-z0-9_].
 assert.match(skinsLibrary, /private function sanitize_skin_dom_id\(\$id\)[\s\S]*?preg_replace\('\/\[\^A-Za-z0-9_\]\/', '', \(string\) \$id\)/);
 assert.equal((skinsLibrary.match(/\$id = \$this->sanitize_skin_dom_id\(\$this->atts\['(instance_id|id)'\]\);/g) || []).length, 2, 'both skin id sources must be sanitized');
 assert.doesNotMatch(skinsLibrary, /return \$this->atts\['(instance_id|id)'\];/);
