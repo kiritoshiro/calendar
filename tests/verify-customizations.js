@@ -335,4 +335,10 @@ assert.match(plugin('app/skins/grid/render.php'), /gmapSkin\('\.json_encode\(\$e
 assert.match(plugin('app/addons/divi/includes/MECShortcodesForDivi.php'), /\$post_id = absint\(\$_POST\['shortcode_id'\] \?\? 0\);/);
 assert.match(ixFeature, /\$this->db->select\(\$wpdb->prepare\("SELECT `post_id` FROM `#__postmeta` WHERE `meta_value`=%s AND `meta_key`='mec_gcal_id'", \$gcal_id\), 'loadResult'\)/);
 assert.match(ixFeature, /\$this->db->select\(\$wpdb->prepare\("SELECT `dstart` FROM `#__mec_dates` WHERE `post_id`=%d ORDER BY `tstart` ASC LIMIT 50", \$post_id\), 'loadColumn'\)/);
+// Shell slips once committed empty files ("atts[", "id") to the plugin root,
+// and the release ZIP shipped them.
+const emptyRootFiles = fs.readdirSync(path.join(root, 'modern-events-calendar-lite'), { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name !== 'index.html' && fs.statSync(path.join(root, 'modern-events-calendar-lite', entry.name)).size === 0)
+    .map((entry) => entry.name);
+assert.deepEqual(emptyRootFiles, [], 'no empty files may sit in the plugin root');
 console.log('Customization checks passed.');
