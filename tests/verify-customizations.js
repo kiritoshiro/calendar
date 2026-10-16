@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.24', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.25', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -326,6 +326,20 @@ assert.match(occurrencesFeature, /SET `params`='"\.\$this->db->escape\(json_enco
 assert.match(skinsLibrary, /private function sanitize_skin_dom_id\(\$id\)[\s\S]*?preg_replace\('\/\[\^A-Za-z0-9_\]\/', '', \(string\) \$id\)/);
 assert.equal((skinsLibrary.match(/\$id = \$this->sanitize_skin_dom_id\(\$this->atts\['(instance_id|id)'\]\);/g) || []).length, 2, 'both skin id sources must be sanitized');
 assert.doesNotMatch(skinsLibrary, /return \$this->atts\['(instance_id|id)'\];/);
+// Request shape (7.35.1.25): switch_skin passed request atts/sf straight to the
+// skins, so atts[sk-options]=x or atts[category][]=x ended in a fatal TypeError
+// (HTTP 500). Arrays are kept only where the skins expect them.
+assert.match(skinsLibrary, /public function normalize_request_values\(\$values, \$array_keys = \[\]\)[\s\S]*?if \(is_array\(\$value\) !== in_array\(\$key, \$array_keys, true\)\) unset\(\$values\[\$key\]\);[\s\S]*?foreach \(\['sk-options', 'sf-options'\] as \$key\)[\s\S]*?array_filter\(\$values\[\$key\], 'is_array'\)/);
+for (const file of ['app/skins/full_calendar.php', 'app/skins/default_full_calendar.php']) {
+    const switchSkin = plugin(file).match(/public function switch_skin\(\)[\s\S]*?\n    \}/)?.[0] || '';
+    assert.match(switchSkin, /\$this->normalize_request_values\(\$this->main->sanitize_deep_array\(\$_REQUEST\['sf'\]\), \['fields'\]\)/, `${file} must normalise sf`);
+    assert.match(switchSkin, /\$this->normalize_request_values\(\$this->main->sanitize_deep_array\(\$_REQUEST\['atts'\]\), \['sk-options', 'sf-options', 'icons', 'include', 'exclude', 'fields'\]\)/, `${file} must normalise atts`);
+    assert.match(switchSkin, /\$atts = \$this->sf_apply\(\$atts, \$this->sf, \$apply_sf_date\);/, `${file} must normalise atts before sf_apply`);
+}
+// The render also reads $_REQUEST['sf'] (initial page render and every AJAX skin).
+const renderLibrary = plugin('app/libraries/render.php');
+assert.equal((renderLibrary.match(/\$SKO->normalize_request_values\(\$this->main->sanitize_deep_array\(\$_REQUEST\['sf'\]\), \['fields'\]\)/g) || []).length, 2, 'both render paths must normalise sf');
+assert.doesNotMatch(renderLibrary, /\? \$this->main->sanitize_deep_array\(\$_REQUEST\['sf'\]\) :/);
 const bookingCalendar = plugin('app/features/bookingcalendar.php');
 for (const key of ['event_id', 'year', 'month']) {
     assert.match(bookingCalendar, new RegExp(`isset\\(\\$_REQUEST\\['${key}'\\]\\) \\? absint\\(\\$_REQUEST\\['${key}'\\]\\)`), `booking calendar ${key} must be an integer`);

@@ -2198,6 +2198,29 @@ class MEC_skins extends MEC_base
         return $atts[$key] ?? '';
     }
 
+    /**
+     * Keep request atts/sf in the shape the skins expect, so a crafted AJAX
+     * request cannot cause a fatal TypeError: arrays only under $array_keys,
+     * scalars everywhere else, and one array per skin in the option groups.
+     * @param array $values
+     * @param array $array_keys
+     * @return array
+     */
+    public function normalize_request_values($values, $array_keys = [])
+    {
+        foreach ($values as $key => $value)
+        {
+            if (is_array($value) !== in_array($key, $array_keys, true)) unset($values[$key]);
+        }
+
+        foreach (['sk-options', 'sf-options'] as $key)
+        {
+            if (isset($values[$key])) $values[$key] = array_filter($values[$key], 'is_array');
+        }
+
+        return $values;
+    }
+
     protected function sf_att_terms($key, $option_scope = false)
     {
         $value = trim((string) $this->sf_att_value($key, $option_scope), ', ');

@@ -244,9 +244,10 @@ class MEC_skin_default_full_calendar extends MEC_skins
      */
     public function switch_skin()
     {
-        $this->sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $this->main->sanitize_deep_array($_REQUEST['sf']) : [];
+        $this->sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $this->normalize_request_values($this->main->sanitize_deep_array($_REQUEST['sf']), ['fields']) : [];
         $apply_sf_date = isset($_REQUEST['apply_sf_date']) ? sanitize_text_field($_REQUEST['apply_sf_date']) : 1;
-        $atts = $this->sf_apply(((isset($_REQUEST['atts']) and is_array($_REQUEST['atts'])) ? $this->main->sanitize_deep_array($_REQUEST['atts']) : array()), $this->sf, $apply_sf_date);
+        $atts = (isset($_REQUEST['atts']) and is_array($_REQUEST['atts'])) ? $this->normalize_request_values($this->main->sanitize_deep_array($_REQUEST['atts']), ['sk-options', 'sf-options', 'icons', 'include', 'exclude', 'fields']) : [];
+        $atts = $this->sf_apply($atts, $this->sf, $apply_sf_date);
 
         $skin = isset($_REQUEST['skin']) ? sanitize_text_field($_REQUEST['skin']) : 'list';
 
