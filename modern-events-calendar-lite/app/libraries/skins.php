@@ -640,7 +640,7 @@ class MEC_skins extends MEC_base
         {
             foreach ($this->atts['fields'] as $field_id => $field_value)
             {
-                if (is_array($field_value) and isset($field_value['date_min'], $field_value['date_max']) and trim($field_value['date_min']) and trim($field_value['date_max']))
+                if (is_array($field_value) and isset($field_value['date_min'], $field_value['date_max']) and is_string($field_value['date_min']) and is_string($field_value['date_max']) and trim($field_value['date_min']) and trim($field_value['date_max']))
                 {
                     $meta_query[] = [
                         'key' => 'mec_fields_' . $field_id,
@@ -2240,6 +2240,19 @@ class MEC_skins extends MEC_base
         }
 
         return $values;
+    }
+
+    /**
+     * Returns a request year or month (mec_year, mec_month) if it is digits only.
+     * Anything else (an array, "x", "") gives $default, so it never reaches mktime().
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function request_date_part($key, $default = null)
+    {
+        $value = (isset($_REQUEST[$key]) and is_string($_REQUEST[$key])) ? trim($_REQUEST[$key]) : '';
+        return ctype_digit($value) ? $value : $default;
     }
 
     protected function sf_att_terms($key, $option_scope = false)

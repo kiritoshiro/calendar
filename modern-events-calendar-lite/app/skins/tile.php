@@ -397,7 +397,7 @@ class MEC_skin_tile extends MEC_skins
         }
 
         // MEC Next Page
-        if (isset($_REQUEST['mec_next_page']) and trim($_REQUEST['mec_next_page']))
+        if (isset($_REQUEST['mec_next_page']) and is_string($_REQUEST['mec_next_page']) and trim($_REQUEST['mec_next_page']))
         {
             $ex = explode(':', $_REQUEST['mec_next_page']);
 
@@ -417,9 +417,9 @@ class MEC_skin_tile extends MEC_skins
      */
     public function load_month()
     {
-        $this->sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $this->main->sanitize_deep_array($_REQUEST['sf']) : [];
+        $this->sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $this->normalize_request_values($this->main->sanitize_deep_array($_REQUEST['sf']), ['fields']) : [];
         $apply_sf_date = isset($_REQUEST['apply_sf_date']) ? sanitize_text_field($_REQUEST['apply_sf_date']) : 1;
-        $atts = $this->sf_apply(((isset($_REQUEST['atts']) and is_array($_REQUEST['atts'])) ? $this->main->sanitize_deep_array($_REQUEST['atts']) : []), $this->sf, $apply_sf_date);
+        $atts = $this->sf_apply(((isset($_REQUEST['atts']) and is_array($_REQUEST['atts'])) ? $this->normalize_request_values($this->main->sanitize_deep_array($_REQUEST['atts']), ['sk-options', 'sf-options', 'icons', 'include', 'exclude', 'fields']) : []), $this->sf, $apply_sf_date);
 
         $navigator_click = isset($_REQUEST['navigator_click']) && sanitize_text_field($_REQUEST['navigator_click']);
 
@@ -449,8 +449,8 @@ class MEC_skin_tile extends MEC_skins
             else
             {
                 // Start Date
-                $this->year = isset($_REQUEST['mec_year']) ? sanitize_text_field($_REQUEST['mec_year']) : current_time('Y');
-                $this->month = isset($_REQUEST['mec_month']) ? sanitize_text_field($_REQUEST['mec_month']) : current_time('m');
+                $this->year = $this->request_date_part('mec_year', current_time('Y'));
+                $this->month = $this->request_date_part('mec_month', current_time('m'));
             }
 
             $this->month_rotation($this->year, $this->month);
@@ -563,9 +563,9 @@ class MEC_skin_tile extends MEC_skins
      */
     public function load_more()
     {
-        $this->sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $this->main->sanitize_deep_array($_REQUEST['sf']) : [];
+        $this->sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $this->normalize_request_values($this->main->sanitize_deep_array($_REQUEST['sf']), ['fields']) : [];
         $apply_sf_date = isset($_REQUEST['apply_sf_date']) ? sanitize_text_field($_REQUEST['apply_sf_date']) : 1;
-        $atts = $this->sf_apply(((isset($_REQUEST['atts']) and is_array($_REQUEST['atts'])) ? $this->main->sanitize_deep_array($_REQUEST['atts']) : []), $this->sf, $apply_sf_date);
+        $atts = $this->sf_apply(((isset($_REQUEST['atts']) and is_array($_REQUEST['atts'])) ? $this->normalize_request_values($this->main->sanitize_deep_array($_REQUEST['atts']), ['sk-options', 'sf-options', 'icons', 'include', 'exclude', 'fields']) : []), $this->sf, $apply_sf_date);
 
         // Initialize the skin
         $this->initialize($atts);
@@ -576,7 +576,7 @@ class MEC_skin_tile extends MEC_skins
         $this->offset = isset($_REQUEST['mec_offset']) ? sanitize_text_field($_REQUEST['mec_offset']) : 0;
 
         // Apply Maximum Date
-        $month = isset($this->sf['month']) && trim($this->sf['month']) ? $this->sf['month'] : ($_REQUEST['mec_month'] ?? '');
+        $month = isset($this->sf['month']) && trim($this->sf['month']) ? $this->sf['month'] : $this->request_date_part('mec_month', '');
         if ($apply_sf_date == 1 and trim($month)) $this->maximum_date = date('Y-m-t', strtotime($this->start_date));
 
         // Return the events

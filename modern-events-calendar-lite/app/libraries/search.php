@@ -22,7 +22,8 @@ class MEC_search extends MEC_base
     public function refine()
     {
         // Variables
-        $sf = isset($_POST['sf']) ? $this->main->sanitize_deep_array($_POST['sf']) : [];
+        // adventistai.lt: every sf value below is read as a string (trim()), so drop arrays (sf[category][]=x was a fatal).
+        $sf = (isset($_POST['sf']) and is_array($_POST['sf'])) ? array_filter($this->main->sanitize_deep_array($_POST['sf']), 'is_scalar') : [];
         $id = isset($_POST['id']) ? sanitize_text_field($_POST['id']) : '';
         $start_date = isset($_POST['mec_start_date']) ? sanitize_text_field($_POST['mec_start_date']) : current_time('Y-m-d');
         $current_field = isset($_POST['last_field']) ? sanitize_text_field($_POST['last_field']) : '';

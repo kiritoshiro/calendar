@@ -361,9 +361,9 @@ class MEC_skin_daily_view extends MEC_skins
      */
     public function load_month()
     {
-        $this->sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $this->main->sanitize_deep_array($_REQUEST['sf']) : [];
+        $this->sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $this->normalize_request_values($this->main->sanitize_deep_array($_REQUEST['sf']), ['fields']) : [];
         $apply_sf_date = isset($_REQUEST['apply_sf_date']) ? sanitize_text_field($_REQUEST['apply_sf_date']) : 1;
-        $atts = $this->sf_apply(((isset($_REQUEST['atts']) and is_array($_REQUEST['atts'])) ? $this->main->sanitize_deep_array($_REQUEST['atts']) : array()), $this->sf, $apply_sf_date);
+        $atts = $this->sf_apply(((isset($_REQUEST['atts']) and is_array($_REQUEST['atts'])) ? $this->normalize_request_values($this->main->sanitize_deep_array($_REQUEST['atts']), ['sk-options', 'sf-options', 'icons', 'include', 'exclude', 'fields']) : array()), $this->sf, $apply_sf_date);
 
         $navigator_click = isset($_REQUEST['navigator_click']) && sanitize_text_field($_REQUEST['navigator_click']);
 
@@ -390,8 +390,8 @@ class MEC_skin_daily_view extends MEC_skins
             else
             {
                 // Start Date
-                $this->year = isset($_REQUEST['mec_year']) ? sanitize_text_field($_REQUEST['mec_year']) : current_time('Y');
-                $this->month = isset($_REQUEST['mec_month']) ? sanitize_text_field($_REQUEST['mec_month']) : current_time('m');
+                $this->year = $this->request_date_part('mec_year', current_time('Y'));
+                $this->month = $this->request_date_part('mec_month', current_time('m'));
             }
 
             $this->day = '1';

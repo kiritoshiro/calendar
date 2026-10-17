@@ -22,8 +22,8 @@ class MEC_skin_general_calendar extends MEC_skins
      */
     public function actions()
     {
-        $this->factory->action('wp_ajax_mec_general_calendar_load_month', [$this, 'load_month']);
-        $this->factory->action('wp_ajax_nopriv_mec_general_calendar_load_month', [$this, 'load_month']);
+        // adventistai.lt: the mec_general_calendar_load_month actions pointed at a
+        // load_month() method this skin never had, so every call was a PHP fatal.
         $this->factory->action('rest_api_init', [$this, 'mec_general_calendar_get_events_api']);
 
         $this->factory->action('wp_ajax_mec_gcalbar_get_year', [$this, 'gcalbar_ajax_get_year']);

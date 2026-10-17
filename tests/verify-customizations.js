@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.26', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.27', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -348,6 +348,27 @@ assert.match(plugin('app/skins/yearly_view.php'), /\$this->months_to_display = \
 const renderLibrary = plugin('app/libraries/render.php');
 assert.equal((renderLibrary.match(/\$SKO->normalize_request_values\(\$this->main->sanitize_deep_array\(\$_REQUEST\['sf'\]\), \['fields'\]\)/g) || []).length, 2, 'both render paths must normalise sf');
 assert.doesNotMatch(renderLibrary, /\? \$this->main->sanitize_deep_array\(\$_REQUEST\['sf'\]\) :/);
+// Other public skin actions (7.35.1.27): each view's load_month/load_more,
+// the map markers, the timetable's weekly program and the yearly view read
+// request sf/atts the same way and failed the same way (sf[month][]=x,
+// atts[sk-options]=x, mec_month[]=x, mec_next_page[]=x ...).
+const skinFiles = fs.readdirSync(path.join(root, 'modern-events-calendar-lite/app/skins')).filter((file) => file.endsWith('.php')).map((file) => `app/skins/${file}`);
+let normalisedSkinReads = 0;
+for (const file of skinFiles) {
+    const source = plugin(file);
+    assert.doesNotMatch(source, /\? \$this->main->sanitize_deep_array\(\$_REQUEST\['(sf|atts)'\]\) :/, `${file} must normalise request sf/atts`);
+    assert.doesNotMatch(source, /\? \$_REQUEST\['mec_month'\] :|: \(\$_REQUEST\['mec_month'\] \?\? ''\)/, `${file} must sanitise mec_month before trim()`);
+    assert.doesNotMatch(source, /isset\(\$_REQUEST\['mec_next_page'\]\) and trim\(/, `${file} must check mec_next_page is a string`);
+    assert.doesNotMatch(source, /sanitize_text_field\(\$_REQUEST\['mec_(year|month)'\]/, `${file} must read mec_year/mec_month with request_date_part()`);
+    normalisedSkinReads += (source.match(/\$this->normalize_request_values\(\$this->main->sanitize_deep_array\(\$_REQUEST\['(sf|atts)'\]\), \[/g) || []).length;
+}
+// mec_year=x (or [], or a scalar sf[year]=x copied into it) reached mktime() in
+// the monthly templates as a string: a TypeError on PHP 8.
+assert.match(skinsLibrary, /public function request_date_part\(\$key, \$default = null\)[\s\S]*?is_string\(\$_REQUEST\[\$key\]\)\) \? trim\(\$_REQUEST\[\$key\]\) : '';\s*return ctype_digit\(\$value\) \? \$value : \$default;/, 'mec_year/mec_month must be digits or the default');
+assert.equal(normalisedSkinReads, 38,'every skin handler must normalise both sf and atts');
+assert.match(skinsLibrary, /isset\(\$field_value\['date_min'\], \$field_value\['date_max'\]\) and is_string\(\$field_value\['date_min'\]\) and is_string\(\$field_value\['date_max'\]\) and trim\(/, 'sf[fields][<id>][date_min][] must not reach trim()');
+assert.match(plugin('app/libraries/search.php'), /\$sf = \(isset\(\$_POST\['sf'\]\) and is_array\(\$_POST\['sf'\]\)\) \? array_filter\(\$this->main->sanitize_deep_array\(\$_POST\['sf'\]\), 'is_scalar'\) : \[\];/, 'the search refine must drop array sf values');
+assert.doesNotMatch(plugin('app/skins/general_calendar.php'),/'wp_ajax_(nopriv_)?mec_general_calendar_load_month'/,'the general calendar has no load_month() method to register');
 const bookingCalendar = plugin('app/features/bookingcalendar.php');
 for (const key of ['event_id', 'year', 'month']) {
     assert.match(bookingCalendar, new RegExp(`isset\\(\\$_REQUEST\\['${key}'\\]\\) \\? absint\\(\\$_REQUEST\\['${key}'\\]\\)`), `booking calendar ${key} must be an integer`);
