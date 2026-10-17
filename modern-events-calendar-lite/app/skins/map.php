@@ -238,9 +238,9 @@ class MEC_skin_map extends MEC_skins
      */
     public function get_markers()
     {
-        $this->sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $this->main->sanitize_deep_array($_REQUEST['sf']) : [];
+        $this->sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $this->normalize_request_values($this->main->sanitize_deep_array($_REQUEST['sf']), ['fields']) : [];
         $apply_sf_date = isset($_REQUEST['apply_sf_date']) ? sanitize_text_field($_REQUEST['apply_sf_date']) : 1;
-        $atts = $this->sf_apply(((isset($_REQUEST['atts']) and is_array($_REQUEST['atts'])) ? $this->main->sanitize_deep_array($_REQUEST['atts']) : array()), $this->sf, $apply_sf_date);
+        $atts = $this->sf_apply(((isset($_REQUEST['atts']) and is_array($_REQUEST['atts'])) ? $this->normalize_request_values($this->main->sanitize_deep_array($_REQUEST['atts']), ['sk-options', 'sf-options', 'icons', 'include', 'exclude', 'fields']) : array()), $this->sf, $apply_sf_date);
 
         // Initialize the skin
         $this->initialize($atts);
