@@ -363,12 +363,16 @@ for (const file of skinFiles) {
     normalisedSkinReads += (source.match(/\$this->normalize_request_values\(\$this->main->sanitize_deep_array\(\$_REQUEST\['(sf|atts)'\]\), \[/g) || []).length;
 }
 // mec_year=x (or [], or a scalar sf[year]=x copied into it) reached mktime() in
-// the monthly templates as a string: a TypeError on PHP 8.
-assert.match(skinsLibrary, /public function request_date_part\(\$key, \$default = null\)[\s\S]*?is_string\(\$_REQUEST\[\$key\]\)\) \? trim\(\$_REQUEST\[\$key\]\) : '';\s*return ctype_digit\(\$value\) \? \$value : \$default;/, 'mec_year/mec_month must be digits or the default');
-assert.equal(normalisedSkinReads, 38,'every skin handler must normalise both sf and atts');
+// the monthly templates as a string: a TypeError on PHP 8. So did a 20-digit
+// year, and mec_month=001 made strtotime() read "2023-001-01" as an ordinal
+// date, which kept the weekly view's week loop running until the time limit.
+assert.match(skinsLibrary, /public function request_date_part\(\$key, \$default = null\)[\s\S]*?is_string\(\$_REQUEST\[\$key\]\)\) \? trim\(\$_REQUEST\[\$key\]\) : '';\s*\$pattern = \$key === 'mec_year' \? '\/\^\\d\{4\}\$\/' : '\/\^\(0\?\[1-9\]\|1\[0-2\]\)\$\/';\s*return preg_match\(\$pattern, \$value\) \? \$value : \$default;/, 'mec_year must be four digits and mec_month 1-12, else the default');
+assert.match(plugin('app/skins/weekly_view/tpl.php'), /while\(isset\(\$week\[\$i\]\) and strtotime\(\$first_week_day\) < \$current_month_time\)/, 'the weekly week loop must stop at the last day of the week');
+// 34 new reads in 13 skins plus the 4 switch_skin() reads from 7.35.1.25.
+assert.equal(normalisedSkinReads, 38, 'every skin handler must normalise both sf and atts');
 assert.match(skinsLibrary, /isset\(\$field_value\['date_min'\], \$field_value\['date_max'\]\) and is_string\(\$field_value\['date_min'\]\) and is_string\(\$field_value\['date_max'\]\) and trim\(/, 'sf[fields][<id>][date_min][] must not reach trim()');
-assert.match(plugin('app/libraries/search.php'), /\$sf = \(isset\(\$_POST\['sf'\]\) and is_array\(\$_POST\['sf'\]\)\) \? array_filter\(\$this->main->sanitize_deep_array\(\$_POST\['sf'\]\), 'is_scalar'\) : \[\];/, 'the search refine must drop array sf values');
-assert.doesNotMatch(plugin('app/skins/general_calendar.php'),/'wp_ajax_(nopriv_)?mec_general_calendar_load_month'/,'the general calendar has no load_month() method to register');
+assert.match(plugin('app/libraries/search.php'), /\$sf = \(isset\(\$_POST\['sf'\]\) and is_array\(\$_POST\['sf'\]\)\) \? array_filter\(\$this->main->sanitize_deep_array\(\$_POST\['sf'\]\), function\(\$value, \$key\)\s*\{\s*return is_scalar\(\$value\) or \$key === 'fields';\s*\}, ARRAY_FILTER_USE_BOTH\) : \[\];/, 'the search refine must drop array sf values except fields');
+assert.doesNotMatch(plugin('app/skins/general_calendar.php'), /'wp_ajax_(nopriv_)?mec_general_calendar_load_month'/, 'the general calendar has no load_month() method to register');
 const bookingCalendar = plugin('app/features/bookingcalendar.php');
 for (const key of ['event_id', 'year', 'month']) {
     assert.match(bookingCalendar, new RegExp(`isset\\(\\$_REQUEST\\['${key}'\\]\\) \\? absint\\(\\$_REQUEST\\['${key}'\\]\\)`), `booking calendar ${key} must be an integer`);
