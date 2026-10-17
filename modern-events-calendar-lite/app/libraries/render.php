@@ -102,7 +102,7 @@ class MEC_render extends MEC_base
         $SKO->sf_base_atts = $atts;
 
         // Apply URL search filters on initial render (so no flash of unfiltered results)
-        $sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $this->main->sanitize_deep_array($_REQUEST['sf']) : [];
+        $sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $SKO->normalize_request_values($this->main->sanitize_deep_array($_REQUEST['sf']), ['fields']) : [];
         if (!empty($sf))
         {
             // Respect date application like AJAX paths do
@@ -623,7 +623,7 @@ class MEC_render extends MEC_base
 
         // Apply URL search filters on initial render to avoid flash of unfiltered content
         // Mirrors AJAX paths that call sf_apply() before initializing the skin.
-        $sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $this->main->sanitize_deep_array($_REQUEST['sf']) : [];
+        $sf = (isset($_REQUEST['sf']) and is_array($_REQUEST['sf'])) ? $SKO->normalize_request_values($this->main->sanitize_deep_array($_REQUEST['sf']), ['fields']) : [];
         if (!empty($sf))
         {
             $apply_sf_date = isset($_REQUEST['apply_sf_date']) ? sanitize_text_field($_REQUEST['apply_sf_date']) : 1;
