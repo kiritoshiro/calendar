@@ -2243,8 +2243,9 @@ class MEC_skins extends MEC_base
     }
 
     /**
-     * Returns a request year or month (mec_year, mec_month) if it is digits only.
-     * Anything else (an array, "x", "") gives $default, so it never reaches mktime().
+     * Returns a request year or month (mec_year, mec_month) if it is 1-4 digits.
+     * Anything else (an array, "x", "", a 20-digit year past PHP_INT_MAX) gives
+     * $default, so it never reaches mktime().
      * @param string $key
      * @param mixed $default
      * @return mixed
@@ -2252,7 +2253,7 @@ class MEC_skins extends MEC_base
     public function request_date_part($key, $default = null)
     {
         $value = (isset($_REQUEST[$key]) and is_string($_REQUEST[$key])) ? trim($_REQUEST[$key]) : '';
-        return ctype_digit($value) ? $value : $default;
+        return preg_match('/^\d{1,4}$/', $value) ? $value : $default;
     }
 
     protected function sf_att_terms($key, $option_scope = false)

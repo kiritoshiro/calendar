@@ -364,7 +364,7 @@ for (const file of skinFiles) {
 }
 // mec_year=x (or [], or a scalar sf[year]=x copied into it) reached mktime() in
 // the monthly templates as a string: a TypeError on PHP 8.
-assert.match(skinsLibrary, /public function request_date_part\(\$key, \$default = null\)[\s\S]*?is_string\(\$_REQUEST\[\$key\]\)\) \? trim\(\$_REQUEST\[\$key\]\) : '';\s*return ctype_digit\(\$value\) \? \$value : \$default;/, 'mec_year/mec_month must be digits or the default');
+assert.match(skinsLibrary, /public function request_date_part\(\$key, \$default = null\)[\s\S]*?is_string\(\$_REQUEST\[\$key\]\)\) \? trim\(\$_REQUEST\[\$key\]\) : '';\s*return preg_match\('\/\^\\d\{1,4\}\$\/', \$value\) \? \$value : \$default;/, 'mec_year/mec_month must be digits or the default');
 assert.equal(normalisedSkinReads, 38,'every skin handler must normalise both sf and atts');
 assert.match(skinsLibrary, /isset\(\$field_value\['date_min'\], \$field_value\['date_max'\]\) and is_string\(\$field_value\['date_min'\]\) and is_string\(\$field_value\['date_max'\]\) and trim\(/, 'sf[fields][<id>][date_min][] must not reach trim()');
 assert.match(plugin('app/libraries/search.php'), /\$sf = \(isset\(\$_POST\['sf'\]\) and is_array\(\$_POST\['sf'\]\)\) \? array_filter\(\$this->main->sanitize_deep_array\(\$_POST\['sf'\]\), 'is_scalar'\) : \[\];/, 'the search refine must drop array sf values');
