@@ -329,7 +329,7 @@ assert.doesNotMatch(skinsLibrary, /return \$this->atts\['(instance_id|id)'\];/);
 // Request shape (7.35.1.25): switch_skin passed request atts/sf straight to the
 // skins, so atts[sk-options]=x or atts[category][]=x ended in a fatal TypeError
 // (HTTP 500). Arrays are kept only where the skins expect them.
-assert.match(skinsLibrary, /public function normalize_request_values\(\$values, \$array_keys = \[\]\)[\s\S]*?if \(is_array\(\$value\) !== in_array\(\$key, \$array_keys, true\)\) unset\(\$values\[\$key\]\);[\s\S]*?foreach \(\['sk-options', 'sf-options'\] as \$key\)[\s\S]*?array_filter\(\$values\[\$key\], 'is_array'\)/);
+assert.match(skinsLibrary, /public function normalize_request_values\(\$values, \$array_keys = \[\]\)[\s\S]*?if \(is_array\(\$value\) !== in_array\(\$key, \$array_keys, true\)\) unset\(\$values\[\$key\]\);[\s\S]*?foreach \(\['sk-options', 'sf-options'\] as \$key\)[\s\S]*?if \(is_array\(\$values\[\$key\]\)\) \$values\[\$key\] = array_filter\(\$values\[\$key\], 'is_array'\);\s*else unset\(\$values\[\$key\]\);/, 'a scalar sf[sk-options] must be dropped, not passed to array_filter');
 for (const file of ['app/skins/full_calendar.php', 'app/skins/default_full_calendar.php']) {
     const switchSkin = plugin(file).match(/public function switch_skin\(\)[\s\S]*?\n    \}/)?.[0] || '';
     assert.match(switchSkin, /\$this->normalize_request_values\(\$this->main->sanitize_deep_array\(\$_REQUEST\['sf'\]\), \['fields'\]\)/, `${file} must normalise sf`);
@@ -357,4 +357,10 @@ assert.match(plugin('app/skins/grid/render.php'), /gmapSkin\('\.json_encode\(\$e
 assert.match(plugin('app/addons/divi/includes/MECShortcodesForDivi.php'), /\$post_id = absint\(\$_POST\['shortcode_id'\] \?\? 0\);/);
 assert.match(ixFeature, /\$this->db->select\(\$wpdb->prepare\("SELECT `post_id` FROM `#__postmeta` WHERE `meta_value`=%s AND `meta_key`='mec_gcal_id'", \$gcal_id\), 'loadResult'\)/);
 assert.match(ixFeature, /\$this->db->select\(\$wpdb->prepare\("SELECT `dstart` FROM `#__mec_dates` WHERE `post_id`=%d ORDER BY `tstart` ASC LIMIT 50", \$post_id\), 'loadColumn'\)/);
+// Shell slips once committed empty files ("atts[", "id") to the plugin root,
+// and the release ZIP shipped them.
+const emptyRootFiles = fs.readdirSync(path.join(root, 'modern-events-calendar-lite'), { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name !== 'index.html' && fs.statSync(path.join(root, 'modern-events-calendar-lite', entry.name)).size === 0)
+    .map((entry) => entry.name);
+assert.deepEqual(emptyRootFiles, [], 'no empty files may sit in the plugin root');
 console.log('Customization checks passed.');
