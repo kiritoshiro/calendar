@@ -2213,9 +2213,14 @@ class MEC_skins extends MEC_base
             if (is_array($value) !== in_array($key, $array_keys, true)) unset($values[$key]);
         }
 
+        // A scalar group survives the loop above when the key is not in
+        // $array_keys (e.g. sf[sk-options]=x), so check the type here too.
         foreach (['sk-options', 'sf-options'] as $key)
         {
-            if (isset($values[$key])) $values[$key] = array_filter($values[$key], 'is_array');
+            if (!isset($values[$key])) continue;
+
+            if (is_array($values[$key])) $values[$key] = array_filter($values[$key], 'is_array');
+            else unset($values[$key]);
         }
 
         return $values;

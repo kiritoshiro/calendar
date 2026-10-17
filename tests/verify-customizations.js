@@ -329,7 +329,7 @@ assert.doesNotMatch(skinsLibrary, /return \$this->atts\['(instance_id|id)'\];/);
 // Request shape (7.35.1.25): switch_skin passed request atts/sf straight to the
 // skins, so atts[sk-options]=x or atts[category][]=x ended in a fatal TypeError
 // (HTTP 500). Arrays are kept only where the skins expect them.
-assert.match(skinsLibrary, /public function normalize_request_values\(\$values, \$array_keys = \[\]\)[\s\S]*?if \(is_array\(\$value\) !== in_array\(\$key, \$array_keys, true\)\) unset\(\$values\[\$key\]\);[\s\S]*?foreach \(\['sk-options', 'sf-options'\] as \$key\)[\s\S]*?array_filter\(\$values\[\$key\], 'is_array'\)/);
+assert.match(skinsLibrary, /public function normalize_request_values\(\$values, \$array_keys = \[\]\)[\s\S]*?if \(is_array\(\$value\) !== in_array\(\$key, \$array_keys, true\)\) unset\(\$values\[\$key\]\);[\s\S]*?foreach \(\['sk-options', 'sf-options'\] as \$key\)[\s\S]*?if \(is_array\(\$values\[\$key\]\)\) \$values\[\$key\] = array_filter\(\$values\[\$key\], 'is_array'\);\s*else unset\(\$values\[\$key\]\);/, 'a scalar sf[sk-options] must be dropped, not passed to array_filter');
 for (const file of ['app/skins/full_calendar.php', 'app/skins/default_full_calendar.php']) {
     const switchSkin = plugin(file).match(/public function switch_skin\(\)[\s\S]*?\n    \}/)?.[0] || '';
     assert.match(switchSkin, /\$this->normalize_request_values\(\$this->main->sanitize_deep_array\(\$_REQUEST\['sf'\]\), \['fields'\]\)/, `${file} must normalise sf`);
