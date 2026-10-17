@@ -2202,6 +2202,8 @@ class MEC_skins extends MEC_base
      * Keep request atts/sf in the shape the skins expect, so a crafted AJAX
      * request cannot cause a fatal TypeError: arrays only under $array_keys,
      * scalars everywhere else, and one array per skin in the option groups.
+     * Inside a skin's sk-options every option is a scalar except the yearly
+     * view's month list (months[n] => 0|1).
      * @param array $values
      * @param array $array_keys
      * @return array
@@ -2221,6 +2223,20 @@ class MEC_skins extends MEC_base
 
             if (is_array($values[$key])) $values[$key] = array_filter($values[$key], 'is_array');
             else unset($values[$key]);
+        }
+
+        if (isset($values['sk-options']))
+        {
+            foreach ($values['sk-options'] as $skin => $options)
+            {
+                foreach ($options as $option => $value)
+                {
+                    if (!is_array($value)) continue;
+
+                    if ($option === 'months') $values['sk-options'][$skin][$option] = array_filter($value, 'is_scalar');
+                    else unset($values['sk-options'][$skin][$option]);
+                }
+            }
         }
 
         return $values;

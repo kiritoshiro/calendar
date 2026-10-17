@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.25', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.26', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -336,6 +336,14 @@ for (const file of ['app/skins/full_calendar.php', 'app/skins/default_full_calen
     assert.match(switchSkin, /\$this->normalize_request_values\(\$this->main->sanitize_deep_array\(\$_REQUEST\['atts'\]\), \['sk-options', 'sf-options', 'icons', 'include', 'exclude', 'fields'\]\)/, `${file} must normalise atts`);
     assert.match(switchSkin, /\$atts = \$this->sf_apply\(\$atts, \$this->sf, \$apply_sf_date\);/, `${file} must normalise atts before sf_apply`);
 }
+// Per-option shape (7.35.1.26): one option inside a skin's group sent as an
+// array (sk-options[full_calendar][limit][]=x, [include_local_time][], tile
+// [count][]...) still ended in trim()/isset TypeErrors. Every option there is
+// a scalar except the yearly view's months[n] list.
+const normalizeRequest = skinsLibrary.match(/public function normalize_request_values\([\s\S]*?\n    \}/)?.[0] || '';
+assert.match(normalizeRequest, /foreach \(\$values\['sk-options'\] as \$skin => \$options\)[\s\S]*?foreach \(\$options as \$option => \$value\)[\s\S]*?if \(!is_array\(\$value\)\) continue;/, 'each sk-options option must be checked');
+assert.match(normalizeRequest, /if \(\$option === 'months'\) \$values\['sk-options'\]\[\$skin\]\[\$option\] = array_filter\(\$value, 'is_scalar'\);\s*else unset\(\$values\['sk-options'\]\[\$skin\]\[\$option\]\);/, 'only months may stay an array');
+assert.match(plugin('app/skins/yearly_view.php'), /\$this->months_to_display = \(isset\(\$this->skin_options\['months'\]\) and is_array\(\$this->skin_options\['months'\]\)/, 'yearly view must still accept a scalar months value');
 // The render also reads $_REQUEST['sf'] (initial page render and every AJAX skin).
 const renderLibrary = plugin('app/libraries/render.php');
 assert.equal((renderLibrary.match(/\$SKO->normalize_request_values\(\$this->main->sanitize_deep_array\(\$_REQUEST\['sf'\]\), \['fields'\]\)/g) || []).length, 2, 'both render paths must normalise sf');
