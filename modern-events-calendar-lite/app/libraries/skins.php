@@ -2243,9 +2243,10 @@ class MEC_skins extends MEC_base
     }
 
     /**
-     * Returns a request year or month (mec_year, mec_month) if it is 1-4 digits.
-     * Anything else (an array, "x", "", a 20-digit year past PHP_INT_MAX) gives
-     * $default, so it never reaches mktime().
+     * Returns the request year (mec_year, four digits) or month (mec_month, 1-12).
+     * Anything else (an array, "x", "", "001", a 20-digit year) gives $default:
+     * such values failed in mktime() or made strtotime() read "Y-001-01" as an
+     * ordinal date, which kept the weekly view looping.
      * @param string $key
      * @param mixed $default
      * @return mixed
@@ -2253,7 +2254,9 @@ class MEC_skins extends MEC_base
     public function request_date_part($key, $default = null)
     {
         $value = (isset($_REQUEST[$key]) and is_string($_REQUEST[$key])) ? trim($_REQUEST[$key]) : '';
-        return preg_match('/^\d{1,4}$/', $value) ? $value : $default;
+        $pattern = $key === 'mec_year' ? '/^\d{4}$/' : '/^(0?[1-9]|1[0-2])$/';
+
+        return preg_match($pattern, $value) ? $value : $default;
     }
 
     protected function sf_att_terms($key, $option_scope = false)

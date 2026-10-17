@@ -21,7 +21,8 @@ foreach($this->weeks as $week_number=>$week)
     $first_week_day = $week[0];
 
     $i = 1;
-    while(strtotime($first_week_day) < $current_month_time)
+    // adventistai.lt: stop at the week's last day; past it strtotime(null) is false and the loop never ended.
+    while(isset($week[$i]) and strtotime($first_week_day) < $current_month_time)
     {
         $first_week_day = $week[$i];
         $i++;

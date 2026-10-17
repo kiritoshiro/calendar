@@ -1,5 +1,17 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.28
+
+- Robustness, follow-up to 7.35.1.27. The darius@ cross-review of PR #39 found these cases; #39 was merged before the fix reached it. `request_date_part()` in 7.35.1.27 accepted any 1–4 digits.
+  - `mec_month=001` or `102` (or `sf[month]=001`, which `sf_apply()` copies into it) made `strtotime()` read `Y-001-01` as an ordinal date. The weekly view's week loop (`weekly_view/tpl.php`) then ran past the week's last day: `strtotime(null)` is false, so it never ended and held a PHP worker until the time limit. 7.35.1.26 did the same.
+  - Month `0`/`13` and years such as `20260` also got through.
+  - Now a year must be four digits and a month 1–12 (`7` or `07`); anything else gets the handler's default. The week loop also stops at the week's last day.
+- `MEC_search::refine()` keeps `sf[fields]` again. `frontend.js` sends it, and refine doesn't read it, but the `mec_map_*_query` filters may. 7.35.1.27 dropped it with the other array values.
+- Verified in WordPress Playground (PHP 8.4.25, logged out) on the same code as this release:
+  - 4,816 fuzz requests to 24 public actions, with 0 fatal and 0 hang. That is the 4,492 of 7.35.1.27 plus 324 digit edge cases (`001`, `102`, `0`, `00`, `13`, `7`, a 20-digit year, `20260`), sent as `mec_*` and as `sf[year]`/`sf[month]`.
+  - The review's repros: on 7.35.1.26 the weekly requests got no reply in 60 s and a 20-digit year returned 500; now all return 200.
+  - On the same site, 74 of 82 well-formed requests are byte-identical to 7.35.1.26. 7 print a random skin id (same length), and 1 is the removed general calendar action.
+
 ## 7.35.1.27
 
 - Robustness (finishes what 7.35.1.25 listed as not covered; WordPress Playground, PHP 8.4.25, logged out): the other public AJAX actions read request values the same unchecked way, and a wrong-shaped value ended in a PHP fatal `TypeError` (HTTP 500). They are each view's `load_month`/`load_more` (monthly, weekly, daily, yearly, list, grid, tile, timetable and its weekly program, agenda, custom, masonry, timeline), `mec_map_get_markers` and `mec_refine_search_items`. The fuzz sent 4,492 single-value requests to 24 public actions: every att as `[]`, the array atts as strings, each option of the view's `sk-options` group as `[]`, every `sf` key as `[]`, the request scalars (`mec_month`, `mec_year`, `mec_next_page`, `mec_start_date`…) as `[]` and as junk strings, and nested `sf[fields]`. Before the fix, 1,099 failed and 3 never returned. After it, none fail and none hang. On the same Playground site, 74 of the run's 82 well-formed requests return byte-identical output before and after. Seven print a random skin id and vary between repeats either way, but keep the same length. The last is `mec_general_calendar_load_month` (below).
