@@ -49,10 +49,15 @@ jobs:
       - name: Verify fork customizations
         run: node tests/verify-customizations.js
 
+      - name: Check the customization checks catch deliberate breaks
+        run: node tests/mutate-customizations.js
+
       - name: Check customized JavaScript syntax
         run: |
           node --check modern-events-calendar-lite/assets/js/frontend.js
           node --check tests/verify-customizations.js
+          node --check tests/verify-linters.js
+          node --check tests/mutate-customizations.js
           node --check tests/build-magenda-css.js
 
       - name: Check the trimmed magenda stylesheet is up to date
