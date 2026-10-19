@@ -4088,7 +4088,19 @@ class MEC_feature_events extends MEC_base
 
     public function mec_event_bookings()
     {
-        $id = isset($_POST['id']) ? sanitize_text_field($_POST['id']) : 0;
+        // adventistai.lt: this lists attendee names and emails, so it needs a nonce and
+        // someone who may edit the event (or its logged-in author, as in FES).
+        $wpnonce = isset($_POST['_wpnonce']) ? sanitize_text_field(wp_unslash($_POST['_wpnonce'])) : '';
+        if (!wp_verify_nonce($wpnonce, 'mec_event_bookings')) $this->main->response(['success' => 0, 'code' => 'NONCE_IS_INVALID']);
+
+        $id = isset($_POST['id']) ? absint($_POST['id']) : 0;
+        $event = $id ? get_post($id) : null;
+        if (!$event or $event->post_type !== $this->PT) $this->main->response(['success' => 0, 'code' => 'INVALID_EVENT']);
+
+        $user_id = get_current_user_id();
+        $can_view = current_user_can('edit_post', $this->main->get_original_event($id)) || ($user_id && (int) $event->post_author === $user_id);
+        if (!$can_view) $this->main->response(['success' => 0, 'code' => 'NO_ACCESS']);
+
         $backend = isset($_POST['backend']) ? sanitize_text_field($_POST['backend']) : 0;
 
         $p_occurrence = isset($_POST['occurrence']) ? sanitize_text_field($_POST['occurrence']) : null;

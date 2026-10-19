@@ -3622,7 +3622,7 @@ class FormBuilder extends Singleton
                         jQuery.ajax({
                                 url: "<?php echo admin_url('admin-ajax.php', NULL); ?>",
                                 type: "POST",
-                                data: "action=mec_event_bookings&id=<?php echo esc_js($post->ID); ?>&occurrence=" + value + "&backend=<?php echo (is_admin() ? 1 : 0); ?>",
+                                data: "action=mec_event_bookings&id=<?php echo esc_js($post->ID); ?>&_wpnonce=<?php echo esc_js(wp_create_nonce('mec_event_bookings')); ?>&occurrence=" + encodeURIComponent(value) + "&backend=<?php echo (is_admin() ? 1 : 0); ?>",
                                 dataType: "json"
                             })
                             .done(function(response) {

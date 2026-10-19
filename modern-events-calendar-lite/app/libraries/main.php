@@ -8734,6 +8734,17 @@ class MEC_main extends MEC_base
      */
     public function get_bookings($event_id, $timestamp = null, $limit = '-1', $user_id = null, $verified = true)
     {
+        // adventistai.lt: these values are concatenated into the SQL below, and some
+        // callers pass request data, so only integers get through (CVE-2026-105067).
+        $event_id = (int) $event_id;
+        if ($event_id <= 0) return [];
+
+        if ($timestamp and !is_numeric($timestamp)) return [];
+        $timestamp = $timestamp ? (int) $timestamp : null;
+
+        $user_id = $user_id ? (int) $user_id : null;
+        $limit = is_numeric($limit) ? (int) $limit : -1;
+
         if ($timestamp)
         {
             $booking_options = get_post_meta($event_id, 'mec_booking', true);
