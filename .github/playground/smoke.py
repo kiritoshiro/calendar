@@ -93,7 +93,12 @@ def blueprint(config, logs_vfs):
             f" 'post_content' => {json.dumps(fixture)}]);"
             "if (is_wp_error($id) || ! $id) { throw new Exception('fixture page was not created'); }"
         )})
-    return {"$schema": "https://playground.wordpress.net/blueprint-schema.json", "steps": steps}
+    bp = {"$schema": "https://playground.wordpress.net/blueprint-schema.json", "steps": steps}
+    # The CLI's --php flag alone is not enough: without preferredVersions the
+    # blueprint runs on Playground's default PHP (seen with CLI 3.1.57).
+    if config.get("preferredVersions"):
+        bp["preferredVersions"] = config["preferredVersions"]
+    return bp
 
 
 def start_server(args, config, root, logs_dir, workdir):
