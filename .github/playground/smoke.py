@@ -6,7 +6,8 @@ plugin(s) or theme, activates them, adds a fixture page, then logs in and loads
 the front end and every wp-admin menu page. It fails when activation fails, a
 page does not answer 200, a page shows a PHP error or WordPress's "critical
 error" screen, or debug.log has a PHP error, warning, notice or deprecation from
-a watched path (this repository's code).
+a watched path (this repository's code). It also fails when Playground runs
+another PHP version than --php asks for.
 
 Usage: python3 .github/playground/smoke.py [--php 8.4] [--wp latest]
 Configuration: .github/playground/config.json (see the comment block there).
@@ -37,6 +38,7 @@ BASE = f"http://127.0.0.1:{PORT}"
 USER, PASSWORD = "admin", "password"
 PHP_LOG_LINE = re.compile(r"PHP (Fatal error|Parse error|Warning|Notice|Deprecated|Recoverable fatal error)", re.I)
 PAGE_ERROR = re.compile(r"<b>(Fatal error|Parse error|Warning|Notice|Deprecated)</b>:|There has been a critical error on this website", re.I)
+PHP_VERSION_FILE = "php-version.txt"  # written by the blueprint into the logs mount
 ADMIN_SKIP = re.compile(r"(customize\.php|site-editor\.php|wp-login\.php|action=logout|update-core\.php|plugin-install\.php|theme-install\.php)")
 
 failures = []
@@ -102,6 +104,11 @@ def blueprint(config, logs_vfs):
 
 
 def start_server(args, config, root, logs_dir, workdir):
+    # Always ask for the versions given on the command line, and record the PHP
+    # version that really runs, so check_php_version() can compare the two.
+    config = dict(config, preferredVersions={"php": args.php, "wp": args.wp},
+                  setup=config.get("setup", []) + [{"step": "runPHP", "code": (
+                      f"<?php file_put_contents('/logs/{PHP_VERSION_FILE}', PHP_VERSION);")}])
     bp_path = os.path.join(workdir, "blueprint.json")
     with open(bp_path, "w", encoding="utf-8") as fh:
         json.dump(blueprint(config, "/logs"), fh, indent=2)
@@ -132,7 +139,24 @@ def start_server(args, config, root, logs_dir, workdir):
     if not ready.is_set():
         stop_server(proc)
         sys.exit("::error::WordPress Playground did not start (blueprint or activation failed); see the log above")
+    error = check_php_version(args.php, logs_dir)
+    if error:
+        stop_server(proc)
+        sys.exit(f"::error::{error}")
     return proc
+
+
+def check_php_version(wanted, logs_dir):
+    """Return an error message unless Playground runs the PHP version asked for."""
+    try:
+        with open(os.path.join(logs_dir, PHP_VERSION_FILE), encoding="utf-8") as fh:
+            running = fh.read().strip()
+    except OSError:
+        return "could not tell which PHP version Playground runs (the blueprint did not write it)"
+    print(f"PHP {running} in Playground (asked for {wanted})", flush=True)
+    if running != wanted and not running.startswith(wanted + "."):
+        return f"asked for PHP {wanted}, but Playground runs PHP {running}"
+    return None
 
 
 def stop_server(proc):

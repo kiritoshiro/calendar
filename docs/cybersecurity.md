@@ -72,7 +72,10 @@ enforce required checks, so review the gate result before merging there.
   - activation errors;
   - pages that don't answer 200;
   - a PHP error or the critical-error screen on a page;
-  - any PHP error, warning, notice or deprecation in `debug.log` from this repository's code.
+  - any PHP error, warning, notice or deprecation in `debug.log` from this repository's code;
+  - Playground running a different PHP version from the one asked for.
+
+  The blueprint sets `preferredVersions` to the `--php` and `--wp` values, and the test reads back `PHP_VERSION` after boot. Before 2026-10-19 it did neither: Playground CLI 3.1.57 ignores `--php` when the blueprint has no `preferredVersions`, so both jobs of the 7.4/8.4 matrix had run on PHP 8.5.10.
 
   The site, its database and its admin account exist only inside the job. To run it locally (needs Node 24 with npx, and Python 3): `python3 .github/playground/smoke.py --php 8.4`. Settings are in `.github/playground/config.json`.
 - **Playground bookings test** (2026-10-19): `.github/playground/bookings.py` is a behavioural regression test for the 7.35.1.29 bookings fix (CVE-2026-105067). A test-only mu-plugin (`bookings-mu-plugin.php`, never shipped) turns the booking module back on, adds events and bookings, and logs every `mec_bookings` query. The test then fails if:
