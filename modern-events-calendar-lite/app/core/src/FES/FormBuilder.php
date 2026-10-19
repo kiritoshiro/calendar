@@ -3622,12 +3622,14 @@ class FormBuilder extends Singleton
                         jQuery.ajax({
                                 url: "<?php echo admin_url('admin-ajax.php', NULL); ?>",
                                 type: "POST",
-                                data: "action=mec_event_bookings&id=<?php echo esc_js($post->ID); ?>&occurrence=" + value + "&backend=<?php echo (is_admin() ? 1 : 0); ?>",
+                                data: "action=mec_event_bookings&id=<?php echo esc_js($post->ID); ?>&_wpnonce=<?php echo esc_js(wp_create_nonce('mec_event_bookings')); ?>&occurrence=" + encodeURIComponent(value) + "&backend=<?php echo (is_admin() ? 1 : 0); ?>",
                                 dataType: "json"
                             })
                             .done(function(response) {
                                 // Display Results
                                 if (response.html) $attendees.html(response.html);
+                                // adventistai.lt: a refused request (expired nonce, no access) must not leave the previous occurrence's list showing.
+                                else $attendees.empty().append(jQuery('<p class="mec-not-found"></p>').text("<?php echo esc_js(__('The attendees could not be loaded. Reload the page and try again.', 'modern-events-calendar-lite')); ?>"));
 
                                 // Enable the Form
                                 $dropdown.removeAttr('disabled');
