@@ -78,4 +78,12 @@ enforce required checks, so review the gate result before merging there.
   The blueprint sets `preferredVersions` to the `--php` and `--wp` values, and the test reads back `PHP_VERSION` after boot. Before 2026-10-19 it did neither: Playground CLI 3.1.57 ignores `--php` when the blueprint has no `preferredVersions`, so both jobs of the 7.4/8.4 matrix had run on PHP 8.5.10.
 
   The site, its database and its admin account exist only inside the job. To run it locally (needs Node 24 with npx, and Python 3): `python3 .github/playground/smoke.py --php 8.4`. Settings are in `.github/playground/config.json`.
+- **Playground bookings test** (2026-10-19): `.github/playground/bookings.py` is a behavioural regression test for the 7.35.1.29 bookings fix (CVE-2026-105067). A test-only mu-plugin (`bookings-mu-plugin.php`, never shipped) turns the booking module back on, adds events and bookings, and logs every `mec_bookings` query. The test then fails if:
+  - `mec_event_bookings` answers, or runs a bookings query, for a request without a nonce, for a subscriber who cannot edit the event, or for something that is not an event;
+  - it refuses the event's logged-in author, the administrator, or a user who may edit the WPML original of a translated event;
+  - `MEC_main::get_bookings()` runs a query for a bad event ID or a non-numeric timestamp, adds a `LIMIT` to the unlimited default, or puts anything but integers into its SQL;
+  - the FES CSV export does not turn its timestamp into an integer;
+  - `get_attach_id()` or the booking verify/cancel endpoints stop finding their rows, including for a key or URL with an apostrophe.
+
+  It uses harmless marker strings only. Run it locally with `python3 .github/playground/bookings.py --php 8.4` (`--plugin-dir` mounts another copy of the plugin, `--port` picks another port).
 - **Links**: `links.yml` checks the links in Markdown and `readme.txt` files with [lychee](https://github.com/lycheeverse/lychee). It runs on pull requests that change them, monthly and on demand. It is not part of the security gate, because a third-party site being down should not block a merge. Exclusions are in `.lychee.toml`; adventistai.lt is excluded because its Cloudflare bot protection answers GitHub runners with 403.
