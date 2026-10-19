@@ -3574,10 +3574,12 @@ class MEC_main extends MEC_base
     {
         if (get_query_var('verify'))
         {
+            global $wpdb;
             $key = sanitize_text_field(get_query_var('verify'));
 
+            // adventistai.lt: the key comes from the URL, so prepare it.
             $db = $this->getDB();
-            $book_id = $db->select("SELECT `post_id` FROM `#__postmeta` WHERE `meta_key`='mec_verification_key' AND `meta_value`='$key'", 'loadResult');
+            $book_id = $db->select($wpdb->prepare("SELECT `post_id` FROM `#__postmeta` WHERE `meta_key`='mec_verification_key' AND `meta_value`=%s", $key), 'loadResult');
 
             if (!$book_id) return false;
 
@@ -3633,11 +3635,13 @@ class MEC_main extends MEC_base
         }
         else if (get_query_var('cancel'))
         {
+            global $wpdb;
             $key = sanitize_text_field(get_query_var('cancel'));
             $sure = isset($_GET['mec-sure']) ? (int) $_GET['mec-sure'] : 0;
 
+            // adventistai.lt: the key comes from the URL, so prepare it.
             $db = $this->getDB();
-            $book_id = $db->select("SELECT `post_id` FROM `#__postmeta` WHERE `meta_key`='mec_cancellation_key' AND `meta_value`='$key'", 'loadResult');
+            $book_id = $db->select($wpdb->prepare("SELECT `post_id` FROM `#__postmeta` WHERE `meta_key`='mec_cancellation_key' AND `meta_value`=%s", $key), 'loadResult');
 
             if (!$book_id) return false;
 
@@ -9066,8 +9070,11 @@ class MEC_main extends MEC_base
      */
     public function get_attach_id($image_url)
     {
+        global $wpdb;
+
+        // adventistai.lt: the URL can come from a front-end submission, so prepare it.
         $db = $this->getDB();
-        return $db->select("SELECT `ID` FROM `#__posts` WHERE `guid`='$image_url'", 'loadResult');
+        return $db->select($wpdb->prepare("SELECT `ID` FROM `#__posts` WHERE `guid`=%s", (string) $image_url), 'loadResult');
     }
 
     /**

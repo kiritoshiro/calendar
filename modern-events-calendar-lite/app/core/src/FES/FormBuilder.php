@@ -3628,6 +3628,8 @@ class FormBuilder extends Singleton
                             .done(function(response) {
                                 // Display Results
                                 if (response.html) $attendees.html(response.html);
+                                // adventistai.lt: a refused request (expired nonce, no access) must not leave the previous occurrence's list showing.
+                                else $attendees.empty().append(jQuery('<p class="mec-not-found"></p>').text("<?php echo esc_js(__('The attendees could not be loaded. Reload the page and try again.', 'modern-events-calendar-lite')); ?>"));
 
                                 // Enable the Form
                                 $dropdown.removeAttr('disabled');

@@ -6,7 +6,11 @@
   - `MEC_main::get_bookings()` concatenated `event_id`, `timestamp`, `user_id` and `limit` into SQL. They are now cast to integers. A missing or non-positive event ID, or a non-numeric timestamp, returns no bookings, the same result the broken query used to give. This covers all 14 callers.
   - `wp_ajax_mec_event_bookings` (the attendees box, registered when the booking module is on) had no nonce and no capability check, so any logged-in user could list any event's attendee names and emails. It now needs the `mec_event_bookings` nonce, which the attendees box sends, and edit rights on the event (or, as in FES, being its logged-in author).
   - The FES CSV export's `timestamp` is now `absint`.
-- Wordfence compares versions, so it keeps flagging 7.35.1.x against "< 7.37.0" after this fix. Ignore that result on the site, with this entry as the reason.
+  - The attendees box clears the previous list and shows a message when a request is refused.
+- Found by the Codex cross-review, same class, also fixed (prepared with `%s`):
+  - `MEC_main::get_attach_id()` put an image URL into a quoted SQL string unescaped. FES submissions reach it through the featured image (`set_featured_image()`), as does the term importer.
+  - The booking verification and cancellation endpoints (`do_endpoints()`, `verify`/`cancel` query vars) did the same with the key from the URL.
+- Not established: which code the advisory means. This release fixes every matching path found in the fork, but Wordfence compares versions, so it keeps flagging 7.35.1.x against "< 7.37.0". If the alert is ignored on the site, record that it is based on this review, not on the vendor's patch.
 
 ## 7.35.1.28
 

@@ -395,6 +395,14 @@ assert.match(eventBookings, /current_user_can\('edit_post', \$this->main->get_or
 assert.match(eventBookings, /\$id = isset\(\$_POST\['id'\]\) \? absint\(\$_POST\['id'\]\) : 0;/);
 assert.match(plugin('app/core/src/FES/FormBuilder.php'), /action=mec_event_bookings&id=<\?php echo esc_js\(\$post->ID\); \?>&_wpnonce=<\?php echo esc_js\(wp_create_nonce\('mec_event_bookings'\)\); \?>/, 'the attendees box must send the bookings nonce');
 assert.match(plugin('app/features/fes.php'), /\$timestamp = isset\(\$_REQUEST\['timestamp'\]\) \? absint\(\$_REQUEST\['timestamp'\]\) : 0;/, 'the FES CSV export timestamp must be an integer');
+assert.match(plugin('app/core/src/FES/FormBuilder.php'), /if \(response\.html\) \$attendees\.html\(response\.html\);\s*\/\/[^\n]*\n\s*else \$attendees\.empty\(\)/, 'a refused bookings request must clear the attendees list');
+// Same class, found by the 7.35.1.29 cross-review: quoted request strings in SQL.
+const mainLib = plugin('app/libraries/main.php');
+assert.match(mainLib, /\$db->select\(\$wpdb->prepare\("SELECT `ID` FROM `#__posts` WHERE `guid`=%s", \(string\) \$image_url\), 'loadResult'\)/, 'get_attach_id must prepare the URL');
+for (const key of ['verification', 'cancellation']) {
+    assert.match(mainLib, new RegExp(`\\$wpdb->prepare\\("SELECT \`post_id\` FROM \`#__postmeta\` WHERE \`meta_key\`='mec_${key}_key' AND \`meta_value\`=%s", \\$key\\)`), `the ${key} endpoint must prepare its key`);
+}
+assert.doesNotMatch(mainLib, /`guid`='\$image_url'|`meta_value`='\$key'/, 'no quoted request string may be interpolated into these lookups');
 // Shell slips once committed empty files ("atts[", "id") to the plugin root,
 // and the release ZIP shipped them.
 const emptyRootFiles = fs.readdirSync(path.join(root, 'modern-events-calendar-lite'), { withFileTypes: true })

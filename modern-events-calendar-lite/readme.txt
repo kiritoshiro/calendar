@@ -24,7 +24,7 @@ Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar 
 
 == Changelog ==
 = 7.35.1.29 =
-* Security: the event bookings list is only shown to people who may edit the event, and booking lookups accept only numeric IDs and dates (CVE-2026-105067).
+* Security: the event bookings list is only shown to people who may edit the event, and booking lookups accept only numeric IDs and dates (CVE-2026-105067). Image and booking-link lookups use prepared queries.
 
 = 7.35.1.28 =
 * Fix: a weekly calendar request with an unusual month number (such as "001") no longer keeps the server busy until it times out.
