@@ -1,5 +1,12 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.30
+
+- Fix: single event pages logged `include(.../app/modules/progress-bar/single.php): Failed to open stream` (73 warnings on adventistai.lt on 2026-10-19, after the update from 7.35.1.9). The slim release left out `app/modules/progress-bar/`, but the single event skins (`single/default.php`, `modern.php`, `m1.php`, `m2.php`) and the list skin always call `MEC_main::display_progress_bar()`.
+  - The module ships again (2 files). It is the "Enable progress bar module" option under Settings → Modules, which shows how far an ongoing event has run. It renders nothing unless that option is on, and could not work while the file was missing.
+  - `MEC_main::module()` returns an empty string for a module file that doesn't exist. That covers the booking, attendees-list and qrcode modules, which stay out of the slim release. In WordPress Playground with default settings, a single event page on the slim build also asked for `attendees-list` and `qrcode`.
+  - Verified in Playground (PHP 8.4.25) on copies built like the release: before, a single event page logged 12 include warnings (`progress-bar`, `attendees-list`, `qrcode`); after, none, with the progress bar setting off or on.
+
 ## 7.35.1.29
 
 - Security: CVE-2026-105067 (Modern Events Calendar Lite < 7.37.0, authenticated SQL injection; Wordfence and Patchstack, published 2026-10-12). The advisories don't name the vulnerable code, and the upstream 7.37.0 change isn't public. The fork's matching paths are fixed here:

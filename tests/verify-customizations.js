@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.29', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.30', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -403,6 +403,12 @@ for (const key of ['verification', 'cancellation']) {
     assert.match(mainLib, new RegExp(`\\$wpdb->prepare\\("SELECT \`post_id\` FROM \`#__postmeta\` WHERE \`meta_key\`='mec_${key}_key' AND \`meta_value\`=%s", \\$key\\)`), `the ${key} endpoint must prepare its key`);
 }
 assert.doesNotMatch(mainLib, /`guid`='\$image_url'|`meta_value`='\$key'/, 'no quoted request string may be interpolated into these lookups');
+// 7.35.1.30: single event pages always call display_progress_bar(), so the
+// progress-bar module ships, and a module left out of the slim build renders
+// nothing instead of a PHP include warning.
+assert.doesNotMatch(buildWorkflow, /--exclude='app\/modules\/progress-bar\/'/, 'the progress-bar module must ship');
+assert.ok(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'app', 'modules', 'progress-bar', 'single.php')), 'progress-bar/single.php must exist');
+assert.match(plugin('app/libraries/main.php'), /\$path = MEC::import\('app\.modules\.' \. \$module, true, true\);\s*\/\/[^\n]*\n\s*\/\/[^\n]*\n\s*if \(!\$path \|\| !is_file\(\$path\)\) return '';/, 'module() must skip a missing module file');
 // Shell slips once committed empty files ("atts[", "id") to the plugin root,
 // and the release ZIP shipped them.
 const emptyRootFiles = fs.readdirSync(path.join(root, 'modern-events-calendar-lite'), { withFileTypes: true })

@@ -3332,6 +3332,10 @@ class MEC_main extends MEC_base
         // Get module path
         $path = MEC::import('app.modules.' . $module, true, true);
 
+        // adventistai.lt: the slim release leaves out the booking, attendees-list and
+        // qrcode modules; a call to one of them renders nothing instead of warning.
+        if (!$path || !is_file($path)) return '';
+
         // MEC libraries
         $render = $this->getRender();
         $factory = $this->getFactory();
