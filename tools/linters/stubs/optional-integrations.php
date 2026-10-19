@@ -31,6 +31,16 @@ namespace {
     function bp_loggedin_user_domain() {}
     function bp_core_load_template($templates) {}
 
+    // MEC BuddyBoss add-on (FES group selector in FES/FormBuilder.php)
+    function bp_mec_is_mec_groups_enabled($group_id) {}
+    function bp_mec_is_mec_assign_groups_enabled($group_id) {}
+    function bp_mec_get_groups() {}
+    function bp_mec_is_user_can_event_change($group_id) {}
+    class BP_MEC_Group_Helper
+    {
+        public static function get_event_groups_ids($event_id) {}
+    }
+
     // Polylang
     function pll_get_post_translations($post_id) {}
     function pll_switch_language($locale) {}

@@ -310,7 +310,8 @@ class MEC_feature_fes extends MEC_base
             die(json_encode(['ex' => "error"]));
         }
 
-        $timestamp = isset($_REQUEST['timestamp']) ? sanitize_text_field($_REQUEST['timestamp']) : 0;
+        // adventistai.lt: the timestamp reaches SQL in get_bookings(), so keep only an integer.
+        $timestamp = isset($_REQUEST['timestamp']) ? absint($_REQUEST['timestamp']) : 0;
         $booking_ids = '';
         $type = isset($_REQUEST['type']) ? sanitize_text_field($_REQUEST['type']) : 'csv';
 

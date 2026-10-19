@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.28', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.29', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -382,6 +382,27 @@ assert.match(plugin('app/skins/grid/render.php'), /gmapSkin\('\.json_encode\(\$e
 assert.match(plugin('app/addons/divi/includes/MECShortcodesForDivi.php'), /\$post_id = absint\(\$_POST\['shortcode_id'\] \?\? 0\);/);
 assert.match(ixFeature, /\$this->db->select\(\$wpdb->prepare\("SELECT `post_id` FROM `#__postmeta` WHERE `meta_value`=%s AND `meta_key`='mec_gcal_id'", \$gcal_id\), 'loadResult'\)/);
 assert.match(ixFeature, /\$this->db->select\(\$wpdb->prepare\("SELECT `dstart` FROM `#__mec_dates` WHERE `post_id`=%d ORDER BY `tstart` ASC LIMIT 50", \$post_id\), 'loadColumn'\)/);
+// CVE-2026-105067: get_bookings() concatenates its arguments into SQL, and the
+// logged-in bookings list and the FES CSV export passed request values to it.
+const getBookings = plugin('app/libraries/main.php').match(/public function get_bookings\([^)]*\)\s*\{([\s\S]*?)\$records = \$db->select/)?.[1] ?? '';
+assert.match(getBookings, /\$event_id = \(int\) \$event_id;\s*if \(\$event_id <= 0\) return \[\];/, 'get_bookings must cast the event ID');
+assert.match(getBookings, /if \(\$timestamp and !is_numeric\(\$timestamp\)\) return \[\];\s*\$timestamp = \$timestamp \? \(int\) \$timestamp : null;/, 'get_bookings must cast the timestamp');
+assert.match(getBookings, /\$user_id = \$user_id \? \(int\) \$user_id : null;/, 'get_bookings must cast the user ID');
+assert.match(getBookings, /\$limit = is_numeric\(\$limit\) \? \(int\) \$limit : -1;/, 'get_bookings must cast the limit');
+const eventBookings = plugin('app/features/events.php').match(/public function mec_event_bookings\(\)\s*\{([\s\S]*?)get_bookings\(/)?.[1] ?? '';
+assert.match(eventBookings, /wp_verify_nonce\(\$wpnonce, 'mec_event_bookings'\)/, 'mec_event_bookings must check its nonce');
+assert.match(eventBookings, /current_user_can\('edit_post', \$this->main->get_original_event\(\$id\)\)/, 'mec_event_bookings must check edit rights');
+assert.match(eventBookings, /\$id = isset\(\$_POST\['id'\]\) \? absint\(\$_POST\['id'\]\) : 0;/);
+assert.match(plugin('app/core/src/FES/FormBuilder.php'), /action=mec_event_bookings&id=<\?php echo esc_js\(\$post->ID\); \?>&_wpnonce=<\?php echo esc_js\(wp_create_nonce\('mec_event_bookings'\)\); \?>/, 'the attendees box must send the bookings nonce');
+assert.match(plugin('app/features/fes.php'), /\$timestamp = isset\(\$_REQUEST\['timestamp'\]\) \? absint\(\$_REQUEST\['timestamp'\]\) : 0;/, 'the FES CSV export timestamp must be an integer');
+assert.match(plugin('app/core/src/FES/FormBuilder.php'), /if \(response\.html\) \$attendees\.html\(response\.html\);\s*\/\/[^\n]*\n\s*else \$attendees\.empty\(\)/, 'a refused bookings request must clear the attendees list');
+// Same class, found by the 7.35.1.29 cross-review: quoted request strings in SQL.
+const mainLib = plugin('app/libraries/main.php');
+assert.match(mainLib, /\$db->select\(\$wpdb->prepare\("SELECT `ID` FROM `#__posts` WHERE `guid`=%s", \(string\) \$image_url\), 'loadResult'\)/, 'get_attach_id must prepare the URL');
+for (const key of ['verification', 'cancellation']) {
+    assert.match(mainLib, new RegExp(`\\$wpdb->prepare\\("SELECT \`post_id\` FROM \`#__postmeta\` WHERE \`meta_key\`='mec_${key}_key' AND \`meta_value\`=%s", \\$key\\)`), `the ${key} endpoint must prepare its key`);
+}
+assert.doesNotMatch(mainLib, /`guid`='\$image_url'|`meta_value`='\$key'/, 'no quoted request string may be interpolated into these lookups');
 // Shell slips once committed empty files ("atts[", "id") to the plugin root,
 // and the release ZIP shipped them.
 const emptyRootFiles = fs.readdirSync(path.join(root, 'modern-events-calendar-lite'), { withFileTypes: true })
