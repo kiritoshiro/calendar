@@ -738,7 +738,7 @@ class MEC_feature_ix extends MEC_base
         $state = isset($_GET['state']) ? sanitize_text_field(wp_unslash($_GET['state'])) : '';
         if (!$state || !wp_verify_nonce($state, 'mec_ix_g_calendar_oauth')) wp_die(esc_html__('Your session expired. Reload the page and try again.', 'modern-events-calendar-lite'), '', ['response' => 403, 'back_link' => true]);
 
-        $code =isset($_GET['code']) ? sanitize_text_field($_GET['code']) : '';
+        $code = isset($_GET['code']) ? sanitize_text_field($_GET['code']) : '';
 
         $ix = $this->main->get_ix_options();
         $client_id = $ix['google_export_client_id'] ?? null;

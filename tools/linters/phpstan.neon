@@ -23,3 +23,7 @@ parameters:
         - identifier: return.missing
         # Upstream reads DOING_AJAX directly instead of wp_doing_ajax().
         - identifier: phpstanWP.wpConstant.fetch
+        # The report template is included from MEC_feature_report::report(), so
+        # its $this->main runs in class scope; PHPStan reads the file on its own.
+        - identifier: property.private
+          path: ../../modern-events-calendar-lite/app/features/report/tpl.php

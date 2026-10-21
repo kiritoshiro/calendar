@@ -173,7 +173,7 @@ add_action('wp_ajax_pgtest_state', function () {
     wp_send_json([
         'php' => PHP_VERSION, 'registered' => (bool) has_action('wp_ajax_mec_event_bookings'), 'fes_export' => (bool) has_action('wp_ajax_mec_fes_csv_export'),
         'posts' => $posts,
-        'ix' => array_intersect_key(is_array($ix) ? $ix : [], array_flip(['sync_g_import', 'sync_g_export', 'google_import_api_key', 'google_export_client_id'])),
+        'ix' => (object) array_intersect_key(is_array($ix) ? $ix : [], array_flip(['sync_g_import', 'sync_g_export', 'google_import_api_key', 'google_export_client_id'])),
         'booking_rows' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mec_bookings"),
         'booking_posts' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'mec-books'"),
     ]);
