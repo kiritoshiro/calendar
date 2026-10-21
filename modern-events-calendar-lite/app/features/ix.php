@@ -740,7 +740,7 @@ class MEC_feature_ix extends MEC_base
 
         // adventistai.lt: handle a cancelled or failed sign-in before contacting Google.
         $url = $this->main->URL('backend') . 'admin.php?page=MEC-ix&tab=MEC-g-calendar-export';
-        if (isset($_GET['error'])) wp_die(esc_html__('Google sign-in was cancelled or failed. Try Authenticate again.', 'modern-events-calendar-lite'), '', ['response' => 400, 'link_url' => $url, 'link_text' => esc_html__('Google Cal. Export', 'modern-events-calendar-lite')]);
+        if (isset($_GET['error'])) wp_die(esc_html__('Google sign-in was cancelled or failed. Try Authenticate again.', 'modern-events-calendar-lite'), '', ['response' => 400, 'link_url' => esc_url($url), 'link_text' => esc_html__('Google Cal. Export', 'modern-events-calendar-lite')]);
 
         $code = isset($_GET['code']) ? sanitize_text_field($_GET['code']) : '';
 
