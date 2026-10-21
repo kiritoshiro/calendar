@@ -67,7 +67,7 @@ class MEC_feature_report extends MEC_base
         // Mass Action
         $this->factory->action('wp_ajax_mec_report_mass', [$this, 'mass_actions']);
 
-        // Export & Purge (admin-post)
+        // Export & Purge (admin-post): disabled in the calendar-only build
         $this->factory->action('admin_post_mec_export_purge', [$this, 'export_purge']);
     }
 
@@ -95,136 +95,15 @@ class MEC_feature_report extends MEC_base
     }
 
     /**
-     * Handle Export & Purge historical bookings
+     * adventistai.lt: Export & Purge is not part of the calendar-only build. The old
+     * handler needed the removed MEC_feature_books class, would have deleted whole
+     * bookings that only partly fell before the cutoff, and left the CSV at a
+     * guessable public uploads URL. The route stays registered so an old form or
+     * link gets an explanation instead of a blank admin-post page.
      */
     public function export_purge()
     {
-        // Permissions
-        if (!current_user_can('mec_report')) wp_die(esc_html__('You do not have permission.', 'modern-events-calendar-lite'));
-
-        // Validate Nonce
-        $nonce = isset($_POST['_wpnonce']) ? sanitize_text_field($_POST['_wpnonce']) : '';
-        if (!wp_verify_nonce($nonce, 'mec_export_purge')) wp_die(esc_html__('Invalid request.', 'modern-events-calendar-lite'));
-
-        $cutoff_raw = isset($_POST['mec_export_purge_cutoff']) ? sanitize_text_field($_POST['mec_export_purge_cutoff']) : '';
-        $emails_raw = isset($_POST['mec_export_purge_emails']) ? sanitize_text_field($_POST['mec_export_purge_emails']) : '';
-
-        if (!$cutoff_raw) wp_die(esc_html__('Please provide a cutoff date.', 'modern-events-calendar-lite'));
-
-        $cutoff_ts = strtotime($cutoff_raw);
-        if (!$cutoff_ts) wp_die(esc_html__('Invalid cutoff date.', 'modern-events-calendar-lite'));
-
-        $cutoff_ts = strtotime('tomorrow', $cutoff_ts) - 1;
-
-        $db = $this->getDB();
-        $rows = $db->select("SELECT DISTINCT `booking_id` FROM `#__mec_bookings` WHERE `timestamp` < '" . esc_sql($cutoff_ts) . "'");
-        $booking_post_ids = [];
-        foreach ((array) $rows as $r)
-        {
-            if (isset($r->booking_id)) $booking_post_ids[] = (int) $r->booking_id;
-        }
-
-        $booking_post_ids = array_values(array_unique(array_filter($booking_post_ids)));
-
-        $csv_rows = [];
-        if (!empty($booking_post_ids))
-        {
-            $book_feature = new MEC_feature_books();
-            $rows_all = $book_feature->csvexcel($booking_post_ids);
-
-            $header = $rows_all[0] ?? [];
-            $start_col_index = null;
-            foreach ($header as $idx => $label)
-            {
-                if (strip_tags($label) === esc_html__('Start Date & Time', 'modern-events-calendar-lite'))
-                {
-                    $start_col_index = $idx;
-                    break;
-                }
-            }
-
-            if ($start_col_index === null) $start_col_index = 2;
-
-            $csv_rows[] = $header;
-            for ($i = 1; $i < count($rows_all); $i++)
-            {
-                $row = $rows_all[$i];
-                $start_str = $row[$start_col_index] ?? '';
-                $start_ts = $start_str ? strtotime($start_str) : 0;
-                if ($start_ts && $start_ts < $cutoff_ts) $csv_rows[] = $row;
-            }
-        }
-
-        if (count($csv_rows) <= 1)
-        {
-            $url = $this->main->add_qs_vars([
-                'page' => 'MEC-report',
-                'tab' => 'export_purge',
-                'mec_export_purge_done' => 1,
-                'mec_export_purge_count' => 0,
-            ], $this->main->URL('backend') . 'admin.php');
-            wp_safe_redirect($url);
-            exit;
-        }
-
-        $upload_dir = wp_upload_dir();
-        $subdir = '/mec-exports/' . date('Y/m');
-        $dir = trailingslashit($upload_dir['basedir']) . ltrim($subdir, '/');
-        if (!file_exists($dir)) wp_mkdir_p($dir);
-
-        $filename = 'mec_export_purge_' . date('Ymd_His') . '.csv';
-        $filepath = trailingslashit($dir) . $filename;
-
-        $handle = fopen($filepath, 'w');
-        if (!$handle) wp_die(esc_html__('Unable to write export file.', 'modern-events-calendar-lite'));
-
-        // UTF-8 BOM
-        fwrite($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
-        foreach ($csv_rows as $r) fputcsv($handle, $r, "\t");
-        fclose($handle);
-
-        $fileurl = trailingslashit($upload_dir['baseurl']) . ltrim($subdir, '/') . '/' . $filename;
-
-        $recipients = [];
-        foreach (preg_split('/[,;\s]+/', $emails_raw) as $e)
-        {
-            $e = trim($e);
-            if ($e && is_email($e)) $recipients[] = $e;
-        }
-
-        if (!empty($recipients))
-        {
-            add_filter('wp_mail_content_type', [$this->main, 'html_email_type']);
-            $subject = sprintf(esc_html__('%s: Bookings Export up to %s', 'modern-events-calendar-lite'), get_bloginfo('name'), date_i18n(get_option('date_format'), $cutoff_ts));
-            $body = sprintf(
-                esc_html__('Attached is the CSV export of bookings prior to %s. A copy is saved here: %s', 'modern-events-calendar-lite'),
-                date_i18n(get_option('date_format'), $cutoff_ts),
-                esc_url($fileurl)
-            );
-            $headers = ['Content-Type: text/html; charset=UTF-8'];
-            wp_mail($recipients, $subject, wpautop($body), $headers, [$filepath]);
-            remove_filter('wp_mail_content_type', [$this->main, 'html_email_type']);
-        }
-
-        foreach($booking_post_ids as $booking_post_id)
-        {
-            wp_delete_post($booking_post_id, true);
-        }
-
-        $db->q("DELETE FROM `#__mec_bookings` WHERE `timestamp` < '" . esc_sql($cutoff_ts) . "'");
-
-        // Redirect with admin notice
-        $count = max(0, count($csv_rows) - 1);
-        $url = $this->main->add_qs_vars([
-            'page' => 'MEC-report',
-            'tab' => 'export_purge',
-            'mec_export_purge_done' => 1,
-            'mec_export_purge_count' => $count,
-            'mec_export_purge_url' => rawurlencode($fileurl),
-        ], $this->main->URL('backend') . 'admin.php');
-
-        wp_safe_redirect($url);
-        exit;
+        wp_die(esc_html__('Export & Purge is not available in this calendar-only build.', 'modern-events-calendar-lite'), '', ['response' => 410, 'back_link' => true]);
     }
 
     /* Report Event Dates */

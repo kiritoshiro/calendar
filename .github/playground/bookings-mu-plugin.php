@@ -1,6 +1,7 @@
 <?php
 /**
- * Test-only helpers for .github/playground/bookings.py (7.35.1.29, CVE-2026-105067).
+ * Test-only helpers for .github/playground/bookings.py (7.35.1.29, CVE-2026-105067;
+ * 7.35.1.31, the 2026-10-21 audit fixes).
  *
  * Installed as a must-use plugin in a throwaway WordPress Playground site only;
  * it is not part of the plugin and never ships. The test fixtures use harmless
@@ -138,17 +139,50 @@ add_action('wp_ajax_pgtest_setup', function () {
     pgtest_booking($ids['wpml_translation'], 'translation-event@example.test', $t1);
     $ids['page'] = wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Not an event']);
 
+    // 7.35.1.31: content a subscriber owns but may not edit, for the FES post-type check.
+    $ids['sub_page'] = wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Subscriber page', 'post_author' => $users['pgsub']]);
+    $ids['sub_post'] = wp_insert_post(['post_type' => 'post', 'post_status' => 'publish', 'post_title' => 'Subscriber post', 'post_author' => $users['pgsub']]);
+    $ids['sub_attachment'] = wp_insert_post(['post_type' => 'attachment', 'post_status' => 'inherit', 'post_title' => 'Subscriber attachment', 'post_author' => $users['pgsub']]);
+
     update_option('pgtest_ids', $ids);
     wp_send_json($ids);
 });
 
 add_action('wp_ajax_pgtest_nonces', function () {
-    wp_send_json(['bookings' => wp_create_nonce('mec_event_bookings'), 'fes' => wp_create_nonce('mec_fes_nonce')]);
+    wp_send_json([
+        'bookings' => wp_create_nonce('mec_event_bookings'), 'fes' => wp_create_nonce('mec_fes_nonce'),
+        'fes_form' => wp_create_nonce('mec_fes_form'), 'report' => wp_create_nonce('mec_settings_nonce'),
+        'purge' => wp_create_nonce('mec_export_purge'), 'ix_import' => wp_create_nonce('mec_ix_g_calendar_import'),
+        'ix_export' => wp_create_nonce('mec_ix_g_calendar_export'),
+    ]);
 });
 
 add_action('wp_ajax_pgtest_state', function () {
     pgtest_admin_only();
-    wp_send_json(['php' => PHP_VERSION, 'registered' =>(bool) has_action('wp_ajax_mec_event_bookings'), 'fes_export' => (bool) has_action('wp_ajax_mec_fes_csv_export')]);
+    global $wpdb;
+
+    $ids = get_option('pgtest_ids');
+    $posts = [];
+    foreach (['event', 'author_event', 'page', 'sub_page', 'sub_post', 'sub_attachment'] as $key)
+    {
+        $post = !empty($ids[$key]) ? get_post($ids[$key]) : null;
+        if ($post) $posts[$key] = ['title' => $post->post_title, 'status' => $post->post_status];
+    }
+
+    $ix = (new MEC_main())->get_ix_options();
+    wp_send_json([
+        'php' => PHP_VERSION, 'registered' => (bool) has_action('wp_ajax_mec_event_bookings'), 'fes_export' => (bool) has_action('wp_ajax_mec_fes_csv_export'),
+        'posts' => $posts,
+        'ix' => (object) array_intersect_key(is_array($ix) ? $ix : [], array_flip(['sync_g_import', 'sync_g_export', 'google_import_api_key', 'google_export_client_id'])),
+        'booking_rows' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mec_bookings"),
+        'booking_posts' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'mec-books'"),
+    ]);
+});
+
+// Is the OAuth state that the Google export put into its authorization link valid?
+add_action('wp_ajax_pgtest_oauth_state', function () {
+    pgtest_admin_only();
+    wp_send_json(['valid' => (bool) wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['state'] ?? '')), 'mec_ix_g_calendar_oauth')]);
 });
 
 // MEC_main::get_bookings() and the prepared lookups, called directly.

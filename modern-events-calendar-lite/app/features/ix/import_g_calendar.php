@@ -42,6 +42,7 @@ $ix_options = $this->main->get_ix_options();
                     </div>
                     <div class="mec-options-fields">
                         <input type="hidden" name="mec-ix-action" value="google-calendar-import-start" />
+                        <?php wp_nonce_field('mec_ix_g_calendar_import', 'mec_ix_nonce', false); ?>
                         <button id="mec_ix_google_import_form_button" class="button button-primary mec-button-primary" type="submit"><?php esc_html_e('Start', 'modern-events-calendar-lite'); ?></button>
                     </div>
                 </form>
@@ -100,6 +101,7 @@ $ix_options = $this->main->get_ix_options();
                                 </label>
                             </div>
                             <input type="hidden" name="mec-ix-action" value="google-calendar-import-do" />
+                            <?php wp_nonce_field('mec_ix_g_calendar_import', 'mec_ix_nonce', false); ?>
                             <input type="hidden" name="ix[google_import_api_key]" value="<?php echo (isset($this->ix['google_import_api_key']) ? esc_attr($this->ix['google_import_api_key']) : ''); ?>" />
                             <input type="hidden" name="ix[google_import_calendar_id]" value="<?php echo (isset($this->ix['google_import_calendar_id']) ? esc_attr($this->ix['google_import_calendar_id']) : ''); ?>" />
                             <button id="mec_ix_google_import_do_form_button" class="button button-primary mec-button-primary" type="submit"><?php esc_html_e('Import', 'modern-events-calendar-lite'); ?></button>

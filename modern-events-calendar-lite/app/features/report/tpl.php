@@ -23,7 +23,6 @@ if($dark_mode == 1) $logo = plugin_dir_url(__FILE__ ) . '../../../assets/img/mec
             <div class="nav-tab-wrapper">
                 <a href="<?php echo esc_url($this->main->add_qs_var('tab', 'selective')); ?>" class="nav-tab <?php echo $tab === 'selective' ? 'nav-tab-active mec-tab-active' : ''; ?>"><?php esc_html_e('Selective Email', 'modern-events-calendar-lite'); ?></a>
                 <a href="<?php echo esc_url($this->main->add_qs_var('tab', 'mass')); ?>" class="nav-tab <?php echo $tab === 'mass' ? 'nav-tab-active mec-tab-active' : ''; ?>"><?php esc_html_e('Mass Email', 'modern-events-calendar-lite'); ?></a>
-                <a href="<?php echo esc_url($this->main->add_qs_var('tab', 'export_purge')); ?>" class="nav-tab <?php echo $tab === 'export_purge' ? 'nav-tab-active mec-tab-active' : ''; ?>"><?php esc_html_e('Export & Purge', 'modern-events-calendar-lite'); ?></a>
             </div>
 
             <div class="mec-container booking-report-container">
@@ -141,50 +140,8 @@ if($dark_mode == 1) $logo = plugin_dir_url(__FILE__ ) . '../../../assets/img/mec
                     </div>
                 </div>
                 <?php else: ?>
-                <h3><?php esc_html_e('Export & Purge', 'modern-events-calendar-lite'); ?></h3>
-                <?php if(isset($_GET['mec_export_purge_done'])): ?>
-                    <?php
-                        $cnt = isset($_GET['mec_export_purge_count']) ? intval($_GET['mec_export_purge_count']) : 0;
-                        $url = isset($_GET['mec_export_purge_url']) ? esc_url_raw($_GET['mec_export_purge_url']) : '';
-                        $url = $url ? esc_url_raw(urldecode($url)) : '';
-                    ?>
-                    <div class="notice notice-success is-dismissible">
-                        <p>
-                            <?php echo sprintf(esc_html__('%d rows exported. File saved and purge completed.', 'modern-events-calendar-lite'), $cnt); ?>
-                            <?php if($url): ?>
-                                <br><?php echo sprintf(esc_html__('Download: %s', 'modern-events-calendar-lite'), '<a href="'.esc_url($url).'" target="_blank">'.esc_html($url).'</a>'); ?>
-                            <?php endif; ?>
-                        </p>
-                    </div>
-                <?php endif; ?>
-                <p>
-                    <?php echo esc_html__( 'Export all bookings before the cutoff date to a CSV file, email it to the recipients, and then delete those outdated booking entries.', 'modern-events-calendar-lite'); ?>
-                    </br>
-                    <?php echo esc_html__( 'WooCommerce orders will remain untouched.', 'modern-events-calendar-lite'); ?>
-                </p>
-                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-                    <?php wp_nonce_field('mec_export_purge'); ?>
-                    <input type="hidden" name="action" value="mec_export_purge" />
-                    <div id="mec-export-purge-form" class="mec-export-purge-form">
-                        <div class="mec-form-row">
-                            <label for="mec_export_purge_cutoff" class="mec-col-3"><?php esc_html_e('Cutoff Date', 'modern-events-calendar-lite'); ?></label>
-                            <div class="mec-col-9">
-                                <input type="date" id="mec_export_purge_cutoff" class="mec-col-5" name="mec_export_purge_cutoff" required />
-                                <p class="description"><?php esc_html_e('Bookings with start date before this date are included.', 'modern-events-calendar-lite'); ?></p>
-                            </div>
-                        </div>
-                        <div class="mec-form-row">
-                            <label for="mec_export_purge_emails" class="mec-col-3"><?php esc_html_e('Email Recipients', 'modern-events-calendar-lite'); ?></label>
-                            <div class="mec-col-9">
-                                <input type="text" id="mec_export_purge_emails" name="mec_export_purge_emails" class="regular-text mec-col-5" placeholder="admin@example.com, ops@example.com" />
-                                <p class="description"><?php esc_html_e('Comma or semicolon separated email addresses to receive the CSV.', 'modern-events-calendar-lite'); ?></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <button type="submit" class="button mec-button-primary"><?php esc_html_e('Export and Purge', 'modern-events-calendar-lite'); ?></button>
-                    </div>
-                </form>
+                <?php /* adventistai.lt: Export & Purge is not part of the calendar-only build. */ ?>
+                <div class="notice notice-info"><p><?php esc_html_e('Export & Purge is not available in this calendar-only build.', 'modern-events-calendar-lite'); ?></p></div>
                 <?php endif; ?>
             </div>
         </div>

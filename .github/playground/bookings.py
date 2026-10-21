@@ -15,11 +15,22 @@ subscriber), a WPML translator and the administrator, that:
 - the FES CSV export turns its timestamp into an integer;
 - get_attach_id() and the booking verify/cancel endpoints still find their rows.
 
+And for the 7.35.1.31 audit fixes (2026-10-21):
+
+- the FES form refuses pages, posts and attachments, also ones the caller owns,
+  and other people's events, but still saves an author's own event;
+- the attendee report refuses subscribers and requests without its nonce;
+- the Import / Export synchronization and Google import forms save nothing
+  without their nonce, and the Google OAuth callback needs the state from the
+  site's own authorization link;
+- Export & Purge is disabled: it answers 410 and deletes no booking.
+
 All markers are harmless strings ("pgmarker", an apostrophe in a key).
 
 Usage: python3 .github/playground/bookings.py [--php 8.4] [--wp latest] [--plugin-dir DIR]
 """
 import argparse
+import html
 import json
 import os
 import re
@@ -162,6 +173,125 @@ def run_tests(log, php):
     else:
         for item in unit["checks"]:
             check(item["name"], item["ok"], item.get("detail"))
+
+    run_audit_tests(users, nonces, ids, t1)
+
+
+def page_text(body):
+    return html.unescape(re.sub(r"\s+", " ", re.sub(r"<(script|style)\b.*?</\1>|<[^>]+>", " ", body, flags=re.S | re.I)))
+
+
+def form_nonce(body):
+    match = re.search(r'name="mec_ix_nonce" value="([0-9a-f]+)"', body)
+    return match.group(1) if match else None
+
+
+def run_audit_tests(users, nonces, ids, t1):
+    """The 7.35.1.31 fixes from the 2026-10-21 security audit."""
+    admin = users["admin"]
+
+    def state():
+        return ajax_json(admin, {"action": "pgtest_state"}) or {}
+
+    # A2: FES only edits events. pgsub owns a page, a post and an attachment but
+    # has no edit rights on them; pgauthor owns an event.
+    before = state().get("posts", {})
+
+    def fes(name, user, target, expect_ok):
+        response = ajax_json(users[user], {"action": "mec_fes_form", "_wpnonce": nonces[user]["fes_form"],
+                                           "mec[post_id]": ids[target], "mec[title]": "pgmarker title",
+                                           "mec[content]": "pgmarker content"}) or {}
+        post = state().get("posts", {}).get(target, {})
+        if expect_ok:
+            check(f"FES: {name} is saved", response.get("success") == 1 and post.get("title") == "pgmarker title", [response, post])
+        else:
+            check(f"FES: {name} is refused and unchanged",
+                  response.get("code") == "NO_ACCESS" and post == before.get(target), [response, post, before.get(target)])
+
+    fes("subscriber's own page", "pgsub", "sub_page", False)
+    fes("subscriber's own post", "pgsub", "sub_post", False)
+    fes("subscriber's own attachment", "pgsub", "sub_attachment", False)
+    fes("subscriber, admin's page", "pgsub", "page", False)
+    fes("subscriber, another author's event", "pgsub", "author_event", False)
+    fes("admin, a page (FES edits events only)", "admin", "page", False)
+    fes("subscriber author, own event", "pgauthor", "author_event", True)
+
+    # Attendee report (CVE-2026-110069): report users with the settings nonce only.
+    attendees = {"action": "mec_attendees", "id": ids["event"], "occurrence": f"{t1}:{t1 + 3600}"}
+    response = ajax_json(users["pgsub"], dict(attendees, nonce=nonces["pgsub"]["report"])) or {}
+    check("mec_attendees refuses a subscriber", response.get("code") == "ADMIN_ONLY", response)
+    response = ajax_json(admin, attendees) or {}
+    check("mec_attendees refuses a request without its nonce", response.get("code") == "NONCE_IS_INVALID", response)
+    response = ajax_json(admin, dict(attendees, nonce=nonces["admin"]["report"])) or {}
+    check("mec_attendees lists the occurrence's attendees for an admin",
+          "admin-event-1@example.test" in response.get("html", "") and "admin-event-2@example.test" not in response.get("html", ""), response)
+
+    # A1: Import / Export forms need their own nonce.
+    sync_path = "/wp-admin/admin.php?page=MEC-ix&tab=MEC-sync"
+    status, _, body = smoke.get(admin, sync_path)
+    sync_nonce = form_nonce(body)
+    check("the synchronization form prints its nonce", status == 200 and sync_nonce, status)
+    expired = "Your session expired"
+    for name, extra in (("without a nonce", {}), ("with another form's nonce", {"mec_ix_nonce": nonces["admin"]["ix_import"]})):
+        data = dict({"mec-ix-action": "save-sync-options", "ix[sync_g_import]": "1", "ix[sync_g_export]": "1"}, **extra)
+        status, _, body = smoke.get(admin, sync_path, data=urllib.parse.urlencode(data).encode())
+        ix = state().get("ix", {})
+        check(f"synchronization settings are not saved {name}",
+              expired in page_text(body) and str(ix.get("sync_g_import", 0)) != "1" and str(ix.get("sync_g_export", 0)) != "1", [status, ix])
+    data = {"mec-ix-action": "save-sync-options", "ix[sync_g_import]": "1", "ix[sync_g_export]": "0", "mec_ix_nonce": sync_nonce or ""}
+    status, _, body = smoke.get(admin, sync_path, data=urllib.parse.urlencode(data).encode())
+    ix = state().get("ix", {})
+    check("synchronization settings are saved with the form's nonce",
+          expired not in page_text(body) and str(ix.get("sync_g_import")) == "1" and str(ix.get("sync_g_export")) == "0", [status, ix])
+
+    import_path = "/wp-admin/admin.php?page=MEC-ix"
+    status, _, body = smoke.get(admin, import_path)
+    import_nonce = form_nonce(body)
+    check("the Google import form prints its nonce", status == 200 and import_nonce, status)
+    data = {"mec-ix-action": "google-calendar-import-start", "ix[google_import_api_key]": "pgmarker-key", "ix[google_import_calendar_id]": "pgmarker-calendar"}
+    status, _, body = smoke.get(admin, import_path, data=urllib.parse.urlencode(data).encode())
+    check("Google import start saves nothing without a nonce",
+          expired in page_text(body) and state().get("ix", {}).get("google_import_api_key") != "pgmarker-key", status)
+    data = {"mec-ix-action": "google-calendar-import-start", "ix[google_import_api_key]": "", "ix[google_import_calendar_id]": "", "mec_ix_nonce": import_nonce or ""}
+    status, _, body = smoke.get(admin, import_path, data=urllib.parse.urlencode(data).encode())
+    check("Google import start accepts the form's nonce", "API key and Calendar ID are required" in page_text(body), [status, page_text(body)[:300]])
+    data = {"mec-ix-action": "google-calendar-import-do", "g-events[]": "pgmarker", "ix[google_import_api_key]": "pgmarker-key", "ix[google_import_calendar_id]": "pgmarker-calendar"}
+    status, _, body = smoke.get(admin, import_path, data=urllib.parse.urlencode(data).encode())
+    check("Google import refuses to import without a nonce", expired in page_text(body), [status, page_text(body)[:300]])
+    data = {"mec-ix-action": "google-calendar-import-do", "mec_ix_nonce": import_nonce or ""}
+    status, _, body = smoke.get(admin, import_path, data=urllib.parse.urlencode(data).encode())
+    check("Google import accepts the form's nonce", "Please select events to import" in page_text(body), [status, page_text(body)[:300]])
+
+    callback = "/wp-admin/admin.php?page=MEC-ix&tab=MEC-g-calendar-export&mec-ix-action=google-calendar-export-get-token&code=pgmarker"
+    stale_link = "This Google sign-in link has expired or is invalid"
+    for name, suffix in (("without a state", ""), ("with a forged state", "&state=pgmarker")):
+        status, _, body = smoke.get(admin, callback + suffix)
+        check(f"the Google OAuth callback is refused {name}", status == 403 and stale_link in page_text(body), [status, page_text(body)[:300]])
+    response = ajax_json(admin, {"action": "mec_ix_g_calendar_authenticate", "mec_ix_nonce": nonces["admin"]["ix_export"],
+                                 "ix[google_export_client_id]": "pgmarker-client", "ix[google_export_client_secret]": "pgmarker-secret",
+                                 "ix[google_export_calendar_id]": "pgmarker-calendar"}) or {}
+    oauth_state = re.search(r"[?&;]state=([0-9a-f]+)", html.unescape(response.get("message", "")))
+    valid = oauth_state and (ajax_json(admin, {"action": "pgtest_oauth_state", "state": oauth_state.group(1)}) or {}).get("valid")
+    check("the Google authorization link carries a valid state", response.get("success") == 1 and valid, response)
+    # Google's error path accepts the state without making a token request.
+    status, _, body = smoke.get(admin, callback.replace("&code=pgmarker", "") + "&" + urllib.parse.urlencode(
+        {"state": oauth_state.group(1) if oauth_state else "", "error": "access_denied"}))
+    check("the Google OAuth callback accepts the authorization link's state on cancellation",
+          status == 400 and stale_link not in page_text(body)
+          and "Google sign-in was cancelled or failed. Try Authenticate again." in page_text(body), [status, page_text(body)[:300]])
+
+    # A3: Export & Purge is disabled and deletes nothing.
+    counts = state()
+    status, _, body = smoke.get(admin, "/wp-admin/admin-post.php", data=urllib.parse.urlencode(
+        {"action": "mec_export_purge", "_wpnonce": nonces["admin"]["purge"], "mec_export_purge_cutoff": "2100-01-01"}).encode())
+    after = state()
+    check("Export & Purge answers 410 and deletes no booking",
+          status == 410 and "not available" in page_text(body)
+          and (after.get("booking_rows"), after.get("booking_posts")) == (counts.get("booking_rows"), counts.get("booking_posts")) and counts.get("booking_rows"),
+          [status, counts.get("booking_rows"), after.get("booking_rows"), counts.get("booking_posts"), after.get("booking_posts")])
+    status, _, body = smoke.get(admin, "/wp-admin/admin.php?page=MEC-report&tab=export_purge")
+    check("the report page offers no Export & Purge form",
+          status == 200 and "not available" in page_text(body) and "mec_export_purge" not in body, status)
 
 
 def report_debug_log(logs_dir):

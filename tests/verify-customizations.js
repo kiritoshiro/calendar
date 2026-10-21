@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.30', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.31', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -415,4 +415,19 @@ const emptyRootFiles = fs.readdirSync(path.join(root, 'modern-events-calendar-li
     .filter((entry) => entry.isFile() && entry.name !== 'index.html' && fs.statSync(path.join(root, 'modern-events-calendar-lite', entry.name)).size === 0)
     .map((entry) => entry.name);
 assert.deepEqual(emptyRootFiles, [], 'no empty files may sit in the plugin root');
+// 7.35.1.31 (2026-10-21 audit): Import / Export forms need their own nonce, the
+// OAuth callback its state, FES edits events only, and Export & Purge is off.
+assert.match(ixFeature, /if \(\$this->action == 'save-sync-options' and !\$this->verify_ix_form_nonce\('mec_ix_sync'\)\)/, 'the sync form must check its nonce before saving');
+assert.match(ixFeature, /in_array\(\$this->action, \['google-calendar-import-start', 'google-calendar-import-do'\], true\) and !\$this->verify_ix_form_nonce\('mec_ix_g_calendar_import'\)\) \$this->response = /, 'both Google import steps must check their nonce');
+assert.match(plugin('app/features/ix/sync.php'), /wp_nonce_field\('mec_ix_sync', 'mec_ix_nonce', false\)/);
+assert.equal((plugin('app/features/ix/import_g_calendar.php').match(/wp_nonce_field\('mec_ix_g_calendar_import', 'mec_ix_nonce', false\)/g) || []).length, 2, 'both Google import forms must print their nonce');
+assert.match(ixFeature, /\$client->setState\(wp_create_nonce\('mec_ix_g_calendar_oauth'\)\);/, 'the Google authorization link must carry a state');
+assert.match(ixFeature, /if \(!\$state or !wp_verify_nonce\(\$state, 'mec_ix_g_calendar_oauth'\)\) wp_die\(/, 'the OAuth callback must check its state');
+const oauthCallback = ixFeature.slice(ixFeature.indexOf('public function g_calendar_export_get_token()'), ixFeature.indexOf('public function g_calendar_export_do()'));
+assert.match(oauthCallback, /wp_verify_nonce\(\$state, 'mec_ix_g_calendar_oauth'\)[\s\S]*if \(isset\(\$_GET\['error'\]\)\) wp_die\([^;]*;[\s\S]*\$client->authenticate\(/, 'the OAuth callback must handle errors after checking state and before authenticating');
+assert.match(fesFeature, /if \(\$post_id == -1\) return true;\s*(\/\/[^\n]*\n\s*)+if \(\(int\) \$post_id <= 0 \|\| get_post_type\(\$post_id\) !== \$this->PT\) return false;/, 'FES may only edit events');
+const reportFeature = plugin('app/features/report.php');
+assert.match(reportFeature, /public function export_purge\(\)\s*\{\s*wp_die\([^;]*'response' => 410[^;]*;\s*\}/, 'Export & Purge must only answer 410');
+assert.doesNotMatch(reportFeature, /new MEC_feature_books|mec-exports|wp_delete_post/, 'Export & Purge must stay disabled');
+assert.doesNotMatch(plugin('app/features/report/tpl.php'), /mec_export_purge/, 'the report page must not offer the Export & Purge form');
 console.log('Customization checks passed.');

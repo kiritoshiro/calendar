@@ -109,7 +109,12 @@ class MEC_feature_ix extends MEC_base
         $this->action = isset($_POST['mec-ix-action']) ? sanitize_text_field($_POST['mec-ix-action']) : '';
         $this->ix = ((isset($_POST['ix']) and is_array($_POST['ix'])) ? array_map('sanitize_text_field', $_POST['ix']) : []);
 
-        if ($this->action == 'save-sync-options')
+        $this->response = [];
+        if ($this->action == 'save-sync-options' and !$this->verify_ix_form_nonce('mec_ix_sync'))
+        {
+            $this->response = ['success' => 0, 'error' => $this->ix_nonce_error()];
+        }
+        else if ($this->action == 'save-sync-options')
         {
             // Save options
             $this->main->save_ix_options([
@@ -157,7 +162,8 @@ class MEC_feature_ix extends MEC_base
         $this->ix = ((isset($_POST['ix']) and is_array($_POST['ix'])) ? array_map('sanitize_text_field', $_POST['ix']) : []);
 
         $this->response = [];
-        if ($this->action == 'google-calendar-import-start') $this->response = $this->g_calendar_import_start();
+        if (in_array($this->action, ['google-calendar-import-start', 'google-calendar-import-do'], true) and !$this->verify_ix_form_nonce('mec_ix_g_calendar_import')) $this->response = ['success' => 0, 'error' => $this->ix_nonce_error()];
+        else if ($this->action == 'google-calendar-import-start') $this->response = $this->g_calendar_import_start();
         else if ($this->action == 'google-calendar-import-do') $this->response = $this->g_calendar_import_do();
 
         $path = MEC::import('app.features.ix.import_g_calendar', true, true);
@@ -165,6 +171,23 @@ class MEC_feature_ix extends MEC_base
         ob_start();
         include $path;
         echo MEC_kses::full(ob_get_clean());
+    }
+
+    /**
+     * adventistai.lt: the menu capability decides who may open the Import / Export
+     * page; the nonce proves the POST came from that page and not a forged form.
+     * @param string $action
+     * @return bool
+     */
+    private function verify_ix_form_nonce($action)
+    {
+        $nonce = isset($_POST['mec_ix_nonce']) ? sanitize_text_field(wp_unslash($_POST['mec_ix_nonce'])) : '';
+        return $nonce && wp_verify_nonce($nonce, $action);
+    }
+
+    private function ix_nonce_error()
+    {
+        return esc_html__('Your session expired. Reload the page and try again.', 'modern-events-calendar-lite');
     }
 
     public function g_calendar_import_start()
@@ -691,6 +714,8 @@ class MEC_feature_ix extends MEC_base
             $client->setClientId($client_id);
             $client->setClientSecret($client_secret);
             $client->setRedirectUri($this->main->add_qs_vars(['mec-ix-action' => 'google-calendar-export-get-token'], $this->main->URL('backend') . 'admin.php?page=MEC-ix&tab=MEC-g-calendar-export'));
+            // adventistai.lt: Google returns the state to the callback, which checks it.
+            $client->setState(wp_create_nonce('mec_ix_g_calendar_oauth'));
 
             $auth_url = filter_var($client->createAuthUrl(), FILTER_SANITIZE_URL);
         }
@@ -707,6 +732,15 @@ class MEC_feature_ix extends MEC_base
         // The OAuth callback stores the site's Google tokens; only the people
         // who manage Import / Export may complete it.
         if (!$this->can_manage_g_calendar_export()) return;
+
+        // adventistai.lt: without the state from our own authorization link, a
+        // forged callback could bind someone else's Google account to the site.
+        $state = isset($_GET['state']) ? sanitize_text_field(wp_unslash($_GET['state'])) : '';
+        if (!$state or !wp_verify_nonce($state, 'mec_ix_g_calendar_oauth')) wp_die(esc_html__('This Google sign-in link has expired or is invalid. Start again from M.E. Calendar > Import / Export > Google Cal. Export > Authenticate.', 'modern-events-calendar-lite'), '', ['response' => 403, 'back_link' => true]);
+
+        // adventistai.lt: handle a cancelled or failed sign-in before contacting Google.
+        $url = $this->main->URL('backend') . 'admin.php?page=MEC-ix&tab=MEC-g-calendar-export';
+        if (isset($_GET['error'])) wp_die(esc_html__('Google sign-in was cancelled or failed. Try Authenticate again.', 'modern-events-calendar-lite'), '', ['response' => 400, 'link_url' => esc_url($url), 'link_text' => esc_html__('Google Cal. Export', 'modern-events-calendar-lite')]);
 
         $code = isset($_GET['code']) ? sanitize_text_field($_GET['code']) : '';
 
@@ -734,8 +768,8 @@ class MEC_feature_ix extends MEC_base
             // Save options
             $this->main->save_ix_options(['google_export_token' => $token, 'google_export_refresh_token' => $refresh_token]);
 
-            $url = $this->main->remove_qs_var('code', $this->main->remove_qs_var('mec-ix-action'));
-            header('location: ' . $url);
+            // adventistai.lt: return to the fixed export tab after saving the tokens.
+            wp_safe_redirect($url);
             exit;
         }
         catch (Exception $ex)
