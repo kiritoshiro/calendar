@@ -1,5 +1,12 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.32
+
+- Security follow-ups from the review of PR #48 (7.35.1.31):
+  - Report: `report_event_dates`, `mec_attendees`, `mec_mass_email` and `mec_report_mass` were registered even though the fork forces `booking_status` off and only the Report menu checked it. `mec_mass_email` let any `mec_report` user with the admin `mec_settings_nonce` send any HTML subject and body to any list of addresses from the site's address. The four actions now register only with the booking module on, as the Report page that uses them (`backend.js`) does; nothing else calls them. `report_event_dates()` and `mass_email()` read a missing `nonce` with `??` instead of logging an "undefined array key" warning.
+  - FES: `mec_fes_remove` checked only `delete_post`, so the "Remove Event" action could trash a page or post, or permanently delete an attachment, that the caller may delete. It now accepts only `mec-events` posts (answering `INVALID_EVENT`), like `current_user_can_upsert_event()`, and reads `post_id` with `absint`.
+  - The Playground bookings test covers both: with bookings off (as in production) the four actions are unknown and the mailer sends nothing; with bookings on it still refuses subscribers and a missing nonce without a PHP warning; FES remove refuses a page, post and attachment an admin may delete, and still removes an event (`wp_delete_post()` trashes only posts and pages, so an event is deleted, as before).
+
 ## 7.35.1.31
 
 - Security fixes from the 2026-10-21 audit of 7.35.1.30 (Wordfence's October advisories against MEC Lite < 7.37.0). These are the fork's own findings; they are not confirmed matches for a CVE.
