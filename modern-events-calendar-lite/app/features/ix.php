@@ -736,7 +736,11 @@ class MEC_feature_ix extends MEC_base
         // adventistai.lt: without the state from our own authorization link, a
         // forged callback could bind someone else's Google account to the site.
         $state = isset($_GET['state']) ? sanitize_text_field(wp_unslash($_GET['state'])) : '';
-        if (!$state || !wp_verify_nonce($state, 'mec_ix_g_calendar_oauth')) wp_die(esc_html__('Your session expired. Reload the page and try again.', 'modern-events-calendar-lite'), '', ['response' => 403, 'back_link' => true]);
+        if (!$state or !wp_verify_nonce($state, 'mec_ix_g_calendar_oauth')) wp_die(esc_html__('This Google sign-in link has expired or is invalid. Start again from M.E. Calendar > Import / Export > Google Cal. Export > Authenticate.', 'modern-events-calendar-lite'), '', ['response' => 403, 'back_link' => true]);
+
+        // adventistai.lt: handle a cancelled or failed sign-in before contacting Google.
+        $url = $this->main->URL('backend') . 'admin.php?page=MEC-ix&tab=MEC-g-calendar-export';
+        if (isset($_GET['error'])) wp_die(esc_html__('Google sign-in was cancelled or failed. Try Authenticate again.', 'modern-events-calendar-lite'), '', ['response' => 400, 'link_url' => $url, 'link_text' => esc_html__('Google Cal. Export', 'modern-events-calendar-lite')]);
 
         $code = isset($_GET['code']) ? sanitize_text_field($_GET['code']) : '';
 
@@ -764,8 +768,8 @@ class MEC_feature_ix extends MEC_base
             // Save options
             $this->main->save_ix_options(['google_export_token' => $token, 'google_export_refresh_token' => $refresh_token]);
 
-            $url = $this->main->remove_qs_var('state', $this->main->remove_qs_var('code', $this->main->remove_qs_var('mec-ix-action')));
-            header('location: ' . $url);
+            // adventistai.lt: return to the fixed export tab after saving the tokens.
+            wp_safe_redirect($url);
             exit;
         }
         catch (Exception $ex)

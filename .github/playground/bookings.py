@@ -263,15 +263,22 @@ def run_audit_tests(users, nonces, ids, t1):
     check("Google import accepts the form's nonce", "Please select events to import" in page_text(body), [status, page_text(body)[:300]])
 
     callback = "/wp-admin/admin.php?page=MEC-ix&tab=MEC-g-calendar-export&mec-ix-action=google-calendar-export-get-token&code=pgmarker"
+    stale_link = "This Google sign-in link has expired or is invalid"
     for name, suffix in (("without a state", ""), ("with a forged state", "&state=pgmarker")):
         status, _, body = smoke.get(admin, callback + suffix)
-        check(f"the Google OAuth callback is refused {name}", status == 403 and expired in page_text(body), [status, page_text(body)[:300]])
+        check(f"the Google OAuth callback is refused {name}", status == 403 and stale_link in page_text(body), [status, page_text(body)[:300]])
     response = ajax_json(admin, {"action": "mec_ix_g_calendar_authenticate", "mec_ix_nonce": nonces["admin"]["ix_export"],
                                  "ix[google_export_client_id]": "pgmarker-client", "ix[google_export_client_secret]": "pgmarker-secret",
                                  "ix[google_export_calendar_id]": "pgmarker-calendar"}) or {}
     oauth_state = re.search(r"[?&;]state=([0-9a-f]+)", html.unescape(response.get("message", "")))
     valid = oauth_state and (ajax_json(admin, {"action": "pgtest_oauth_state", "state": oauth_state.group(1)}) or {}).get("valid")
     check("the Google authorization link carries a valid state", response.get("success") == 1 and valid, response)
+    # Google's error path accepts the state without making a token request.
+    status, _, body = smoke.get(admin, callback.replace("&code=pgmarker", "") + "&" + urllib.parse.urlencode(
+        {"state": oauth_state.group(1) if oauth_state else "", "error": "access_denied"}))
+    check("the Google OAuth callback accepts the authorization link's state on cancellation",
+          status == 400 and stale_link not in page_text(body)
+          and "Google sign-in was cancelled or failed. Try Authenticate again." in page_text(body), [status, page_text(body)[:300]])
 
     # A3: Export & Purge is disabled and deletes nothing.
     counts = state()

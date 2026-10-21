@@ -86,7 +86,7 @@ enforce required checks, so review the gate result before merging there.
   - `get_attach_id()` or the booking verify/cancel endpoints stop finding their rows, including for a key or URL with an apostrophe;
   - (7.35.1.31) `mec_fes_form` changes a page, post or attachment, even one the caller owns, or another author's event, or refuses an author's own event;
   - `mec_attendees` answers a subscriber or a request without its nonce, or stops listing an occurrence's attendees for an admin;
-  - the Import / Export Synchronization or Google import forms save or import without their `mec_ix_nonce`, or the Google OAuth callback runs without the `state` from the site's own authorization link;
+  - the Import / Export Synchronization or Google import forms save or import without their `mec_ix_nonce`, or the Google OAuth callback runs without the `state` from the site's own authorization link or refuses a valid state (tested via Google's error path without a token request);
   - Export & Purge does anything but answer 410, or the report page still offers its form.
 
   It uses harmless marker strings only. Run it locally with `python3 .github/playground/bookings.py --php 8.4` (`--plugin-dir` mounts another copy of the plugin, `--port` picks another port).
