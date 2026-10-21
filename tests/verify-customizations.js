@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.31', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.32', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -430,4 +430,17 @@ const reportFeature = plugin('app/features/report.php');
 assert.match(reportFeature, /public function export_purge\(\)\s*\{\s*wp_die\([^;]*'response' => 410[^;]*;\s*\}/, 'Export & Purge must only answer 410');
 assert.doesNotMatch(reportFeature, /new MEC_feature_books|mec-exports|wp_delete_post/, 'Export & Purge must stay disabled');
 assert.doesNotMatch(plugin('app/features/report/tpl.php'), /mec_export_purge/, 'the report page must not offer the Export & Purge form');
+// 7.35.1.32 (PR #48 review): the Report page's AJAX actions, among them a mailer,
+// exist only with the booking module on; FES removes events only.
+const reportInit = reportFeature.slice(reportFeature.indexOf('public function init()'), reportFeature.indexOf('public function menu()'));
+const reportGate = reportInit.indexOf('if (!$this->booking_enabled()) return;');
+assert.ok(reportGate > 0, 'the report AJAX actions must be gated on the booking module');
+for (const action of ['report_event_dates', 'mec_attendees', 'mec_mass_email', 'mec_report_mass']) {
+    const at = reportInit.indexOf(`'wp_ajax_${action}'`);
+    assert.ok(at > reportGate, `wp_ajax_${action} must only be registered with the booking module on`);
+}
+assert.match(reportFeature, /private function booking_enabled\(\)\s*\{\s*return isset\(\$this->settings\['booking_status'\]\) && \$this->settings\['booking_status'\];\s*\}/);
+assert.match(reportFeature, /public function menu\(\)\s*\{\s*if \(\$this->booking_enabled\(\)\)/, 'the Report menu must use the same gate');
+assert.doesNotMatch(reportFeature, /\$_REQUEST\['nonce'\]\)/, 'report nonces must be read with ?? so a missing one causes no warning');
+assert.match(fesFeature, /\$post_id = isset\(\$_POST\['post_id'\]\) \? absint\(\$_POST\['post_id'\]\) : 0;\s*(\/\/[^\n]*\n\s*)+if \(!\$post_id \|\| get_post_type\(\$post_id\) !== \$this->PT\) \$this->main->response\(\['success' => 0, 'code' => 'INVALID_EVENT'\]\);\s*(\/\/[^\n]*\n\s*)*if \(!current_user_can\('delete_post', \$post_id\)\)/, 'FES may only remove events');
 console.log('Customization checks passed.');

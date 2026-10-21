@@ -55,6 +55,14 @@ class MEC_feature_report extends MEC_base
     {
         $this->factory->action('admin_menu', [$this, 'menu'], 11);
 
+        // Export & Purge (admin-post): disabled in the calendar-only build
+        $this->factory->action('admin_post_mec_export_purge', [$this, 'export_purge']);
+
+        // adventistai.lt: the AJAX actions below only serve the Report page, which
+        // exists only with the booking module on (the fork forces it off). They
+        // included a mailer that sent any HTML to any address from the site.
+        if (!$this->booking_enabled()) return;
+
         // Close Custom Text Notification
         $this->factory->action('wp_ajax_report_event_dates', [$this, 'report_event_dates']);
 
@@ -66,14 +74,16 @@ class MEC_feature_report extends MEC_base
 
         // Mass Action
         $this->factory->action('wp_ajax_mec_report_mass', [$this, 'mass_actions']);
+    }
 
-        // Export & Purge (admin-post): disabled in the calendar-only build
-        $this->factory->action('admin_post_mec_export_purge', [$this, 'export_purge']);
+    private function booking_enabled()
+    {
+        return isset($this->settings['booking_status']) && $this->settings['booking_status'];
     }
 
     public function menu()
     {
-        if (isset($this->settings['booking_status']) && $this->settings['booking_status'])
+        if ($this->booking_enabled())
         {
             add_submenu_page('mec-intro', esc_html__('MEC - Report', 'modern-events-calendar-lite'), esc_html__('Report', 'modern-events-calendar-lite'), 'mec_report', 'MEC-report', [$this, 'report']);
         }
@@ -111,7 +121,7 @@ class MEC_feature_report extends MEC_base
     {
         // Current User is not Permitted
         if (!current_user_can('mec_report')) $this->main->response(['success' => 0, 'code' => 'ADMIN_ONLY']);
-        if (!wp_verify_nonce(sanitize_text_field($_REQUEST['nonce']), 'mec_settings_nonce')) exit();
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_REQUEST['nonce'] ?? '')), 'mec_settings_nonce')) exit();
 
         // adventistai.lt: an event ID (or "none"); it reaches SQL and an inline onchange handler.
         $event_id = sanitize_text_field(wp_unslash($_POST['event_id'] ?? ''));
@@ -231,7 +241,7 @@ class MEC_feature_report extends MEC_base
 
     public function mass_email()
     {
-        if (!wp_verify_nonce(sanitize_text_field($_REQUEST['nonce']), 'mec_settings_nonce')) exit();
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_REQUEST['nonce'] ?? '')), 'mec_settings_nonce')) exit();
 
         // Current User is not Permitted
         if (!current_user_can('mec_report')) $this->main->response(['success' => 0, 'code' => 'NO_ACCESS']);
