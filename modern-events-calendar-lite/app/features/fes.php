@@ -134,6 +134,11 @@ class MEC_feature_fes extends MEC_base
     {
         if ($post_id == -1) return true;
 
+        // adventistai.lt: FES only edits events. Without this, the author
+        // fallback below let an FES user rewrite a page or post they own
+        // even when WordPress denies them edit_post on it.
+        if ((int) $post_id <= 0 || get_post_type($post_id) !== $this->PT) return false;
+
         $original_post_id = $this->main->get_original_event($post_id);
         if (current_user_can('edit_post', $original_post_id)) return true;
 

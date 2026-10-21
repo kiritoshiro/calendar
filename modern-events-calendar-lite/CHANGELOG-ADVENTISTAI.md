@@ -1,5 +1,13 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.31
+
+- Security fixes from the 2026-10-21 audit of 7.35.1.30 (Wordfence's October advisories against MEC Lite < 7.37.0). These are the fork's own findings; they are not confirmed matches for a CVE.
+  - Import / Export (A1): the Synchronization form saved its settings with no nonce check, and the Google import forms printed no nonce at all. Each now sends its own `mec_ix_nonce` (`mec_ix_sync`, `mec_ix_g_calendar_import`), and a request without it saves and imports nothing and says the session expired. The menu capability check stays. The Google export OAuth callback stored the site's tokens for any returned `code`; the authorization link now carries a `state` nonce (`mec_ix_g_calendar_oauth`), and the callback refuses a missing or wrong state with 403.
+  - FES (A2): `current_user_can_upsert_event()` let a logged-in user rewrite any page, post or attachment they authored (title, content, excerpt and status) through `mec_fes_form`, even without `edit_post` on it. It now accepts only existing `mec-events` posts, for the edit check and the author fallback alike. The FES CSV export uses the same check.
+  - Report (A3): the retained `admin_post_mec_export_purge` handler crashed on the removed `MEC_feature_books` class. Behind that class it would have deleted whole bookings that only partly fell before the cutoff and left the CSV at a guessable public uploads URL. The handler now answers 410 "not available" and touches nothing, and the report page no longer shows the Export & Purge form.
+  - The Playground bookings test (`.github/playground/bookings.py`) covers all three in WordPress, plus the `mec_attendees` access checks.
+
 ## 7.35.1.30
 
 - Fix: single event pages logged `include(.../app/modules/progress-bar/single.php): Failed to open stream` (73 warnings on adventistai.lt on 2026-10-19, after the update from 7.35.1.9). The slim release left out `app/modules/progress-bar/`, but the single event skins (`single/default.php`, `modern.php`, `m1.php`, `m2.php`) and the list skin always call `MEC_main::display_progress_bar()`.

@@ -55,8 +55,10 @@ jobs:
           package-manager-cache: false
       # Behavioural regression test for the 7.35.1.29 bookings fix
       # (CVE-2026-105067): access checks on mec_event_bookings, integer-only
-      # get_bookings() SQL, the FES CSV timestamp and the prepared lookups.
-      # See .github/playground/bookings.py.
+      # get_bookings() SQL, the FES CSV timestamp and the prepared lookups;
+      # and for the 7.35.1.31 audit fixes: FES edits events only, attendee
+      # report access, Import / Export nonces and OAuth state, Export & Purge
+      # off. See .github/playground/bookings.py.
       - name: Check the bookings guards in WordPress Playground
         env:
           PHP_VERSION: ${{ matrix.php }}

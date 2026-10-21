@@ -83,7 +83,11 @@ enforce required checks, so review the gate result before merging there.
   - it refuses the event's logged-in author, the administrator, or a user who may edit the WPML original of a translated event;
   - `MEC_main::get_bookings()` runs a query for a bad event ID or a non-numeric timestamp, adds a `LIMIT` to the unlimited default, or puts anything but integers into its SQL;
   - the FES CSV export does not turn its timestamp into an integer;
-  - `get_attach_id()` or the booking verify/cancel endpoints stop finding their rows, including for a key or URL with an apostrophe.
+  - `get_attach_id()` or the booking verify/cancel endpoints stop finding their rows, including for a key or URL with an apostrophe;
+  - (7.35.1.31) `mec_fes_form` changes a page, post or attachment, even one the caller owns, or another author's event, or refuses an author's own event;
+  - `mec_attendees` answers a subscriber or a request without its nonce, or stops listing an occurrence's attendees for an admin;
+  - the Import / Export Synchronization or Google import forms save or import without their `mec_ix_nonce`, or the Google OAuth callback runs without the `state` from the site's own authorization link;
+  - Export & Purge does anything but answer 410, or the report page still offers its form.
 
   It uses harmless marker strings only. Run it locally with `python3 .github/playground/bookings.py --php 8.4` (`--plugin-dir` mounts another copy of the plugin, `--port` picks another port).
 - **Links**: `links.yml` checks the links in Markdown and `readme.txt` files with [lychee](https://github.com/lycheeverse/lychee). It runs on pull requests that change them, monthly and on demand. It is not part of the security gate, because a third-party site being down should not block a merge. Exclusions are in `.lychee.toml`; adventistai.lt is excluded because its Cloudflare bot protection answers GitHub runners with 403.
