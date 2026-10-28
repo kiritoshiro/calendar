@@ -1,5 +1,15 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.33
+
+- Security fixes from the 2026-10-27 WordPress administration and data security assessment (finding 3, static leads confirmed in code; upstream MEC behaviour, unchanged in the last public wordpress.org release, 6.5.6):
+  - FES guest accounts (only with "Automatically create users after event publish" on): when an event was published, `status_changed()` read the `fes_guest_email` the submitter typed, which any FES user could send. An address that belonged to an existing account, the administrator's included, made that account the event's author; a new address got a new account with the Author role, which may publish posts and upload files. Now:
+    - only events a logged-out guest submitted are considered. New FES events from guests are flagged with `mec_fes_guest_submission`, so a logged-in user's event never changes author. Guest events submitted before this release are not flagged and get no account when published;
+    - an address that already has an account changes nothing; the guest name and email stay on the event, as before, for the moderator;
+    - a new account gets the `subscriber` role, or what the new `mec_fes_guest_user_role` filter returns if that role exists. It still becomes the event's author, so its owner can edit the event through FES when subscribers are among the FES access roles; such edits are saved as pending, not published. WordPress sends the set-password link to the address, as before.
+  - Event gallery upload (`mec_event_gallery_image_upload`, only with the event gallery on): it checked only the nonce and, for guests, guest submission. Any logged-in user with the nonce, which the event meta box prints for contributors, could add images to the Media Library. Users without `upload_files` now need FES submission access (`current_user_can_submit_event()`), the same gate as the FES featured image upload: guest submission for logged-out visitors, one of the FES access roles for logged-in users.
+  - The new Playground test `.github/playground/fes_guest.py` covers both in WordPress.
+
 ## 7.35.1.31
 
 - Security fixes from the 2026-10-21 audit of 7.35.1.30 (Wordfence's October advisories against MEC Lite < 7.37.0). These are the fork's own findings; they are not confirmed matches for a CVE.

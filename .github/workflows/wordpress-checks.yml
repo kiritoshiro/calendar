@@ -65,3 +65,11 @@ jobs:
         env:
           PHP_VERSION: ${{ matrix.php }}
         run: python3 .github/playground/bookings.py --php "$PHP_VERSION"
+      # 7.35.1.33: FES guest accounts are subscribers and never existing users,
+      # and the event gallery upload follows the FES access roles. Its own site,
+      # so its settings cannot affect the bookings test. See
+      # .github/playground/fes_guest.py.
+      - name: Check the FES guest and gallery guards in WordPress Playground
+        env:
+          PHP_VERSION: ${{ matrix.php }}
+        run: python3 .github/playground/fes_guest.py --php "$PHP_VERSION"

@@ -4,7 +4,7 @@ Tags: calendar, events, google calendar
 Requires at least: 6.6
 Tested up to: 7.0.2
 Requires PHP: 8.4
-Stable tag: 7.35.1.31
+Stable tag: 7.35.1.33
 License: GPLv2 or later
 
 Focused calendar build maintained by adventistai.lt.
@@ -23,6 +23,9 @@ Booking, attendees, payments, WooCommerce, SMS, PDF invoices, non-Google importe
 Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar → Import / Export. For private updates define ADVENTISTAI_CALENDAR_GITHUB_TOKEN in wp-config.php with repository read access.
 
 == Changelog ==
+= 7.35.1.33 =
+* Security: accounts created for guest event submitters are subscribers, not authors, and publishing a guest's event never hands it to an existing account. Event gallery uploads follow the frontend event form's access roles.
+
 = 7.35.1.31 =
 * Security: the Import / Export forms and the Google Calendar sign-in return check that the request came from the site's own page. The frontend event form edits events only, never pages or posts. The unused Export & Purge booking tool is switched off.
 
