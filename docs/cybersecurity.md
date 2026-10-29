@@ -92,7 +92,7 @@ enforce required checks, so review the gate result before merging there.
   It uses harmless marker strings only. Run it locally with `python3 .github/playground/bookings.py --php 8.4` (`--plugin-dir` mounts another copy of the plugin, `--port` picks another port).
 - **Playground FES guest and gallery test** (2026-10-28, 7.35.1.33): `.github/playground/fes_guest.py` with a test-only mu-plugin (`fes-guest-mu-plugin.php`, never shipped) that turns on guest submission, guest account creation and the event gallery, limits FES to administrators and subscribers, and stops all e-mail. It fails if:
   - the gallery upload accepts a contributor, a request without its nonce, or a guest while guest submission is off, or refuses a subscriber in the FES roles, a guest while guest submission is on, or an administrator;
-  - publishing a guest's event makes an existing account its author, or creates an account with any role but `subscriber`, or does not make the new account the author;
+  - publishing a guest's event makes an existing account its author, or creates an account with any role but `subscriber`, or does not make the new account the author; the site's default role is set to Author, and the account must already be a subscriber when `user_register` runs, and the default role must be Author again afterwards;
   - a logged-in user's event, sent with a guest address, creates an account or changes author when published.
 
   Run it locally with `python3 .github/playground/fes_guest.py --php 8.4` (same options as the bookings test).

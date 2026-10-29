@@ -2020,9 +2020,26 @@ class MEC_feature_fes extends MEC_base
 
             if (email_exists($guest_email)) return;
 
+            // adventistai.lt: upstream made every guest an Author, who may publish
+            // posts and upload files. The account only needs to own its event, so
+            // it gets the least privileged role.
+            $role = apply_filters('mec_fes_guest_user_role', 'subscriber', $post);
+            if (!is_string($role) || !get_role($role)) $role = 'subscriber';
+
             // A new account for the address. WordPress sends the set-password link
-            // to that address, so only its owner can sign in.
-            $user_id = register_new_user($guest_email, $guest_email);
+            // to that address, so only its owner can sign in. register_new_user()
+            // gives the account the site's default role before its hooks and
+            // notification run, so that role is $role for this one call.
+            $default_role = function () use ($role) { return $role; };
+            add_filter('pre_option_default_role', $default_role, PHP_INT_MAX);
+            try
+            {
+                $user_id = register_new_user($guest_email, $guest_email);
+            }
+            finally
+            {
+                remove_filter('pre_option_default_role', $default_role, PHP_INT_MAX);
+            }
             if (is_wp_error($user_id)) return;
 
             $guest_name = get_post_meta($post->ID, 'fes_guest_name', true);
@@ -2039,12 +2056,7 @@ class MEC_feature_fes extends MEC_base
                 'last_name' => $last_name,
             ]);
 
-            // adventistai.lt: upstream made every guest an Author, who may publish
-            // posts and upload files. The account only needs to own its event, so
-            // it gets the least privileged role.
-            $role = apply_filters('mec_fes_guest_user_role', 'subscriber', $post);
-            if (!is_string($role) || !get_role($role)) $role = 'subscriber';
-
+            // In case a registration hook changed it.
             $user = new WP_User($user_id);
             $user->set_role($role);
 

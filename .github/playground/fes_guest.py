@@ -13,7 +13,8 @@ subscribers, and stops all e-mail. It then checks that:
   and an administrator;
 - publishing a guest's event never makes an existing account its author;
 - publishing a guest's event with a new address creates a subscriber (not an
-  Author) and makes it the event's author;
+  Author) and makes it the event's author; the site's default role is Author,
+  and the account is a subscriber already when user_register runs;
 - a logged-in user's event creates no account and keeps its author, whatever
   guest address the request carries.
 
@@ -140,6 +141,9 @@ def run_tests(php):
               new_user and new_user["roles"] == ["subscriber"], after["users"])
         check("guest event, new address: the new account is the event's author",
               new_user and after["event"]["author"] == new_user["id"], [after["event"], new_user])
+        check("guest event, new address: with Author as the site's default role, the account is already a subscriber when user_register runs",
+              after["register_roles"].get("pgfnew@example.test") == ["subscriber"], after["register_roles"])
+        check("guest event, new address: the site's default role is Author again afterwards", after["default_role"] == "author", after["default_role"])
 
     sub = setup["users"]["pgfsub"]
     event, after = submit_and_publish("subscriber's event with a guest address", "pgfsub", "pgfother@example.test")

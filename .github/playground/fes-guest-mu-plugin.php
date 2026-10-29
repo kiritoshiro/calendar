@@ -24,6 +24,15 @@ add_filter('option_mec_options', function ($options) {
 // No e-mail leaves the site; register_new_user() sends two.
 add_filter('pre_wp_mail', '__return_true');
 
+// The roles each new account has when user_register runs, before any other
+// handler (integrations see the account at this point).
+add_action('user_register', function ($user_id) {
+    $user = get_userdata($user_id);
+    $seen = get_option('pgfes_register_roles', []);
+    $seen[$user->user_email] = array_values($user->roles);
+    update_option('pgfes_register_roles', $seen);
+}, 1);
+
 function pgfes_admin_only()
 {
     if (!current_user_can('manage_options')) wp_send_json(['error' => 'not an administrator'], 403);
@@ -40,6 +49,10 @@ add_action('wp_ajax_pgfes_setup', function () {
         if (is_wp_error($uid)) wp_send_json(['error' => $uid->get_error_message()], 500);
         $users[$login] = $uid;
     }
+
+    // A site whose new users are Authors by default: a guest account must
+    // still never be one, not even while its registration hooks run.
+    update_option('default_role', 'author');
 
     wp_send_json(['users' => $users]);
 });
@@ -64,7 +77,10 @@ add_action('wp_ajax_pgfes_state', function () {
     pgfes_admin_only();
     global $wpdb;
 
-    $out = ['attachments' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'attachment'"), 'users' => []];
+    $out = [
+        'attachments' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'attachment'"), 'users' => [],
+        'register_roles' => (object) get_option('pgfes_register_roles', []), 'default_role' => get_option('default_role'),
+    ];
 
     $title = sanitize_text_field(wp_unslash($_POST['title'] ?? ''));
     if ($title)

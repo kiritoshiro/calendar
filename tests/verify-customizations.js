@@ -309,6 +309,7 @@ const guestStatusChanged = fesFeature.slice(fesFeature.indexOf('public function 
 assert.match(guestStatusChanged, /if \(!get_post_meta\(\$post->ID, 'mec_fes_guest_submission', true\)\) return;[\s\S]*if \(email_exists\(\$guest_email\)\) return;[\s\S]*register_new_user\(/, 'guest accounts: guest submissions only, and never an existing account');
 assert.doesNotMatch(guestStatusChanged, /set_role\('author'\)|\$user_id = \$user_exists/, 'guest accounts must not be Authors or existing users');
 assert.match(guestStatusChanged, /apply_filters\('mec_fes_guest_user_role', 'subscriber', \$post\);\s*if \(!is_string\(\$role\) \|\| !get_role\(\$role\)\) \$role = 'subscriber';/);
+assert.match(guestStatusChanged, /\$role = 'subscriber';[\s\S]*add_filter\('pre_option_default_role', \$default_role, PHP_INT_MAX\);\s*try\s*\{\s*\$user_id = register_new_user\(\$guest_email, \$guest_email\);\s*\}\s*finally\s*\{\s*remove_filter\('pre_option_default_role', \$default_role, PHP_INT_MAX\);/, 'a guest account must be created with its final role, before registration hooks run');
 assert.match(fesFeature, /update_post_meta\(\$post_id, 'mec_created_by_fes', 1\);\s*(\/\/[^\n]*\n\s*)+if \(!is_user_logged_in\(\)\) update_post_meta\(\$post_id, 'mec_fes_guest_submission', 1\);/, 'new guest submissions must be flagged');
 assert.match(plugin('app/skins/single.php'), /\$viewable = is_post_publicly_viewable\(\$post\)/);
 assert.match(plugin('app/libraries/main.php'), /get_post_meta\(\(int\) \$book_id, 'mec_event_id', true\) === \(int\) \$event->ID/);
