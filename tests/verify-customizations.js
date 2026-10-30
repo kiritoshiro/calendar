@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.31', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.33', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -300,7 +300,17 @@ const fesFeature = plugin('app/features/fes.php');
 assert.match(fesFeature, /if \(!\$this->guest_submission_allowed\(\)\) return false;/);
 assert.match(fesFeature, /get_current_user_id\(\) && \(int\) \$post->post_author === get_current_user_id\(\)/);
 assert.equal((fesFeature.match(/if \(!\$this->current_user_can_submit_event\(\)\) \$this->main->response/g) || []).length, 2, 'the event form and image upload must check submission access');
-assert.match(plugin('app/features/events.php'), /if \(!is_user_logged_in\(\) and \(!isset\(\$this->settings\['fes_guest_status'\]\)/);
+// 7.35.1.33 (2026-10-27 assessment, finding 3): the gallery uploader is gated like
+// the FES featured image; FES guest accounts never take over existing users and
+// are not Authors.
+const galleryUpload = plugin('app/features/events.php').match(/public function gallery_image_upload\(\)\s*\{[\s\S]*?\$images = /)?.[0] || '';
+assert.match(galleryUpload, /wp_verify_nonce\([^;]*'mec_event_gallery_image_upload'\)\) \$this->main->response[\s\S]*if \(!current_user_can\('upload_files'\)\)\s*\{[\s\S]*if \(!\$fes \|\| !\$fes->current_user_can_submit_event\(\)\) \$this->main->response\(\['success' => 0, 'code' => 'NO_ACCESS'/, 'the gallery upload must check its nonce, then upload_files or FES submission access');
+const guestStatusChanged = fesFeature.slice(fesFeature.indexOf('public function status_changed('), fesFeature.indexOf('public function current_user_attachments('));
+assert.match(guestStatusChanged, /if \(!get_post_meta\(\$post->ID, 'mec_fes_guest_submission', true\)\) return;[\s\S]*if \(email_exists\(\$guest_email\)\) return;[\s\S]*register_new_user\(/, 'guest accounts: guest submissions only, and never an existing account');
+assert.doesNotMatch(guestStatusChanged, /set_role\('author'\)|\$user_id = \$user_exists/, 'guest accounts must not be Authors or existing users');
+assert.match(guestStatusChanged, /apply_filters\('mec_fes_guest_user_role', 'subscriber', \$post\);\s*if \(!is_string\(\$role\) \|\| !get_role\(\$role\)\) \$role = 'subscriber';/);
+assert.match(guestStatusChanged, /\$role = 'subscriber';[\s\S]*add_filter\('pre_option_default_role', \$default_role, PHP_INT_MAX\);\s*try\s*\{\s*\$user_id = register_new_user\(\$guest_email, \$guest_email\);\s*\}\s*finally\s*\{\s*remove_filter\('pre_option_default_role', \$default_role, PHP_INT_MAX\);/, 'a guest account must be created with its final role, before registration hooks run');
+assert.match(fesFeature, /update_post_meta\(\$post_id, 'mec_created_by_fes', 1\);\s*(\/\/[^\n]*\n\s*)+if \(!is_user_logged_in\(\)\) update_post_meta\(\$post_id, 'mec_fes_guest_submission', 1\);/, 'new guest submissions must be flagged');
 assert.match(plugin('app/skins/single.php'), /\$viewable = is_post_publicly_viewable\(\$post\)/);
 assert.match(plugin('app/libraries/main.php'), /get_post_meta\(\(int\) \$book_id, 'mec_event_id', true\) === \(int\) \$event->ID/);
 // Logged-in handler audit (7.35.1.12): admin AJAX handlers check capabilities,

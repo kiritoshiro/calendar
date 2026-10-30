@@ -998,6 +998,9 @@ class MEC_feature_fes extends MEC_base
             // FES Flag
             update_post_meta($post_id, 'mec_created_by_fes', 1);
 
+            // adventistai.lt: status_changed() acts only on events a guest submitted.
+            if (!is_user_logged_in()) update_post_meta($post_id, 'mec_fes_guest_submission', 1);
+
             // Default Category
             if (isset($this->settings['fes_default_category']) && $this->settings['fes_default_category'] && !count($post_categories))
             {
@@ -2005,45 +2008,60 @@ class MEC_feature_fes extends MEC_base
 
         if (('publish' === $new_status && 'publish' !== $old_status) && $this->PT === $post->post_type)
         {
+            // adventistai.lt: the guest email is whatever the submitter typed, and any
+            // FES user can send one. Act only on events a logged-out guest submitted,
+            // and never hand an event to an existing account on that basis: the
+            // submitter has not shown they own the address. The guest name and
+            // email stay on the event as meta.
+            if (!get_post_meta($post->ID, 'mec_fes_guest_submission', true)) return;
+
             $guest_email = get_post_meta($post->ID, 'fes_guest_email', true);
             if (!trim($guest_email) || !is_email($guest_email)) return;
 
-            $user_id = 0;
-            $user_exists = email_exists($guest_email);
+            if (email_exists($guest_email)) return;
 
-            if ($user_exists and $user_exists == $post->post_author) return;
-            else if ($user_exists) $user_id = $user_exists;
-            else
+            // adventistai.lt: upstream made every guest an Author, who may publish
+            // posts and upload files. The account only needs to own its event, so
+            // it gets the least privileged role.
+            $role = apply_filters('mec_fes_guest_user_role', 'subscriber', $post);
+            if (!is_string($role) || !get_role($role)) $role = 'subscriber';
+
+            // A new account for the address. WordPress sends the set-password link
+            // to that address, so only its owner can sign in. register_new_user()
+            // gives the account the site's default role before its hooks and
+            // notification run, so that role is $role for this one call.
+            $default_role = function () use ($role) { return $role; };
+            add_filter('pre_option_default_role', $default_role, PHP_INT_MAX);
+            try
             {
-                $registered = register_new_user($guest_email, $guest_email);
-                if (!is_wp_error($registered))
-                {
-                    $user_id = $registered;
-
-                    $guest_name = get_post_meta($post->ID, 'fes_guest_name', true);
-                    $ex = explode(' ', $guest_name);
-
-                    $first_name = $ex[0];
-                    unset($ex[0]);
-
-                    $last_name = implode(' ', $ex);
-
-                    wp_update_user([
-                        'ID' => $user_id,
-                        'first_name' => $first_name,
-                        'last_name' => $last_name,
-                    ]);
-
-                    $user = new WP_User($user_id);
-                    $user->set_role('author');
-                }
+                $user_id = register_new_user($guest_email, $guest_email);
             }
-
-            if ($user_id)
+            finally
             {
-                $db = $this->getDB();
-                $db->q("UPDATE `#__posts` SET `post_author`='$user_id' WHERE `ID`='" . $post->ID . "'");
+                remove_filter('pre_option_default_role', $default_role, PHP_INT_MAX);
             }
+            if (is_wp_error($user_id)) return;
+
+            $guest_name = get_post_meta($post->ID, 'fes_guest_name', true);
+            $ex = explode(' ', $guest_name);
+
+            $first_name = $ex[0];
+            unset($ex[0]);
+
+            $last_name = implode(' ', $ex);
+
+            wp_update_user([
+                'ID' => $user_id,
+                'first_name' => $first_name,
+                'last_name' => $last_name,
+            ]);
+
+            // In case a registration hook changed it.
+            $user = new WP_User($user_id);
+            $user->set_role($role);
+
+            $db = $this->getDB();
+            $db->q("UPDATE `#__posts` SET `post_author`='" . (int) $user_id . "' WHERE `ID`='" . (int) $post->ID . "'");
         }
     }
 

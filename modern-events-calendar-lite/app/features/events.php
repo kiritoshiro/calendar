@@ -4198,8 +4198,17 @@ class MEC_feature_events extends MEC_base
         // Verify that the nonce is valid.
         if (!wp_verify_nonce(sanitize_text_field($_POST['_wpnonce']), 'mec_event_gallery_image_upload')) $this->main->response(['success' => 0, 'code' => 'NONCE_IS_INVALID']);
 
-        // adventistai.lt: logged-out visitors may upload only when guest submission is enabled.
-        if (!is_user_logged_in() and (!isset($this->settings['fes_guest_status']) or !$this->settings['fes_guest_status'] or $this->settings['fes_guest_status'] == '0')) $this->main->response(['success' => 0, 'code' => 'NO_ACCESS']);
+        // adventistai.lt: this uploader serves users without upload_files (the FES
+        // form and the event meta box). Gate it like the FES featured image upload:
+        // guest submission must be on for logged-out visitors, and a logged-in
+        // user's role must be one of the FES access roles.
+        if (!current_user_can('upload_files'))
+        {
+            if (!class_exists('MEC_feature_fes')) MEC::import('app.features.fes');
+            $fes = class_exists('MEC_feature_fes') ? new MEC_feature_fes() : null;
+
+            if (!$fes || !$fes->current_user_can_submit_event()) $this->main->response(['success' => 0, 'code' => 'NO_ACCESS', 'message' => esc_html__("Sorry! You don't have access to upload images.", 'modern-events-calendar-lite')]);
+        }
 
         $images = isset($_FILES['images']) && is_array($_FILES['images']) ? $_FILES['images'] : [];
 
