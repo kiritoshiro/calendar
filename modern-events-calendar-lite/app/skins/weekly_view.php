@@ -501,13 +501,64 @@ class MEC_skin_weekly_view extends MEC_skins
             if ($date === $today) $classes .= ' mec-magenda-day-today';
             if ($is_sat) $classes .= ' mec-magenda-day-saturday';
             ?>
-            <button type="button" class="<?php echo esc_attr($classes); ?>" data-date="<?php echo esc_attr($date); ?>">
+            <button type="button" class="<?php echo esc_attr($classes); ?>" data-date="<?php echo esc_attr($date); ?>"<?php if ($count): ?> aria-label="<?php echo esc_attr($day_num.', '.$this->magenda_count_label($count)); ?>"<?php endif; ?>>
                 <span class="mec-magenda-day-num"><?php echo esc_html($day_num); ?></span>
-                <?php if ($count): ?><span class="mec-magenda-day-count"><?php echo esc_html($count); ?></span><?php endif; ?>
+                <?php if ($count): ?><span class="mec-magenda-day-dots" data-n="<?php echo esc_attr(min($count, 3)); ?>"></span><?php endif; ?>
             </button>
             <?php
         }
         return ob_get_clean();
+    }
+
+    /** Plural forms of "N events" and the rule that picks one; frontend.js
+     *  uses the same pair for the months it draws. The dots under a day
+     *  are decorative, so screen readers get the count from this label. */
+    public function magenda_count_forms()
+    {
+        $locale = get_locale();
+        if (strpos($locale, 'lt') === 0) return array('lt', array('%d renginys', '%d renginiai', '%d renginių'));
+        if (strpos($locale, 'ru') === 0) return array('ru', array('%d событие', '%d события', '%d событий'));
+
+        return array('en', array(
+            /* translators: %d: number of events on a calendar day, 1 */
+            __('%d event', 'modern-events-calendar-lite'),
+            /* translators: %d: number of events on a calendar day, more than 1 */
+            __('%d events', 'modern-events-calendar-lite'),
+        ));
+    }
+
+    public function magenda_count_label($count)
+    {
+        list($rule, $forms) = $this->magenda_count_forms();
+
+        $n = (int) $count;
+        if ($rule === 'en') $form = ($n === 1) ? 0 : 1;
+        elseif ($n % 10 === 1 && $n % 100 !== 11) $form = 0;
+        elseif (($rule === 'lt' ? $n % 10 >= 2 : ($n % 10 >= 2 && $n % 10 <= 4)) && ($n % 100 < 10 || $n % 100 >= 20)) $form = 1;
+        else $form = 2;
+
+        return sprintf($forms[$form], $n);
+    }
+
+    /** Month names as the header shows them: nominative and capitalised
+     *  ("Lapkritis"). WordPress's Lithuanian 'F' is the genitive
+     *  ("lapkričio"), which only reads right before a day number. */
+    public function magenda_month_names($year)
+    {
+        $lt = array(
+            1 => 'Sausis', 2 => 'Vasaris', 3 => 'Kovas', 4 => 'Balandis',
+            5 => 'Gegužė', 6 => 'Birželis', 7 => 'Liepa', 8 => 'Rugpjūtis',
+            9 => 'Rugsėjis', 10 => 'Spalis', 11 => 'Lapkritis', 12 => 'Gruodis',
+        );
+        $is_lt = (strpos(get_locale(), 'lt') === 0);
+
+        $names = array();
+        for ($m = 1; $m <= 12; $m++)
+        {
+            $name = $is_lt ? $lt[$m] : wp_date('F', mktime(0, 0, 0, $m, 1, $year));
+            $names[] = mb_strtoupper(mb_substr($name, 0, 1)).mb_substr($name, 1);
+        }
+        return $names;
     }
 
     /** Standard Lithuanian short forms for month names (shared logic with
@@ -566,7 +617,9 @@ class MEC_skin_weekly_view extends MEC_skins
             $this->main->m('weekdays_sa', esc_html__('SA', 'modern-events-calendar-lite')),
         );
 
-        $month_full = wp_date('F', strtotime($this->start_date));
+        $month_full_names = $this->magenda_month_names($year);
+        $month_full = $month_full_names[$month - 1];
+        list($count_rule, $count_forms) = $this->magenda_count_forms();
 
         $today = current_time('Y-m-d');
 
@@ -599,6 +652,9 @@ class MEC_skin_weekly_view extends MEC_skins
              data-cur-year="<?php echo esc_attr($year); ?>"
              data-cur-month="<?php echo esc_attr(sprintf('%02d', $month)); ?>"
              data-month-names="<?php echo esc_attr(wp_json_encode($month_names)); ?>"
+             data-month-full="<?php echo esc_attr(wp_json_encode($month_full_names)); ?>"
+             data-count-rule="<?php echo esc_attr($count_rule); ?>"
+             data-count-forms="<?php echo esc_attr(wp_json_encode($count_forms)); ?>"
              data-all-day-label="<?php echo esc_attr($all_day_label); ?>"
              data-today-word="<?php echo esc_attr($today_word); ?>">
 

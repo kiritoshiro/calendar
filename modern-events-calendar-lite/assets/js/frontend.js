@@ -7781,26 +7781,40 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
                 (dateStr === today ? ' mec-magenda-day-today' : '') +
                 (d.getDay() === 6 ? ' mec-magenda-day-saturday' : '');
 
-            html += '<button type="button" class="' + cls + '" data-date="' + dateStr + '">' +
+            // One dot per event, at most three; the count is in the label.
+            html += '<button type="button" class="' + cls + '" data-date="' + dateStr + '"' +
+                (count ? ' aria-label="' + day + ', ' + countLabel($root, count).replace(/[&"<>]/g, '') + '"' : '') +
+                (dateStr === today ? ' aria-current="date"' : '') + '>' +
                 '<span class="mec-magenda-day-num">' + day + '</span>' +
-                (count ? '<span class="mec-magenda-day-count">' + count + '</span>' : '') +
+                (count ? '<span class="mec-magenda-day-dots" data-n="' + Math.min(count, 3) + '" aria-hidden="true"></span>' : '') +
                 '</button>';
         });
 
         $root.find('.mec-magenda-grid').html(html);
     }
 
+    /** "3 renginiai": the forms and plural rule come from magenda_count_forms(). */
+    function countLabel($root, n) {
+        var forms = $root.data('count-forms') || ['%d', '%d', '%d'];
+        var rule = $root.data('count-rule');
+        var form;
+        if (rule !== 'lt' && rule !== 'ru') form = n === 1 ? 0 : 1;
+        else if (n % 10 === 1 && n % 100 !== 11) form = 0;
+        else if ((rule === 'lt' ? n % 10 >= 2 : (n % 10 >= 2 && n % 10 <= 4)) && (n % 100 < 10 || n % 100 >= 20)) form = 1;
+        else form = 2;
+        return String(forms[form] || forms[forms.length - 1]).replace('%d', n);
+    }
+
     /**
-     * Today's all-day events show "Šiandien" instead of the usual "All Day"
-     * label — timed events (real hour ranges) never match this exact
-     * string, so they're untouched. Runs on init and after every agenda
-     * refresh, since MEC's own AJAX response has no way to know about
-     * this swap ahead of time.
+     * Today's events say so: all-day events show "Šiandien" instead of the
+     * usual "All Day" label, timed ones "Šiandien, 19:00 - 20:00". Runs on
+     * init and after every agenda refresh, since MEC's own AJAX response
+     * has no way to know about this swap ahead of time; each time element
+     * is changed once.
      */
     function relabelToday($root) {
         var allDayLabel = ($root.data('all-day-label') || '').toString().trim();
         var todayWord = $root.data('today-word') || 'Today';
-        if (!allDayLabel) return;
 
         var id = $root.data('mec-id');
         var ymd = (($root.data('today') || '') + '').replace(/-/g, '');
@@ -7809,6 +7823,7 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
 
         $li.find('.mec-event-time, .mec-event-detailed-time').each(function () {
             var el = this;
+            if (el.hasAttribute('data-magenda-today')) return;
             var textNodes = [];
             for (var i = 0; i < el.childNodes.length; i++) {
                 if (el.childNodes[i].nodeType === 3) textNodes.push(el.childNodes[i]);
@@ -7816,10 +7831,22 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
             if (!textNodes.length) return;
 
             var combined = textNodes.map(function (n) { return n.nodeValue; }).join('').trim();
-            if (combined !== allDayLabel) return;
+            if (!combined) return;
+            el.setAttribute('data-magenda-today', '');
 
-            textNodes[textNodes.length - 1].nodeValue = ' ' + todayWord;
-            for (var j = 0; j < textNodes.length - 1; j++) textNodes[j].nodeValue = '';
+            if (allDayLabel && combined === allDayLabel) {
+                textNodes[textNodes.length - 1].nodeValue = ' ' + todayWord;
+                for (var j = 0; j < textNodes.length - 1; j++) textNodes[j].nodeValue = '';
+                return;
+            }
+
+            // A multi-day range already names its dates.
+            if ($(el).hasClass('mec-event-detailed-time')) return;
+            for (var k = 0; k < textNodes.length; k++) {
+                if (!textNodes[k].nodeValue.trim()) continue;
+                textNodes[k].nodeValue = textNodes[k].nodeValue.replace(/^(\s*)/, '$1' + todayWord + ', ');
+                break;
+            }
         });
     }
 
@@ -7966,7 +7993,9 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
         $root.data('cur-year', year);
         $root.data('cur-month', pad(month));
         $root.find('.mec-magenda-year-label').text(year);
-        if (data.label) $root.find('.mec-magenda-month-label').text(data.label);
+        // Nominative "Lapkritis"; the reply's label is WordPress's genitive.
+        var label = ($root.data('month-full') || [])[month - 1] || data.label;
+        if (label) $root.find('.mec-magenda-month-label').text(label);
         $root.find('.mec-magenda-picker-month .mec-magenda-picker-item')
             .removeClass('mec-magenda-picker-item-active')
             .filter('[data-month="' + pad(month) + '"]')
@@ -8022,6 +8051,8 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
                 year = parseInt(today.slice(0, 4), 10);
                 month = parseInt(today.slice(5, 7), 10);
             }
+            // MEC_kses drops aria-current from the page's grid; renderGrid() sets it too.
+            $root.find('.mec-magenda-day-today').attr('aria-current', 'date');
 
             // The surrounding page may be cached while event occurrences are
             // updated independently. Refresh the visible month through the

@@ -26308,117 +26308,117 @@ body.rtl .mec-wrap {
    to win regardless of which of the two (or both) apply, and regardless
    of theme. Once one property on a selector uses !important, any later,
    more specific rule that wants to override JUST that property also
-   needs !important, or it silently loses to the earlier one; every
-   state modifier below (today/active/saturday/pad) has been checked
-   against this. */
+   needs !important, or it silently loses to the earlier one.
+
+   Layout: a light calendar without cell boxes; today is a filled circle,
+   each event a dot under its day (at most three; the count is in the
+   button's aria-label). The base rules fit a ~143 px sidebar; the
+   @container rules further down scale it up when the calendar itself
+   is wider (front page, full width), whatever the viewport. */
 
 .mec-magenda {
-    --magenda-accent: var(--mec-color-skin, #3d5a92);
-    font-family: var(--mec-paragraph-font-family, inherit);
-    border: 1px solid rgba(0, 0, 0, .08);
-    border-radius: var(--mec-primary-border-radius, 6px);
-    overflow: hidden;
-    position: relative;
+    --magenda-accent: var(--mec-color-skin, #2d5c88);
+    --magenda-ink: #04132b;
+    --magenda-muted: #545e6e; /* 6.6:1 on white */
+    --magenda-pad: #6b7280; /* other-month days: 4.8:1 on white */
+    --magenda-dot: var(--magenda-accent);
+    --magenda-line: #dee4ec;
+    container: magenda / inline-size;
+    width: 100%;
     max-width: 100%;
-    box-sizing: border-box;
+    position: relative;
+    font-family: var(--mec-paragraph-font-family, inherit);
+    color: var(--magenda-ink);
 }
 
 .mec-magenda, .mec-magenda * { box-sizing: border-box; }
 
 .mec-magenda.mec-magenda-loading { opacity: .6; pointer-events: none; }
 
-/* ---------- Header: "‹ Month Year ›" -- the numbers/name themselves open pickers ---------- */
+/* Shared button reset (see the note above). */
+.mec-magenda-nav,
+.mec-magenda-label,
+.mec-magenda-picker-item,
+.mec-magenda-day {
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    font-family: inherit !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-transform: none !important;
+    text-decoration: none !important;
+    letter-spacing: 0 !important;
+    min-height: 0 !important;
+    transition: none !important; /* MEC's button rule animates "all", the focus outline included */
+    cursor: pointer;
+}
+
+.mec-magenda button:focus-visible {
+    outline: 2px solid var(--magenda-accent) !important;
+    outline-offset: 1px;
+    border-radius: 4px !important;
+}
+
+/* ---------- Header: "‹ Lapkritis 2026 ›"; month and year open pickers ---------- */
 
 .mec-magenda-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
-    background: var(--magenda-accent);
-    color: #fff;
-    padding: 10px 12px;
+    padding: 0 0 8px;
 }
 
 .mec-magenda-nav {
-    position: static !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 28px;
-    height: 28px;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-radius: 50% !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    color: #fff !important;
-    opacity: .85;
-    font-size: 15px !important;
-    font-weight: 400 !important;
-    line-height: 1 !important;
-    font-family: inherit !important;
-    text-align: center !important;
-    text-transform: none !important;
-    text-decoration: none !important;
-    cursor: pointer;
-    transition: background .15s ease, opacity .15s ease;
+    flex: 0 0 auto;
+    width: 16px;
+    height: 24px;
+    color: var(--magenda-muted) !important;
+    font-size: 16px !important;
 }
 
-.mec-magenda-nav:hover {
-    opacity: 1;
-    border: 0 !important;
-    box-shadow: none !important;
-    background: rgba(255, 255, 255, .15) !important;
-}
+.mec-magenda-prev { margin-right: auto !important; }
+.mec-magenda-next { margin-left: auto !important; }
+.mec-magenda-year-label { margin-left: .3em !important; }
+
+.mec-magenda-nav:hover { color: var(--magenda-ink) !important; }
 
 .mec-magenda-label {
-    position: static !important;
     display: inline-block !important;
-    margin: 0 !important;
-    padding: 4px 6px !important;
-    border: 0 !important;
-    border-radius: 4px !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    color: #fff !important;
-    font-weight: 700 !important;
-    font-size: 15px !important;
-    line-height: 1.2 !important;
-    font-family: inherit !important;
-    text-align: center !important;
-    text-transform: none !important;
-    text-decoration: none !important;
-    cursor: pointer;
-    transition: background .15s ease;
+    padding: 4px 0 !important;
+    color: var(--magenda-ink) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.15 !important;
+    white-space: nowrap;
 }
 
-.mec-magenda-label:hover,
-.mec-magenda-label:focus-visible {
-    border: 0 !important;
-    box-shadow: none !important;
-    background: rgba(255, 255, 255, .15) !important;
-}
+.mec-magenda-label:hover { color: var(--magenda-accent) !important; }
 
 /* ---------- Month/year picker popovers ---------- */
 
 .mec-magenda-picker {
     position: absolute;
-    top: 52px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 30px;
+    left: 0;
+    right: 0;
     z-index: 20;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 4px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
     background: #fff;
     border: 1px solid rgba(0, 0, 0, .1);
     border-radius: var(--mec-secondary-border-radius, 4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, .15);
-    padding: 8px;
-    width: min(280px, 90vw);
+    padding: 4px;
     max-height: 260px;
     overflow-y: auto;
 }
@@ -26426,33 +26426,17 @@ body.rtl .mec-wrap {
 .mec-magenda-picker[hidden] { display: none; }
 
 .mec-magenda-picker-item {
-    position: static !important;
     display: block !important;
     width: 100%;
-    margin: 0 !important;
-    padding: 8px 4px !important;
-    border: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-    text-align: center !important;
-    background: transparent !important;
+    padding: 7px 2px !important;
     border-radius: var(--mec-secondary-border-radius, 4px) !important;
-    font-size: 12.5px !important;
-    font-weight: 400 !important;
+    color: var(--magenda-ink) !important;
+    font-size: 12px !important;
     line-height: 1.3 !important;
-    font-family: inherit !important;
-    color: #1f2937 !important;
-    text-transform: none !important;
-    text-decoration: none !important;
-    cursor: pointer;
-    transition: background .15s ease, color .15s ease;
+    white-space: nowrap;
 }
 
-.mec-magenda-picker-item:hover {
-    border: 0 !important;
-    box-shadow: none !important;
-    background: color-mix(in srgb, var(--magenda-accent) 10%, #fff) !important;
-}
+.mec-magenda-picker-item:hover { background: color-mix(in srgb, var(--magenda-accent) 10%, #fff) !important; }
 
 .mec-magenda-picker-item-active {
     background: var(--magenda-accent) !important;
@@ -26460,162 +26444,99 @@ body.rtl .mec-wrap {
     font-weight: 700 !important;
 }
 
-/* ---------- Weekday header + day grid ---------- */
+/* ---------- Weekday letters + day grid ---------- */
 
-.mec-magenda-weekdays {
-    display: grid;
-    /* minmax(0, 1fr), not plain 1fr: a plain 1fr track still won't shrink
-       below its content's natural minimum width, which is exactly what
-       was forcing the whole grid wider than the phone screen and cutting
-       off the last column(s). minmax(0, 1fr) lets columns actually
-       compress down to fit. */
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    background: #fafafa;
-    border-bottom: 1px solid rgba(0, 0, 0, .06);
-}
-
-.mec-magenda-weekdays span {
-    text-align: center;
-    font-size: 11px;
-    font-weight: 700;
-    color: #646b78; /* 5.1:1 on the header row (WCAG AA) */
-    padding: 6px 0;
-    text-transform: uppercase;
-}
-
-/* Saturday (Sabbath) column stands out in the weekday header too. */
-.mec-magenda-weekdays .mec-magenda-weekday-saturday {
-    color: var(--magenda-accent);
-    font-weight: 800;
-}
-
+/* minmax(0, 1fr), not plain 1fr: a plain 1fr track won't shrink below
+   its content, which pushed the grid wider than a narrow column. */
+.mec-magenda-weekdays,
 .mec-magenda-grid {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 1px;
-    background: rgba(0, 0, 0, .05);
 }
 
+.mec-magenda-weekdays span {
+    padding: 0 0 4px;
+    color: var(--magenda-muted);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 14px;
+    text-align: center;
+}
+
+/* Saturday (Sabbath) letter in the site colour. */
+.mec-magenda-weekdays .mec-magenda-weekday-saturday { color: var(--magenda-accent); }
+
 .mec-magenda-day {
-    position: static !important;
     display: flex !important;
     flex-direction: column;
     align-items: center !important;
-    justify-content: center !important;
-    gap: 3px;
+    justify-content: flex-start !important;
+    gap: 2px;
     width: 100%;
     min-width: 0;
-    margin: 0 !important;
-    padding: 8px 2px !important;
-    border: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-    background: #fff !important;
-    color: #1f2937 !important;
-    font-size: 13px !important;
-    font-weight: 400 !important;
-    line-height: 1.3 !important;
-    font-family: inherit !important;
-    text-align: center !important;
-    text-transform: none !important;
-    text-decoration: none !important;
-    cursor: pointer;
+    height: 28px;
+    color: var(--magenda-ink) !important;
+    font-size: 12px !important;
+}
+
+.mec-magenda-day-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
     transition: background .15s ease;
 }
 
-.mec-magenda-day:hover {
-    border: 0 !important;
-    box-shadow: none !important;
-    background: color-mix(in srgb, var(--magenda-accent) 8%, #fff) !important;
+/* The dots: one 4 px circle and box-shadow copies of it 7 px apart.
+   The right margin keeps the group centred under the number. */
+.mec-magenda-day-dots {
+    flex: 0 0 auto;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--magenda-dot);
+    --magenda-dot-step: 7px;
 }
 
-.mec-magenda-day-pad { color: #676e7a !important; } /* other-month days: 5.1:1 on white, 4.6:1 on Saturday tints */
-
-.mec-magenda-day-num {
-    font-size: inherit;
-    font-weight: inherit;
-    line-height: 1;
+.mec-magenda-day-dots[data-n="2"] {
+    margin-right: var(--magenda-dot-step);
+    box-shadow: var(--magenda-dot-step) 0 var(--magenda-dot);
 }
 
-.mec-magenda-day-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 16px;
-    padding: 0 5px;
-    border-radius: 999px;
-    background: var(--magenda-accent);
-    color: #fff;
-    font-size: 10px;
+.mec-magenda-day-dots[data-n="3"] {
+    margin-right: calc(2 * var(--magenda-dot-step));
+    box-shadow: var(--magenda-dot-step) 0 var(--magenda-dot), calc(2 * var(--magenda-dot-step)) 0 var(--magenda-dot);
+}
+
+.mec-magenda-day-pad {
+    --magenda-dot: #a0a8b4;
+    color: var(--magenda-pad) !important;
+}
+
+.mec-magenda-day:hover .mec-magenda-day-num { background: color-mix(in srgb, var(--magenda-accent) 10%, #fff); }
+
+/* The selected day: a light circle; today stays filled when selected. */
+.mec-magenda-day-active .mec-magenda-day-num {
+    background: color-mix(in srgb, var(--magenda-accent) 16%, #fff);
     font-weight: 700;
-    line-height: 1;
 }
 
-.mec-magenda-day-pad.mec-magenda-day-has-events .mec-magenda-day-count {
-    background: #676e7a;
+.mec-magenda-day-today .mec-magenda-day-num,
+.mec-magenda-day-today:hover .mec-magenda-day-num {
+    background: var(--magenda-ink);
+    color: #fff;
+    font-weight: 700;
 }
 
-/* Saturday column tint. Placed before the today/active rules below so
-   those win the cascade (same specificity) whenever a Saturday is also
-   today and/or selected — selection should stay the most visible state. */
-.mec-magenda-day-saturday {
-    background: color-mix(in srgb, var(--magenda-accent) 8%, #fff) !important;
+/* ---------- Agenda: the selected day's events, under a thin rule ---------- */
+
+.mec-magenda-agenda {
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid var(--magenda-line);
 }
-
-.mec-magenda-day-saturday.mec-magenda-day-pad {
-    background: color-mix(in srgb, var(--magenda-accent) 4%, #fff) !important;
-}
-
-.mec-magenda-day-saturday:hover {
-    background: color-mix(in srgb, var(--magenda-accent) 16%, #fff) !important;
-}
-
-/* "Today" gets a persistent outline box, independent of selection. */
-.mec-magenda-day-today {
-    font-weight: 700 !important;
-    box-shadow: inset 0 0 0 2px var(--magenda-accent) !important;
-    border-radius: var(--mec-secondary-border-radius, 4px);
-}
-
-.mec-magenda-day-active {
-    background: var(--magenda-accent) !important;
-    color: #fff !important;
-    font-weight: 700 !important;
-}
-
-.mec-magenda-day-active .mec-magenda-day-count {
-    background: #fff;
-    color: var(--magenda-accent);
-}
-
-/* Today + selected at once: swap the ring to white so it still reads
-   against the filled accent background instead of disappearing into it. */
-.mec-magenda-day-today.mec-magenda-day-active {
-    box-shadow: inset 0 0 0 2px #fff !important;
-}
-
-/* ---------- Responsive: scale down rather than overflow ---------- */
-
-@media (max-width: 420px) {
-    .mec-magenda-day { padding: 6px 1px !important; font-size: 12px !important; gap: 2px; }
-    .mec-magenda-day-count { min-width: 16px; height: 14px; font-size: 9px; padding: 0 3px; }
-    .mec-magenda-weekdays span { font-size: 9.5px; padding: 5px 0; }
-    .mec-magenda-label { font-size: 13px !important; }
-    .mec-magenda-header { padding: 8px 6px; gap: 2px; }
-}
-
-@media (max-width: 340px) {
-    .mec-magenda-day { padding: 5px 1px !important; font-size: 11px !important; }
-    .mec-magenda-day-count { min-width: 14px; height: 13px; font-size: 8.5px; }
-    .mec-magenda-weekdays span { font-size: 8.5px; }
-    .mec-magenda-label { font-size: 12px !important; }
-    .mec-magenda-nav { width: 24px; height: 24px; font-size: 13px !important; }
-}
-
-/* ---------- Agenda panel: reuses MEC's own event-card markup, tightened ---------- */
-
-.mec-magenda-agenda { padding: 4px 10px 8px; }
 
 .mec-magenda-agenda .mec-weekly-view-dates-events { margin: 0; padding: 0; list-style: none; }
 
@@ -26625,13 +26546,19 @@ body.rtl .mec-wrap {
 .mec-magenda-agenda .mec-weekly-view-date-events:not(.mec-util-hidden) { display: block; }
 
 .mec-magenda-agenda .mec-event-article {
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, .06);
+    margin: 0;
+    padding: 0 0 6px;
+    border: 0;
 }
 
-.mec-magenda-agenda .mec-event-article:last-child { border-bottom: 0; }
+.mec-magenda-agenda .mec-event-article:last-child { padding-bottom: 0; }
 
-.mec-magenda-agenda .mec-event-list-weekly-date { display: none; } /* redundant once grouped under one visible day */
+/* Redundant once grouped under one visible day; the time needs no clock. */
+.mec-magenda-agenda .mec-event-list-weekly-date,
+.mec-magenda-agenda .mec-sl-clock-o,
+.mec-magenda-agenda .mec-event-image:empty,
+.mec-magenda-agenda .mec-event-loc-place:empty,
+.mec-magenda-agenda .mec-event-footer { display: none; }
 
 .mec-magenda-agenda .mec-weekly-contents-wrapper {
     display: flex;
@@ -26651,24 +26578,76 @@ body.rtl .mec-wrap {
 
 .mec-magenda-agenda .mec-event-time,
 .mec-magenda-agenda .mec-event-detailed-time {
-    font-size: 12px;
-    margin-bottom: 2px;
-    color: #6b7280;
+    margin: 0 0 2px;
+    color: var(--magenda-accent);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 14px;
 }
 
+/* The event's colour dot goes before its title. */
 .mec-magenda-agenda .mec-event-title {
-    font-size: 14px;
-    margin: 0 0 2px;
-    line-height: 1.3;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    margin: 0;
+    color: var(--magenda-ink);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 18px;
+}
+
+.mec-magenda-agenda .mec-event-title a { color: inherit; }
+
+.mec-magenda-agenda .mec-event-title .event-color {
+    order: -1;
+    flex: 0 0 auto;
+    align-self: center;
+    width: 6px;
+    height: 6px;
+    margin: 0;
+    border-radius: 50%;
 }
 
 .mec-magenda-agenda .mec-event-detail,
 .mec-magenda-agenda .mec-event-loc-place {
+    color: var(--magenda-muted);
     font-size: 12px;
-    color: #6b7280;
 }
 
-.mec-magenda-agenda .mec-event-footer { display: none; }
+/* ---------- Wider calendars (front page, full width) ---------- */
+
+@container magenda (min-width: 260px) {
+    .mec-magenda-header { padding-bottom: 12px; }
+    .mec-magenda-nav { width: 28px; height: 28px; font-size: 20px !important; }
+    .mec-magenda-label { font-size: 17px !important; }
+    .mec-magenda-picker {
+        top: 40px;
+        left: 50%;
+        right: auto;
+        width: min(280px, 100%);
+        transform: translateX(-50%);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 4px;
+        padding: 8px;
+    }
+    .mec-magenda-picker-item { padding: 8px 4px !important; font-size: 12.5px !important; }
+    .mec-magenda-weekdays span { padding-bottom: 6px; font-size: 12px; }
+    .mec-magenda-day { height: 40px; gap: 3px; font-size: 14px !important; }
+    .mec-magenda-day-num { width: 28px; height: 28px; }
+    .mec-magenda-day-dots { width: 5px; height: 5px; --magenda-dot-step: 8px; }
+    .mec-magenda-agenda { margin-top: 6px; padding-top: 10px; }
+    .mec-magenda-agenda .mec-event-article { padding-bottom: 8px; }
+    .mec-magenda-agenda .mec-event-time,
+    .mec-magenda-agenda .mec-event-detailed-time { font-size: 12.5px; line-height: 16px; }
+    .mec-magenda-agenda .mec-event-title { font-size: 15px; line-height: 21px; }
+    .mec-magenda-agenda .mec-event-title .event-color { width: 8px; height: 8px; }
+}
+
+@container magenda (min-width: 480px) {
+    .mec-magenda-day { height: 46px; font-size: 15px !important; }
+    .mec-magenda-day-num { width: 32px; height: 32px; }
+}
 
 /* The calendar's heading is for screen readers only. */
 .mec-magenda .mec-magenda-sr-title {
@@ -26681,19 +26660,4 @@ body.rtl .mec-wrap {
     clip: rect(0, 0, 0, 0) !important;
     white-space: nowrap !important;
     border: 0 !important;
-}
-
-/* The clock is the only icon the agenda shows. Drawn as an SVG mask in the
-   text colour, it no longer needs the 30 KB simple-line-icons font, which
-   pages then do not download. */
-.mec-magenda .mec-sl-clock-o { font-family: inherit !important; }
-.mec-magenda .mec-sl-clock-o:before {
-    content: "" !important;
-    display: inline-block;
-    width: 1em;
-    height: 1em;
-    vertical-align: -.125em;
-    background-color: currentColor;
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6.5V12l3.5 2'/%3E%3C/svg%3E") center / contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6.5V12l3.5 2'/%3E%3C/svg%3E") center / contain no-repeat;
 }

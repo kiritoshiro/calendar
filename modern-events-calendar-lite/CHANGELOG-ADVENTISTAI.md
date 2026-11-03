@@ -1,5 +1,17 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.34
+
+- The magenda (the Weekly View mini calendar in the adventistai.lt sidebar, about 143 px wide) is redrawn to the approved homepage mock-up. It felt squashed: a navy header bar, boxed 36 px day cells, a tinted Saturday column and a count badge in each cell.
+  - Header: a plain centred "‹ Lapkritis 2026 ›" line; month and year still open their pickers. The month is nominative and capitalised (`magenda_month_names()`; Lithuanian from a table, other locales from `wp_date('F')`). WordPress's Lithuanian `F` is the genitive ("lapkričio"), which the header used to show. The client uses the same names after month navigation (`data-month-full`).
+  - Grid: small grey weekday letters (Saturday in the site colour), no cell boxes, borders or tint, 28 px rows. Today is a filled navy circle with a white number; the selected day is a light circle.
+  - Events: one dot per event under the number, at most three (`.mec-magenda-day-dots[data-n]`, one element drawn with box-shadow, so the grid has no more elements than before). Days from the neighbouring months and their dots are grey.
+  - Accessibility: the dots are `aria-hidden`; a day with events gets `aria-label="10, 2 renginiai"` (lt/ru plural forms, English otherwise, from `magenda_count_forms()`, the same in PHP and frontend.js). Today gets `aria-current="date"` from frontend.js (MEC_kses drops it from the page markup). Every magenda button shows a 2 px focus outline at once: MEC's button rule animated `all`, which faded the outline in, so magenda buttons have no transitions.
+  - Agenda: a thin rule, then the day's events: the time in small semibold site blue ("Šiandien, 19:00 - 20:00" for today's timed events; all-day events still say "Šiandien"), then the title with its colour dot in front. No clock icon or separators between events.
+  - Wider calendars: the sizes grow with the calendar's own width (CSS container queries at 260 px and 480 px), not the viewport, so the front-page or full-width magenda keeps larger rows and the narrow sidebar on a wide screen no longer gets desktop sizes.
+  - `magenda.min.css` is 23,487 bytes (was 25,025), still under the ALPS theme's 26,000-byte inline limit. `tests/build-magenda-css.js` now also keeps `@container` blocks.
+  - Day clicks, month and year pickers, prev/next and the month prefetch (7.35.1.23) are unchanged.
+
 ## 7.35.1.33
 
 - Security fixes from the 2026-10-27 WordPress administration and data security assessment (finding 3, static leads confirmed in code; upstream MEC behaviour, unchanged in the last public wordpress.org release, 6.5.6):

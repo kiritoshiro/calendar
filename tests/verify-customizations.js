@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.33', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.34', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -235,10 +235,45 @@ const magendaCss = plugin('assets/css/magenda.min.css');
 const weeklyRender = plugin('app/skins/weekly_view/render.php');
 assert.ok(!/<h4 class="mec-event-title"/.test(weeklyRender) && (weeklyRender.match(/<h3 class="mec-event-title">/g) || []).length === 2, 'Weekly View event titles are h3');
 assert.match(plugin('app/skins/weekly_view.php'), /<h2 class="mec-magenda-sr-title"><\?php echo esc_html\(\$calendar_heading\); \?><\/h2>/);
-// The agenda's clock is an SVG mask, so the icon font is not downloaded for it.
-assert.match(plugin('assets/css/magenda.min.css'), /\.mec-magenda \.mec-sl-clock-o\s*\{\s*font-family:\s*inherit !important;?\s*\}/);
+// The agenda shows no clock, so the icon font is not downloaded for it.
+assert.match(magendaCss, /\.mec-magenda-agenda \.mec-sl-clock-o,[^{]*\{\s*display:\s*none;?\s*\}/);
 assert.match(plugin('assets/css/magenda.min.css'), /\.mec-magenda \.mec-magenda-sr-title\s*\{[^}]*clip:\s*rect\(0, 0, 0, 0\)/);
-assert.ok(magendaCss.length < 40000 && /\.mec-magenda\s*\{[^}]*position:\s*relative/.test(magendaCss) && /@font-face\s*\{[^}]*simple-line-icons/.test(magendaCss), 'magenda.min.css holds the magenda styles and the icon font');
+// The ALPS theme inlines magenda.min.css only below 26,000 bytes (InlineStyles::MAX_FILE).
+assert.ok(magendaCss.length < 26000 && /\.mec-magenda\s*\{[^}]*position:\s*relative/.test(magendaCss) && /@font-face\s*\{[^}]*simple-line-icons/.test(magendaCss), 'magenda.min.css holds the magenda styles and the icon font, under the theme\'s inline limit');
+
+// 7.35.1.34: the slim magenda. A dot per event (at most three) instead of a
+// count badge; the count is in the button's aria-label, the dots are hidden.
+assert.doesNotMatch(weeklySkin + frontendJs + magendaCss, /mec-magenda-day-count/, 'no count badges left');
+assert.match(weeklySkin, /<span class="mec-magenda-day-dots" data-n="<\?php echo esc_attr\(min\(\$count, 3\)\); \?>"><\/span>/);
+assert.match(weeklySkin, /aria-label="<\?php echo esc_attr\(\$day_num\.', '\.\$this->magenda_count_label\(\$count\)\); \?>"/);
+assert.match(miniAgendaInit, /\$root\.find\('\.mec-magenda-day-today'\)\.attr\('aria-current', 'date'\);/, 'today is marked for screen readers (MEC_kses drops aria-current from the page markup)');
+assert.match(frontendJs, /\(dateStr === today \? ' aria-current="date"' : ''\)/);
+assert.match(frontendJs, /'<span class="mec-magenda-day-dots" data-n="' \+ Math\.min\(count, 3\) \+ '" aria-hidden="true"><\/span>'/);
+assert.match(frontendJs, /' aria-label="' \+ day \+ ', ' \+ countLabel\(\$root, count\)/);
+assert.match(magendaCss, /\.mec-magenda-day-dots\[data-n="3"\]\s*\{[^}]*box-shadow:/);
+assert.match(magendaCss, /@container magenda \(min-width: ?260px\)\s*\{[^@]*\.mec-magenda-day\s*\{\s*height:\s*40px/, 'wider calendars scale with their own width');
+assert.match(magendaCss, /\.mec-magenda\s*\{[^}]*container:\s*magenda \/ inline-size/);
+assert.match(magendaCss, /\.mec-magenda button:focus-visible\s*\{[^}]*outline:\s*2px solid/, 'keyboard focus stays visible');
+assert.match(magendaCss, /\.mec-magenda-day\s*\{[^}]*transition:\s*none !important/, "MEC's button transition does not fade the focus outline in");
+// The plural rule in frontend.js matches magenda_count_label() in PHP.
+const countLabel = vm.runInNewContext(`${extractFunction(frontendJs, 'countLabel')}\ncountLabel`, {});
+const fakeRoot = (rule, forms) => ({ data: key => ({ 'count-rule': rule, 'count-forms': forms })[key] });
+const lt = fakeRoot('lt', ['%d renginys', '%d renginiai', '%d renginių']);
+const ru = fakeRoot('ru', ['%d событие', '%d события', '%d событий']);
+const en = fakeRoot('en', ['%d event', '%d events']);
+assert.deepEqual([1, 2, 9, 10, 11, 12, 21, 22, 30].map(n => countLabel(lt, n)), ['1 renginys', '2 renginiai', '9 renginiai', '10 renginių', '11 renginių', '12 renginių', '21 renginys', '22 renginiai', '30 renginių']);
+assert.deepEqual([1, 3, 5, 11, 14, 21, 24, 25].map(n => countLabel(ru, n)), ['1 событие', '3 события', '5 событий', '11 событий', '14 событий', '21 событие', '24 события', '25 событий']);
+assert.deepEqual([1, 2].map(n => countLabel(en, n)), ['1 event', '2 events']);
+assert.match(weeklySkin, /if \(strpos\(\$locale, 'lt'\) === 0\) return array\('lt', array\('%d renginys', '%d renginiai', '%d renginių'\)\);/);
+assert.match(weeklySkin, /elseif \(\(\$rule === 'lt' \? \$n % 10 >= 2 : \(\$n % 10 >= 2 && \$n % 10 <= 4\)\) && \(\$n % 100 < 10 \|\| \$n % 100 >= 20\)\) \$form = 1;/);
+// The header month is nominative ("Lapkritis"), on the page and after navigation.
+assert.match(weeklySkin, /11 => 'Lapkritis', 12 => 'Gruodis',/);
+assert.match(weeklySkin, /\$month_full = \$month_full_names\[\$month - 1\];/);
+assert.match(weeklySkin, /data-month-full="<\?php echo esc_attr\(wp_json_encode\(\$month_full_names\)\); \?>"/);
+assert.match(frontendJs, /var label = \(\$root\.data\('month-full'\) \|\| \[\]\)\[month - 1\] \|\| data\.label;/);
+// Today's timed events read "Šiandien, 19:00 - 20:00", once per element.
+assert.match(frontendJs, /if \(el\.hasAttribute\('data-magenda-today'\)\) return;/);
+assert.match(frontendJs, /textNodes\[k\]\.nodeValue\.replace\(\/\^\(\\s\*\)\/, '\$1' \+ todayWord \+ ', '\)/);
 assert.match(factory, /\|\| self::\$rendered_search_form\) return false;/);
 assert.match(skinsLibrary, /private function note_search_form\(\$html\)/);
 assert.match(skinsLibrary, /strpos\(\$html, 'mec-search-form'\) !== false\) MEC_factory::mark_rendered\(\$this->skin, true\);/);

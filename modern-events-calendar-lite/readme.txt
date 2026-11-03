@@ -4,7 +4,7 @@ Tags: calendar, events, google calendar
 Requires at least: 6.6
 Tested up to: 7.0.2
 Requires PHP: 8.4
-Stable tag: 7.35.1.33
+Stable tag: 7.35.1.34
 License: GPLv2 or later
 
 Focused calendar build maintained by adventistai.lt.
@@ -23,6 +23,9 @@ Booking, attendees, payments, WooCommerce, SMS, PDF invoices, non-Google importe
 Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar → Import / Export. For private updates define ADVENTISTAI_CALENDAR_GITHUB_TOKEN in wp-config.php with repository read access.
 
 == Changelog ==
+= 7.35.1.34 =
+* The small sidebar calendar is lighter: no header bar or day boxes, today in a filled circle, and a dot under the day for each event (up to three) instead of a number. The month is shown as "Lapkritis 2026". Screen readers still hear how many events a day has.
+
 = 7.35.1.33 =
 * Security: accounts created for guest event submitters are subscribers, not authors, and publishing a guest's event never hands it to an existing account. Event gallery uploads follow the frontend event form's access roles.
 
