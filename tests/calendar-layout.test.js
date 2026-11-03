@@ -38,7 +38,8 @@ const baseCss = `
 // The magenda (Weekly View mini calendar) as weekly_view.php prints it, for
 // November 2026: today the 3rd, event counts per day, Dec 1-5 as padding.
 const magendaCss = fs.readFileSync(path.join(root, 'modern-events-calendar-lite/assets/css/magenda.min.css'), 'utf8');
-const magendaCounts = { 3: 1, 6: 1, 7: 1, 10: 2, 13: 3, 14: 1, 21: 4, 27: 1, 32: 1, 34: 1 };
+// 19-21: three days in a row with three or more events.
+const magendaCounts = { 3: 1, 6: 1, 7: 1, 10: 2, 13: 3, 14: 1, 19: 3, 20: 5, 21: 4, 27: 1, 32: 1, 34: 1 };
 const magendaMarkup = () => {
     let days = '';
     for (let i = 1; i <= 35; i++) {
@@ -99,7 +100,7 @@ async function checkMagenda(browser) {
             const r = rect(dots);
             const shadows = style.boxShadow === 'none' ? [] : style.boxShadow.split(/,(?![^(]*\))/).map(s => parseFloat(s.replace(/rgba?\([^)]*\)/, '').trim()));
             const right = Math.max(r.right, ...shadows.map(x => r.right + x));
-            return { count: 1 + shadows.length, width: r.width, centre: (r.left + right) / 2, colour: style.backgroundColor, top: r.top };
+            return { count: 1 + shadows.length, width: r.width, left: r.left, right, centre: (r.left + right) / 2, colour: style.backgroundColor, top: r.top };
         };
         const numRect = rect(day('2026-11-13').querySelector('.mec-magenda-day-num'));
         const prev = rect(document.querySelector('.mec-magenda-prev'));
@@ -115,7 +116,7 @@ async function checkMagenda(browser) {
             rowPitch: tops[1] - tops[0],
             plainDay: { background: plain.backgroundColor, border: plain.borderTopWidth, shadow: plain.boxShadow, radius: plain.borderTopLeftRadius, transform: plain.textTransform },
             todayNum: { background: todayNum.backgroundColor, colour: todayNum.color, weight: todayNum.fontWeight, radius: todayNum.borderTopLeftRadius },
-            dots: { d6: dotGroup(day('2026-11-06')), d10: dotGroup(day('2026-11-10')), d13: dotGroup(day('2026-11-13')), d21: dotGroup(day('2026-11-21')), pad: dotGroup(day('2026-12-02')) },
+            dots: { d6: dotGroup(day('2026-11-06')), d10: dotGroup(day('2026-11-10')), d13: dotGroup(day('2026-11-13')), d19: dotGroup(day('2026-11-19')), d20: dotGroup(day('2026-11-20')), d21: dotGroup(day('2026-11-21')), pad: dotGroup(day('2026-12-02')) },
             numCentre: (numRect.left + numRect.right) / 2,
             numBottom: numRect.bottom,
             header: { prevLeft: prev.left - rect(root).left, nextRight: rect(root).right - next.right, titleCentre: (month.left + year.right) / 2 - (rect(root).left + rect(root).width / 2), titleTop: month.top, yearTop: year.top },
@@ -143,7 +144,9 @@ async function checkMagenda(browser) {
     assert.equal(m.todayNum.weight, '700');
     assert.equal(m.todayNum.radius, '50%');
     assert.deepEqual([m.dots.d6.count, m.dots.d10.count, m.dots.d13.count, m.dots.d21.count], [1, 2, 3, 3], 'one dot per event, at most three');
-    assert.equal(m.dots.d6.width, 4);
+    assert.equal(m.dots.d6.width, 3, 'small 3 px dots in the sidebar');
+    const gap = Math.min(m.dots.d20.left - m.dots.d19.right, m.dots.d21.left - m.dots.d20.right);
+    assert.ok(gap >= 6, `days in a row with three dots stay apart (${gap.toFixed(1)} px between groups)`);
     for (const key of ['d6', 'd10', 'd13']) assert.equal(m.dots[key].colour, 'rgb(45, 92, 136)', `${key} dots use the site blue`);
     assert.equal(m.dots.pad.colour, 'rgb(160, 168, 180)', 'other-month dots are grey');
     assert.ok(Math.abs(m.dots.d13.centre - m.numCentre) < 0.6, `three dots are centred under the number (${m.dots.d13.centre} vs ${m.numCentre})`);

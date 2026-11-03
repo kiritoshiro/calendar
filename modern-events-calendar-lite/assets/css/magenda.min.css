@@ -120,11 +120,11 @@
     transition: background .15s ease;
 }.mec-magenda-day-dots{
     flex: 0 0 auto;
-    width: 4px;
-    height: 4px;
+    width: 3px;
+    height: 3px;
     border-radius: 50%;
     background: var(--magenda-dot);
-    --magenda-dot-step: 7px;
+    --magenda-dot-step: 5px;
 }.mec-magenda-day-dots[data-n="2"]{
     margin-right: var(--magenda-dot-step);
     box-shadow: var(--magenda-dot-step) 0 var(--magenda-dot);
@@ -200,8 +200,8 @@
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 4px;
         padding: 8px;
-    }.mec-magenda-picker-item{ padding: 8px 4px !important; font-size: 12.5px !important; }.mec-magenda-weekdays span{ padding-bottom: 6px; font-size: 12px; }.mec-magenda-day{ height: 40px; gap: 3px; font-size: 14px !important; }.mec-magenda-day-num{ width: 28px; height: 28px; }.mec-magenda-day-dots{ width: 5px; height: 5px; --magenda-dot-step: 8px; }.mec-magenda-agenda{ margin-top: 6px; padding-top: 10px; }.mec-magenda-agenda .mec-event-article{ padding-bottom: 8px; }.mec-magenda-agenda .mec-event-time,
-    .mec-magenda-agenda .mec-event-detailed-time{ font-size: 12.5px; line-height: 16px; }.mec-magenda-agenda .mec-event-title{ font-size: 15px; line-height: 21px; }.mec-magenda-agenda .mec-event-title .event-color{ width: 8px; height: 8px; }}@container magenda (min-width: 480px){.mec-magenda-day{ height: 46px; font-size: 15px !important; }.mec-magenda-day-num{ width: 32px; height: 32px; }}.mec-magenda .mec-magenda-sr-title{
+    }.mec-magenda-picker-item{ padding: 8px 4px !important; font-size: 12.5px !important; }.mec-magenda-weekdays span{ padding-bottom: 6px; font-size: 12px; }.mec-magenda-day{ height: 40px; gap: 3px; font-size: 14px !important; }.mec-magenda-day-num{ width: 28px; height: 28px; }.mec-magenda-day-dots{ width: 4px; height: 4px; --magenda-dot-step: 6px; }.mec-magenda-agenda{ margin-top: 6px; padding-top: 10px; }.mec-magenda-agenda .mec-event-article{ padding-bottom: 8px; }.mec-magenda-agenda .mec-event-time,
+    .mec-magenda-agenda .mec-event-detailed-time{ font-size: 12.5px; line-height: 16px; }.mec-magenda-agenda .mec-event-title{ font-size: 15px; line-height: 21px; }.mec-magenda-agenda .mec-event-title .event-color{ width: 8px; height: 8px; }}@container magenda (min-width: 480px){.mec-magenda-day{ height: 46px; font-size: 15px !important; }.mec-magenda-day-num{ width: 32px; height: 32px; }.mec-magenda-day-dots{ width: 5px; height: 5px; --magenda-dot-step: 8px; }}.mec-magenda .mec-magenda-sr-title{
     position: absolute !important;
     width: 1px !important;
     height: 1px !important;

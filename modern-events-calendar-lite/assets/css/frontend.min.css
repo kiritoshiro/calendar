@@ -445,15 +445,17 @@
     transition: background .15s ease;
 }
 
-/* The dots: one 4 px circle and box-shadow copies of it 7 px apart.
-   The right margin keeps the group centred under the number. */
+/* The dots: one circle and box-shadow copies of it, 2 px apart. The
+   right margin keeps the group centred under the number. In a ~20 px
+   sidebar column three 3 px dots take 13 px, so neighbouring days that
+   both have three events still have a clear gap between their groups. */
 .mec-magenda-day-dots {
     flex: 0 0 auto;
-    width: 4px;
-    height: 4px;
+    width: 3px;
+    height: 3px;
     border-radius: 50%;
     background: var(--magenda-dot);
-    --magenda-dot-step: 7px;
+    --magenda-dot-step: 5px;
 }
 
 .mec-magenda-day-dots[data-n="2"] {
@@ -591,7 +593,7 @@
     .mec-magenda-weekdays span { padding-bottom: 6px; font-size: 12px; }
     .mec-magenda-day { height: 40px; gap: 3px; font-size: 14px !important; }
     .mec-magenda-day-num { width: 28px; height: 28px; }
-    .mec-magenda-day-dots { width: 5px; height: 5px; --magenda-dot-step: 8px; }
+    .mec-magenda-day-dots { width: 4px; height: 4px; --magenda-dot-step: 6px; }
     .mec-magenda-agenda { margin-top: 6px; padding-top: 10px; }
     .mec-magenda-agenda .mec-event-article { padding-bottom: 8px; }
     .mec-magenda-agenda .mec-event-time,
@@ -603,6 +605,7 @@
 @container magenda (min-width: 480px) {
     .mec-magenda-day { height: 46px; font-size: 15px !important; }
     .mec-magenda-day-num { width: 32px; height: 32px; }
+    .mec-magenda-day-dots { width: 5px; height: 5px; --magenda-dot-step: 8px; }
 }
 
 /* The calendar's heading is for screen readers only. */
