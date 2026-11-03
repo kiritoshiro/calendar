@@ -294,27 +294,32 @@ const fakeTime = (className, ...texts) => {
     return { className, childNodes, hasAttribute: key => attrs.has(key), setAttribute: key => attrs.add(key) };
 };
 const timeText = el => el.childNodes.filter(node => node.nodeType === 3).map(node => node.nodeValue).join('').trim();
-const agendaRoot = (times, today) => ({
+// listDate: the day whose <li> the agenda holds (default: today).
+const agendaRoot = (times, today, listDate = today) => ({
     data: key => ({ 'all-day-label': 'Visą dieną', 'today-word': 'Šiandien', 'mec-id': 'mec6', today })[key],
-    find: selector => selector === '#mec_weekly_view_date_eventsmec6_' + today.replace(/-/g, '') && times
+    find: selector => selector === '#mec_weekly_view_date_eventsmec6_' + listDate.replace(/-/g, '') && times
         ? { length: 1, find: () => ({ each: callback => times.forEach(el => callback.call(el)) }) }
         : { length: 0 },
 });
 const relabelToday = vm.runInNewContext(`${extractFunction(frontendJs, 'relabelToday')}\nrelabelToday`, { $: el => ({ hasClass: name => el.className.split(' ').includes(name) }) });
 const timed = fakeTime('mec-event-time mec-color', ' 19:00 - 20:00');
 const allDay = fakeTime('mec-event-time mec-color', ' Visą dieną');
-const range = fakeTime('mec-event-detailed-time mec-event-time mec-color', ' 3 lapkr. 19:00 - 5 lapkr. 20:00');
+// As display_detailed_time() prints it: clock, a space, then nested divs.
+const range = fakeTime('mec-event-detailed-time mec-event-time mec-color', ' ');
+const rangeWrapper = { nodeType: 1, innerHTML: '<div class="mec-detailed-time-start">Start from: 2026-11-03 - 19:00</div><div class="mec-detailed-time-end">End at: 2026-11-05 - 20:00</div>' };
+range.childNodes.splice(2, 1, rangeWrapper);
 const rangeAllDay = fakeTime('mec-event-detailed-time mec-event-time', ' Visą dieną');
 for (let i = 0; i < 3; i++) relabelToday(agendaRoot([timed, allDay, range, rangeAllDay], '2026-11-03'));
-assert.deepEqual([timed, allDay, range, rangeAllDay].map(timeText), ['Šiandien, 19:00 - 20:00', 'Šiandien', '3 lapkr. 19:00 - 5 lapkr. 20:00', 'Šiandien'], 'today\'s times are relabelled once; a multi-day range keeps its dates');
+assert.deepEqual([timed, allDay, rangeAllDay].map(timeText), ['Šiandien, 19:00 - 20:00', 'Šiandien', 'Šiandien'], 'today\'s times are relabelled once');
+assert.ok(range.childNodes[1].nodeValue === ' ' && range.childNodes[2] === rangeWrapper && rangeWrapper.innerHTML.startsWith('<div class="mec-detailed-time-start">Start from:') && !range.hasAttribute('data-magenda-today'), 'a multi-day range keeps its dates');
 // A loaded month puts new nodes in the agenda for each selection.
 const fresh = fakeTime('mec-event-time', ' 09:00', ' - 10:00');
 relabelToday(agendaRoot([fresh], '2026-11-03'));
 relabelToday(agendaRoot([fresh], '2026-11-03'));
 assert.equal(timeText(fresh), 'Šiandien, 09:00 - 10:00', 'only the first text node gets the prefix');
 const otherDay = fakeTime('mec-event-time', ' 09:00');
-relabelToday(agendaRoot(null, '2026-11-03'));
-assert.equal(timeText(otherDay), '09:00', 'no list for today, nothing changes');
+relabelToday(agendaRoot([otherDay], '2026-11-03', '2026-11-04'));
+assert.equal(timeText(otherDay), '09:00', 'another day\'s events are not relabelled');
 
 // The header month is nominative ("Lapkritis"), on the page and after navigation.
 assert.match(weeklySkin, /11 => 'Lapkritis', 12 => 'Gruodis',/);
