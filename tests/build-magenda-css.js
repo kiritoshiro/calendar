@@ -107,7 +107,7 @@ function build() {
         const prelude = block.prelude;
         if (/^@font-face/i.test(prelude)) kept.push(prelude + '{' + block.body + '}');
         else if (/^@(-webkit-)?keyframes/i.test(prelude)) keyframes.set(prelude.split(/\s+/)[1], prelude + '{' + block.body + '}');
-        else if (/^@(media|supports)/i.test(prelude)) {
+        else if (/^@(media|supports|container)/i.test(prelude)) {
             const inner = blocks(block.body).filter((rule) => !rule.prelude.startsWith('@') && keepRule(rule.prelude));
             if (inner.length) kept.push(prelude + '{' + inner.map((rule) => rule.prelude + '{' + rule.body + '}').join('') + '}');
         } else if (!prelude.startsWith('@') && keepRule(prelude)) kept.push(prelude + '{' + block.body + '}');

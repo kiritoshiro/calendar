@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.33', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.34', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -235,10 +235,102 @@ const magendaCss = plugin('assets/css/magenda.min.css');
 const weeklyRender = plugin('app/skins/weekly_view/render.php');
 assert.ok(!/<h4 class="mec-event-title"/.test(weeklyRender) && (weeklyRender.match(/<h3 class="mec-event-title">/g) || []).length === 2, 'Weekly View event titles are h3');
 assert.match(plugin('app/skins/weekly_view.php'), /<h2 class="mec-magenda-sr-title"><\?php echo esc_html\(\$calendar_heading\); \?><\/h2>/);
-// The agenda's clock is an SVG mask, so the icon font is not downloaded for it.
-assert.match(plugin('assets/css/magenda.min.css'), /\.mec-magenda \.mec-sl-clock-o\s*\{\s*font-family:\s*inherit !important;?\s*\}/);
+// The agenda shows no clock, so the icon font is not downloaded for it.
+assert.match(magendaCss, /\.mec-magenda-agenda \.mec-sl-clock-o,[^{]*\{\s*display:\s*none;?\s*\}/);
 assert.match(plugin('assets/css/magenda.min.css'), /\.mec-magenda \.mec-magenda-sr-title\s*\{[^}]*clip:\s*rect\(0, 0, 0, 0\)/);
-assert.ok(magendaCss.length < 40000 && /\.mec-magenda\s*\{[^}]*position:\s*relative/.test(magendaCss) && /@font-face\s*\{[^}]*simple-line-icons/.test(magendaCss), 'magenda.min.css holds the magenda styles and the icon font');
+// The ALPS theme inlines magenda.min.css only below 26,000 bytes (InlineStyles::MAX_FILE).
+assert.ok(Buffer.byteLength(magendaCss, 'utf8') < 26000 && /\.mec-magenda\s*\{[^}]*position:\s*relative/.test(magendaCss) && /@font-face\s*\{[^}]*simple-line-icons/.test(magendaCss), 'magenda.min.css holds the magenda styles and the icon font, under the theme\'s inline limit');
+
+// 7.35.1.34: the slim magenda. A dot per event (at most three) instead of a
+// count badge; the count is in the button's aria-label, the dots are hidden.
+assert.doesNotMatch(weeklySkin + frontendJs + magendaCss, /mec-magenda-day-count/, 'no count badges left');
+assert.match(weeklySkin, /<span class="mec-magenda-day-dots" data-n="<\?php echo esc_attr\(min\(\$count, 3\)\); \?>"><\/span>/);
+assert.match(weeklySkin, /aria-label="<\?php echo esc_attr\(\$day_num\.', '\.\$this->magenda_count_label\(\$count\)\); \?>"/);
+assert.match(miniAgendaInit, /\$root\.find\('\.mec-magenda-day-today'\)\.attr\('aria-current', 'date'\);/, 'today is marked for screen readers (MEC_kses drops aria-current from the page markup)');
+assert.match(frontendJs, /\(dateStr === today \? ' aria-current="date"' : ''\)/);
+assert.match(frontendJs, /'<span class="mec-magenda-day-dots" data-n="' \+ Math\.min\(count, 3\) \+ '" aria-hidden="true"><\/span>'/);
+assert.match(magendaCss, /\.mec-magenda-day-dots\[data-n="3"\]\s*\{[^}]*box-shadow:/);
+assert.match(magendaCss, /@container magenda \(min-width: ?260px\)\s*\{[^@]*\.mec-magenda-day\s*\{\s*height:\s*40px/, 'wider calendars scale with their own width');
+assert.match(magendaCss, /\.mec-magenda\s*\{[^}]*container:\s*magenda \/ inline-size/);
+assert.match(magendaCss, /\.mec-magenda button:focus-visible\s*\{[^}]*outline:\s*2px solid/, 'keyboard focus stays visible');
+assert.match(magendaCss, /\.mec-magenda-day\s*\{[^}]*transition:\s*none !important/, "MEC's button transition does not fade the focus outline in");
+// The plural rule in frontend.js matches magenda_count_label() in PHP.
+const countLabel = vm.runInNewContext(`${extractFunction(frontendJs, 'countLabel')}\ncountLabel`, {});
+const fakeRoot = (rule, forms) => ({ data: key => ({ 'count-rule': rule, 'count-forms': forms })[key] });
+const lt = fakeRoot('lt', ['%d renginys', '%d renginiai', '%d renginių']);
+const ru = fakeRoot('ru', ['%d событие', '%d события', '%d событий']);
+const en = fakeRoot('en', ['%d event', '%d events']);
+assert.deepEqual([1, 2, 9, 10, 11, 12, 21, 22, 30].map(n => countLabel(lt, n)), ['1 renginys', '2 renginiai', '9 renginiai', '10 renginių', '11 renginių', '12 renginių', '21 renginys', '22 renginiai', '30 renginių']);
+assert.deepEqual([1, 3, 5, 11, 14, 21, 24, 25].map(n => countLabel(ru, n)), ['1 событие', '3 события', '5 событий', '11 событий', '14 событий', '21 событие', '24 события', '25 событий']);
+assert.deepEqual([1, 2].map(n => countLabel(en, n)), ['1 event', '2 events']);
+assert.match(weeklySkin, /if \(strpos\(\$locale, 'lt'\) === 0\) return array\('lt', array\('%d renginys', '%d renginiai', '%d renginių'\)\);/);
+assert.match(weeklySkin, /elseif \(\(\$rule === 'lt' \? \$n % 10 >= 2 : \(\$n % 10 >= 2 && \$n % 10 <= 4\)\) && \(\$n % 100 < 10 \|\| \$n % 100 >= 20\)\) \$form = 1;/);
+// renderGrid() draws what magenda_render_grid_days() prints (the Playground
+// bookings test checks the PHP side): the count in aria-label, encoded like
+// esc_attr(), and at most three dots.
+const gridFns = ['pad', 'buildGridDays', 'escAttr', 'countLabel', 'renderGrid'].map(name => extractFunction(frontendJs, name)).join('\n');
+const renderGrid = vm.runInNewContext(`${gridFns}\nrenderGrid`, {});
+const drawGrid = (forms, counts) => {
+    let html = '';
+    const root = { data: key => ({ fdow: 0, today: '2026-11-03', 'count-rule': 'lt', 'count-forms': forms })[key], find: () => ({ html: value => { html = value; } }) };
+    renderGrid(root, 2026, 11, counts);
+    return html;
+};
+const grid = drawGrid(['%d renginys', '%d renginiai', '%d renginių'], { '2026-11-13': 3, '2026-11-21': 4, '2026-12-02': 1 });
+assert.equal((grid.match(/<button /g) || []).length, 35, 'November 2026 has five weeks');
+assert.match(grid, /<button type="button" class="mec-magenda-day mec-magenda-day-has-events" data-date="2026-11-13" aria-label="13, 3 renginiai"><span class="mec-magenda-day-num">13<\/span><span class="mec-magenda-day-dots" data-n="3" aria-hidden="true"><\/span><\/button>/);
+assert.match(grid, /data-date="2026-11-21" aria-label="21, 4 renginiai"><span class="mec-magenda-day-num">21<\/span><span class="mec-magenda-day-dots" data-n="3"/, 'four events still draw three dots');
+assert.match(grid, /class="mec-magenda-day mec-magenda-day-pad mec-magenda-day-has-events" data-date="2026-12-02" aria-label="2, 1 renginys">/);
+assert.match(grid, /class="mec-magenda-day mec-magenda-day-today" data-date="2026-11-03" aria-current="date">/);
+assert.doesNotMatch(grid, /data-date="2026-11-04"[^>]*aria-/, 'a day without events has no label');
+assert.match(drawGrid(Array(3).fill(`%d "x" <b> & 'y'`), { '2026-11-13': 3 }), /aria-label="13, 3 &quot;x&quot; &lt;b&gt; &amp; &#039;y&#039;"/, 'translated labels are encoded, not cut');
+
+// relabelToday() on a small fake of the DOM it touches. selectDay() runs it
+// every time; before a month loads, the page's own nodes stay in place.
+const fakeTime = (className, ...texts) => {
+    const attrs = new Set();
+    const childNodes = [{ nodeType: 1 }];
+    texts.forEach(text => childNodes.push({ nodeType: 3, nodeValue: text }, { nodeType: 1 }));
+    return { className, childNodes, hasAttribute: key => attrs.has(key), setAttribute: key => attrs.add(key) };
+};
+const timeText = el => el.childNodes.filter(node => node.nodeType === 3).map(node => node.nodeValue).join('').trim();
+// listDate: the day whose <li> the agenda holds (default: today).
+const agendaRoot = (times, today, listDate = today) => ({
+    data: key => ({ 'all-day-label': 'Visą dieną', 'today-word': 'Šiandien', 'mec-id': 'mec6', today })[key],
+    find: selector => selector === '#mec_weekly_view_date_eventsmec6_' + listDate.replace(/-/g, '') && times
+        ? { length: 1, find: () => ({ each: callback => times.forEach(el => callback.call(el)) }) }
+        : { length: 0 },
+});
+const relabelToday = vm.runInNewContext(`${extractFunction(frontendJs, 'relabelToday')}\nrelabelToday`, { $: el => ({ hasClass: name => el.className.split(' ').includes(name) }) });
+const timed = fakeTime('mec-event-time mec-color', ' 19:00 - 20:00');
+const allDay = fakeTime('mec-event-time mec-color', ' Visą dieną');
+// As display_detailed_time() prints it: clock, a space, then nested divs.
+const range = fakeTime('mec-event-detailed-time mec-event-time mec-color', ' ');
+const rangeWrapper = { nodeType: 1, innerHTML: '<div class="mec-detailed-time-start">Start from: 2026-11-03 - 19:00</div><div class="mec-detailed-time-end">End at: 2026-11-05 - 20:00</div>' };
+range.childNodes.splice(2, 1, rangeWrapper);
+const rangeAllDay = fakeTime('mec-event-detailed-time mec-event-time', ' Visą dieną');
+for (let i = 0; i < 3; i++) relabelToday(agendaRoot([timed, allDay, range, rangeAllDay], '2026-11-03'));
+assert.deepEqual([timed, allDay, rangeAllDay].map(timeText), ['Šiandien, 19:00 - 20:00', 'Šiandien', 'Šiandien'], 'today\'s times are relabelled once');
+assert.ok(range.childNodes[1].nodeValue === ' ' && range.childNodes[2] === rangeWrapper && rangeWrapper.innerHTML.startsWith('<div class="mec-detailed-time-start">Start from:') && !range.hasAttribute('data-magenda-today'), 'a multi-day range keeps its dates');
+// A loaded month puts new nodes in the agenda for each selection.
+const fresh = fakeTime('mec-event-time', ' 09:00', ' - 10:00');
+relabelToday(agendaRoot([fresh], '2026-11-03'));
+relabelToday(agendaRoot([fresh], '2026-11-03'));
+assert.equal(timeText(fresh), 'Šiandien, 09:00 - 10:00', 'only the first text node gets the prefix');
+const otherDay = fakeTime('mec-event-time', ' 09:00');
+relabelToday(agendaRoot([otherDay], '2026-11-03', '2026-11-04'));
+assert.equal(timeText(otherDay), '09:00', 'another day\'s events are not relabelled');
+
+// The header month is nominative ("Lapkritis"), on the page and after navigation.
+assert.match(weeklySkin, /11 => 'Lapkritis', 12 => 'Gruodis',/);
+assert.match(weeklySkin, /wp_date\('F', mktime\(12, 0, 0, \$m, 15, \$year\)\)/, 'mid-month noon: the same month in every site timezone');
+assert.doesNotMatch(weeklySkin, /mktime\(0, 0, 0, \$m, 1, \$year\)/);
+assert.match(weeklySkin, /\$month_full = \$month_full_names\[\$month - 1\];/);
+assert.match(weeklySkin, /data-month-full="<\?php echo esc_attr\(wp_json_encode\(\$month_full_names\)\); \?>"/);
+assert.match(frontendJs, /var label = \(\$root\.data\('month-full'\) \|\| \[\]\)\[month - 1\] \|\| data\.label;/);
+// Today's timed events read "Šiandien, 19:00 - 20:00", once per element.
+assert.match(frontendJs, /if \(el\.hasAttribute\('data-magenda-today'\)\) return;/);
+assert.match(frontendJs, /textNodes\[k\]\.nodeValue\.replace\(\/\^\(\\s\*\)\/, '\$1' \+ todayWord \+ ', '\)/);
 assert.match(factory, /\|\| self::\$rendered_search_form\) return false;/);
 assert.match(skinsLibrary, /private function note_search_form\(\$html\)/);
 assert.match(skinsLibrary, /strpos\(\$html, 'mec-search-form'\) !== false\) MEC_factory::mark_rendered\(\$this->skin, true\);/);
