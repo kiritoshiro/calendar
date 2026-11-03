@@ -10,6 +10,8 @@
   - Agenda: a thin rule, then the day's events: the time in small semibold site blue ("Šiandien, 19:00 - 20:00" for today's timed events; all-day events still say "Šiandien"), then the title with its colour dot in front. No clock icon or separators between events.
   - Wider calendars: the sizes grow with the calendar's own width (CSS container queries at 260 px and 480 px), not the viewport, so the front-page or full-width magenda keeps larger rows and the narrow sidebar on a wide screen no longer gets desktop sizes.
   - `magenda.min.css` is 23,561 bytes (was 25,025), still under the ALPS theme's 26,000-byte inline limit. `tests/build-magenda-css.js` now also keeps `@container` blocks.
+  - Non-Lithuanian month names (header and the month picker's short names) are formatted from noon on the 15th. They used midnight on the 1st from `mktime()`, which runs in UTC while `wp_date()` uses the site's timezone, so a site west of UTC (e.g. New York) showed the previous month. The picker's short names had this bug before this release too. Found by the Codex review.
+  - Tests: `verify-customizations.js` runs `renderGrid()` and `relabelToday()` (on a small fake DOM) instead of only matching their source; the Playground bookings test checks `magenda_month_names()` in New York time, the count labels in en/lt/ru and the PHP grid markup in real WordPress.
   - Day clicks, month and year pickers, prev/next and the month prefetch (7.35.1.23) are unchanged.
 
 ## 7.35.1.33

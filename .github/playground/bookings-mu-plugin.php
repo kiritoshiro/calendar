@@ -272,5 +272,38 @@ add_action('wp_ajax_pgtest_unit', function () {
     }
     $check('the verify endpoint ignores an unknown key', $endpoint('verify', 'pg-unknown') === '');
 
+    // 7.35.1.34: the magenda's month names, event-count labels and dots.
+    // West of UTC, a month's first midnight in UTC is still the previous
+    // month in the site's timezone.
+    $skin = MEC::getInstance('app.skins.weekly_view', 'MEC_skin_weekly_view');
+    $timezone = get_option('timezone_string');
+    update_option('timezone_string', 'America/New_York');
+    $locale = function () use (&$pg_locale) { return $pg_locale; };
+    add_filter('locale', $locale, 99);
+
+    $pg_locale = 'en_US';
+    $names = $skin->magenda_month_names(2026);
+    $check('magenda month names match their month in a timezone west of UTC (en_US, New York)', $names === ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], $names);
+    $check('magenda event counts in English', [$skin->magenda_count_label(1), $skin->magenda_count_label(2)] === ['1 event', '2 events']);
+    $skin->year = 2026;
+    $skin->month = 11;
+    $skin->events = ['2026-11-13' => [1, 2, 3], '2026-11-21' => [1, 2, 3, 4], '2026-12-02' => [1]];
+    $grid = preg_replace('/\s+/', ' ', $skin->magenda_render_grid_days('2026-11-03'));
+    $check('magenda days carry the count in aria-label and at most three dots', substr_count($grid, '<button ') === 35
+        && strpos($grid, 'data-date="2026-11-13" aria-label="13, 3 events"> <span class="mec-magenda-day-num">13</span> <span class="mec-magenda-day-dots" data-n="3"></span>') !== false
+        && strpos($grid, 'data-date="2026-11-21" aria-label="21, 4 events"> <span class="mec-magenda-day-num">21</span> <span class="mec-magenda-day-dots" data-n="3"></span>') !== false
+        && strpos($grid, 'class="mec-magenda-day mec-magenda-day-pad mec-magenda-day-has-events" data-date="2026-12-02" aria-label="2, 1 event"') !== false
+        && strpos($grid, 'mec-magenda-day-count') === false, $grid);
+
+    $pg_locale = 'lt_LT';
+    $names = $skin->magenda_month_names(2026);
+    $check('magenda month names are nominative in Lithuanian', $names[0] === 'Sausis' && $names[10] === 'Lapkritis', $names);
+    $check('magenda event counts in Lithuanian', array_map([$skin, 'magenda_count_label'], [1, 2, 10, 21]) === ['1 renginys', '2 renginiai', '10 renginių', '21 renginys']);
+    $pg_locale = 'ru_RU';
+    $check('magenda event counts in Russian', array_map([$skin, 'magenda_count_label'], [1, 3, 5, 22]) === ['1 событие', '3 события', '5 событий', '22 события']);
+
+    remove_filter('locale', $locale, 99);
+    update_option('timezone_string', $timezone);
+
     wp_send_json(['checks' => $checks]);
 });

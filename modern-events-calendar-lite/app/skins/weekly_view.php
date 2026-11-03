@@ -542,7 +542,10 @@ class MEC_skin_weekly_view extends MEC_skins
 
     /** Month names as the header shows them: nominative and capitalised
      *  ("Lapkritis"). WordPress's Lithuanian 'F' is the genitive
-     *  ("lapkričio"), which only reads right before a day number. */
+     *  ("lapkričio"), which only reads right before a day number. Other
+     *  locales format noon on the 15th: mktime() runs in UTC and wp_date()
+     *  in the site's timezone, so midnight on the 1st is the previous
+     *  month west of UTC. */
     public function magenda_month_names($year)
     {
         $lt = array(
@@ -555,7 +558,7 @@ class MEC_skin_weekly_view extends MEC_skins
         $names = array();
         for ($m = 1; $m <= 12; $m++)
         {
-            $name = $is_lt ? $lt[$m] : wp_date('F', mktime(0, 0, 0, $m, 1, $year));
+            $name = $is_lt ? $lt[$m] : wp_date('F', mktime(12, 0, 0, $m, 15, $year));
             $names[] = mb_strtoupper(mb_substr($name, 0, 1)).mb_substr($name, 1);
         }
         return $names;
@@ -626,7 +629,7 @@ class MEC_skin_weekly_view extends MEC_skins
         // The month and year pickers are built by frontend.js when first
         // opened; it only needs the month names.
         $month_names = array();
-        for ($m = 1; $m <= 12; $m++) $month_names[] = $this->magenda_short_month_label($m, wp_date('F', mktime(0, 0, 0, $m, 1, $year)));
+        for ($m = 1; $m <= 12; $m++) $month_names[] = $this->magenda_short_month_label($m, $month_full_names[$m - 1]);
 
         // The exact "All Day" label MEC itself would print (respects any
         // admin override of that message), so the client-side "Šiandien"

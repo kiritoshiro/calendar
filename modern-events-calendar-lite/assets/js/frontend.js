@@ -7783,7 +7783,7 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
 
             // One dot per event, at most three; the count is in the label.
             html += '<button type="button" class="' + cls + '" data-date="' + dateStr + '"' +
-                (count ? ' aria-label="' + day + ', ' + countLabel($root, count).replace(/[&"<>]/g, '') + '"' : '') +
+                (count ? ' aria-label="' + escAttr(day + ', ' + countLabel($root, count)) + '"' : '') +
                 (dateStr === today ? ' aria-current="date"' : '') + '>' +
                 '<span class="mec-magenda-day-num">' + day + '</span>' +
                 (count ? '<span class="mec-magenda-day-dots" data-n="' + Math.min(count, 3) + '" aria-hidden="true"></span>' : '') +
@@ -7791,6 +7791,13 @@ function mec_toggle_shortcode_pagination(shortcode_id, method) {
         });
 
         $root.find('.mec-magenda-grid').html(html);
+    }
+
+    /** Like PHP's esc_attr() for the attribute values renderGrid() builds. */
+    function escAttr(value) {
+        return String(value).replace(/[&"'<>]/g, function (c) {
+            return { '&': '&amp;', '"': '&quot;', "'": '&#039;', '<': '&lt;', '>': '&gt;' }[c];
+        });
     }
 
     /** "3 renginiai": the forms and plural rule come from magenda_count_forms(). */
