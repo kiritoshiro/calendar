@@ -1,15 +1,15 @@
 {
   "mounts": [
     {
-      "host": "modern-events-calendar-lite",
-      "vfs": "/wordpress/wp-content/plugins/modern-events-calendar-lite"
+      "host": "renginiu-kalendorius",
+      "vfs": "/wordpress/wp-content/plugins/renginiu-kalendorius"
     }
   ],
   "plugins": [
-    "modern-events-calendar-lite/modern-events-calendar-lite.php"
+    "renginiu-kalendorius/renginiu-kalendorius.php"
   ],
   "watch": [
-    "/wordpress/wp-content/plugins/modern-events-calendar-lite/"
+    "/wordpress/wp-content/plugins/renginiu-kalendorius/"
   ],
   "fixture": "<!-- wp:shortcode -->[MEC]<!-- /wp:shortcode -->"
 }
