@@ -1,7 +1,7 @@
 {
   "category": "WordPress calendar plugin",
   "source_paths": [
-    "modern-events-calendar-lite"
+    "renginiu-kalendorius"
   ],
   "semgrep_rules": [
     "p/php",

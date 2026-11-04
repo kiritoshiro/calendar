@@ -45,7 +45,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import smoke  # noqa: E402  (shares the Playground boot/stop and HTTP helpers)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PLUGIN = "modern-events-calendar-lite/modern-events-calendar-lite.php"
+PLUGIN = "renginiu-kalendorius/renginiu-kalendorius.php"
 
 failures = []
 
@@ -319,7 +319,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--php", default="8.4")
     parser.add_argument("--wp", default="latest")
-    parser.add_argument("--plugin-dir", default="modern-events-calendar-lite",
+    parser.add_argument("--plugin-dir", default="renginiu-kalendorius",
                         help="plugin folder to mount (another copy, to check that the test catches a reverted guard)")
     parser.add_argument("--port", type=int, default=smoke.PORT)
     parser.add_argument("--boot-timeout", type=int, default=420)
@@ -329,7 +329,7 @@ def main():
     with open(os.path.join(HERE, "bookings-mu-plugin.php"), encoding="utf-8") as fh:
         mu_plugin = fh.read()
     config = {
-        "mounts": [{"host": os.path.abspath(args.plugin_dir), "vfs": "/wordpress/wp-content/plugins/modern-events-calendar-lite"}],
+        "mounts": [{"host": os.path.abspath(args.plugin_dir), "vfs": "/wordpress/wp-content/plugins/renginiu-kalendorius"}],
         "plugins": [PLUGIN],
         "preferredVersions": {"php": args.php, "wp": args.wp},
         "setup": [{"step": "writeFile", "path": "/wordpress/wp-content/mu-plugins/pgtest-bookings.php", "data": mu_plugin}],

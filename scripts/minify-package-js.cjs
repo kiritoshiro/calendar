@@ -18,8 +18,8 @@ const vm = require('vm');
 const esbuild = require('esbuild');
 
 const plugin = process.argv[2];
-if (!plugin || !fs.existsSync(path.join(plugin, 'modern-events-calendar-lite.php'))) {
-    console.error('Usage: node scripts/minify-package-js.cjs <staged modern-events-calendar-lite directory>');
+if (!plugin || !fs.existsSync(path.join(plugin, 'renginiu-kalendorius.php'))) {
+    console.error('Usage: node scripts/minify-package-js.cjs <staged renginiu-kalendorius directory>');
     process.exit(2);
 }
 

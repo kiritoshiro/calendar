@@ -8,9 +8,9 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), 'utf8');
-const plugin = (relativePath) => read(path.join('modern-events-calendar-lite', relativePath));
+const plugin = (relativePath) => read(path.join('renginiu-kalendorius', relativePath));
 
-const main = plugin('modern-events-calendar-lite.php');
+const main = plugin('renginiu-kalendorius.php');
 const readme = plugin('readme.txt');
 const init = plugin('mec-init.php');
 const updater = plugin('app/libraries/github-updater.php');
@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.34', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.35', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -51,7 +51,7 @@ assert.match(updater, /empty\(\$_GET\['force-check'\]\) \|\| !current_user_can\(
 assert.match(updater, /delete_site_transient\('update_plugins'\);/);
 assert.match(updater, /\$release_version === \$version/);
 assert.match(updater, /Authorization'\] = 'Bearer ' \./);
-assert.match(updater, /REMOTE_PLUGIN_FILE = 'modern-events-calendar-lite\/modern-events-calendar-lite\.php'/);
+assert.match(updater, /REMOTE_PLUGIN_FILE = 'renginiu-kalendorius\/renginiu-kalendorius\.php'/);
 assert.match(updater, /mec_adventistai_invalid_update_package/);
 assert.doesNotMatch(updater, /[?&](?:token|access_token)=/i, 'a GitHub token must never be placed in a URL');
 assert.doesNotMatch(updater, /mec_adventistai_missing_github_token/, 'update checks must not require a token while the repository is public');
@@ -81,7 +81,7 @@ assert.match(dashboard, /is_readable\(\$log_file\)/);
 assert.match(dashboard, /mec-download-log-file=1/);
 assert.doesNotMatch(feature, /MEC-support|support_menu|support_page|display_support/);
 assert.doesNotMatch(factory, /MEC-support/);
-assert.equal(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'app', 'features', 'mec', 'support-page.php')), false, 'the standalone support page must stay removed');
+assert.equal(fs.existsSync(path.join(root, 'renginiu-kalendorius', 'app', 'features', 'mec', 'support-page.php')), false, 'the standalone support page must stay removed');
 assert.doesNotMatch(ix, /include_meetup_api|MEC-f-calendar-import|MEC-meetup-import|MEC-thirdparty|MEC-test-data|MEC-export|MEC-import|sync_f_import|sync_meetup_import/);
 for (const removed of ['app/features/mec/wizard.php', 'app/features/ix/export.php', 'app/features/ix/import.php', 'app/features/ix/import_f_calendar.php', 'app/features/ix/import_meetup.php', 'app/features/ix/thirdparty.php', 'app/features/ix/test_data.php']) {
     assert.match(buildWorkflow, new RegExp(`--exclude='${removed.replaceAll('/', '\\/')}'`));
@@ -218,7 +218,7 @@ assert.match(factory, /\$lean = \$late && \$this->lean_assets_only\(\);/);
 assert.match(factory, /\$popup = !\$lean \|\| self::\$rendered_event_popup;/);
 assert.match(factory, /if \(\$popup\) wp_enqueue_script\('featherlight'\);/);
 assert.match(skinsLibrary, /MEC_factory::mark_event_popup\(\);/);
-assert.match(read('modern-events-calendar-lite/assets/js/frontend.js'), /\.mec-magenda a\[data-event-id\]\[target="m1"\]/);
+assert.match(read('renginiu-kalendorius/assets/js/frontend.js'), /\.mec-magenda a\[data-event-id\]\[target="m1"\]/);
 assert.match(factory, /if \(!\$lean && !defined\("SHOW_CT_BUILDER"\)\) wp_enqueue_script\('jquery-ui-datepicker'\);/);
 
 // Those pages load the trimmed magenda stylesheet; the popup adds the full one.
@@ -226,7 +226,7 @@ assert.match(factory, /'mec-magenda-style' => \$this->main->asset\('css\/magenda
 assert.match(factory, /\$trimmed = \$lean && !is_rtl\(\) && !is_admin\(\)/);
 assert.match(factory, /&& !wp_style_is\('mec-frontend-style', 'enqueued'\)\s+&& !wp_style_is\('mec-frontend-style', 'done'\)/);
 assert.match(factory, /&& is_readable\(MEC_ABSPATH \. 'assets\/css\/magenda\.min\.css'\)\s+&& apply_filters\('mec_weekly_view_css', true\);/);
-assert.equal(fs.existsSync(path.join(root, 'modern-events-calendar-lite/assets/css/weekly-view.min.css')), false, 'only one trimmed stylesheet ships');
+assert.equal(fs.existsSync(path.join(root, 'renginiu-kalendorius/assets/css/weekly-view.min.css')), false, 'only one trimmed stylesheet ships');
 assert.match(factory, /if \(\$trimmed\) wp_enqueue_style\('mec-magenda-style'\);/);
 assert.match(factory, /'full_styles' => \$trimmed \? \$this->style_urls\(\['mec-font-icons', 'mec-frontend-style'\]\) : \[\]/);
 assert.match(frontendJs, /mecSingleEventDisplayer\.loadFullStyles\(\);\s+if \(jQuery\('\.mec-modal-result'\)/);
@@ -338,7 +338,7 @@ assert.match(skinsLibrary, /strpos\(\$html, 'mec-search-form'\) !== false\) MEC_
 // Unused libraries, the upstream update checker and unused locales stay out of
 // the repository; unminified stylesheets stay out of the package.
 for (const removed of ['app/api/Twilio', 'app/api/TFPDF', 'app/api/Stripe', 'app/api/Campaign_Monitor', 'app/api/Meetup', 'app/api/addons-api', 'app/core/puc']) {
-    assert.equal(fs.existsSync(path.join(root, 'modern-events-calendar-lite', removed)), false, `${removed} must stay removed`);
+    assert.equal(fs.existsSync(path.join(root, 'renginiu-kalendorius', removed)), false, `${removed} must stay removed`);
 }
 // A published package is never replaced, publishing waits for the security
 // checks, and Plugin Check fails only on findings beyond the legacy baseline.
@@ -346,9 +346,9 @@ const pluginChecks = read('.github/workflows/plugin-checks.yml');
 assert.doesNotMatch(buildWorkflow, /--clobber/);
 // The package's scripts are minified with the pinned esbuild; sources stay readable.
 assert.match(buildWorkflow, /npm ci --ignore-scripts/);
-assert.match(buildWorkflow, /node scripts\/minify-package-js\.cjs "\$stage\/modern-events-calendar-lite"/);
+assert.match(buildWorkflow, /node scripts\/minify-package-js\.cjs "\$stage\/renginiu-kalendorius"/);
 assert.equal(JSON.parse(read('package.json')).devDependencies.esbuild, '0.28.2');
-assert.ok(read('modern-events-calendar-lite/assets/js/frontend.js').includes('\n    getSinglePage: function'), 'frontend.js stays readable in the repository');
+assert.ok(read('renginiu-kalendorius/assets/js/frontend.js').includes('\n    getSinglePage: function'), 'frontend.js stays readable in the repository');
 assert.match(buildWorkflow, /uses: \.\/\.github\/workflows\/security-gate\.yml/);
 assert.match(buildWorkflow, /needs: security-gate\b/);
 const securityGate = read('.github/workflows/security-gate.yml');
@@ -371,15 +371,15 @@ for (const file of ['app/features/events.php', 'app/features/mec.php', 'app/libr
 }
 
 // The Events list offers "MS Excel Export"; its writer must ship.
-assert.ok(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'app', 'api', 'XLSX', 'xlsxwriter.class.php')), 'the XLSX writer must stay');
+assert.ok(fs.existsSync(path.join(root, 'renginiu-kalendorius', 'app', 'api', 'XLSX', 'xlsxwriter.class.php')), 'the XLSX writer must stay');
 assert.doesNotMatch(buildWorkflow, /--exclude='app\/api\/XLSX\/'/);
 // Vendored libraries' GitHub templates are not shipped.
 assert.match(buildWorkflow, /--exclude='\.github\/'/);
-const languages = fs.readdirSync(path.join(root, 'modern-events-calendar-lite', 'languages')).sort();
-assert.deepEqual(languages, ['index.html', 'modern-events-calendar-lite-en_US.mo', 'modern-events-calendar-lite-en_US.po', 'modern-events-calendar-lite-lt_LT.po', 'modern-events-calendar-lite-ru_RU.mo', 'modern-events-calendar-lite-ru_RU.po', 'modern-events-calendar-lite.pot']);
+const languages = fs.readdirSync(path.join(root, 'renginiu-kalendorius', 'languages')).sort();
+assert.deepEqual(languages, ['index.html', 'renginiu-kalendorius-en_US.mo', 'renginiu-kalendorius-en_US.po', 'renginiu-kalendorius-lt_LT.po', 'renginiu-kalendorius-ru_RU.mo', 'renginiu-kalendorius-ru_RU.po', 'renginiu-kalendorius.pot']);
 for (const css of ['frontend', 'backend', 'a11y', 'a11y-backend']) {
     assert.match(buildWorkflow, new RegExp(`--exclude='assets\\/css\\/${css}\\.css'`));
-    assert.ok(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'assets', 'css', `${css}.min.css`)), `${css}.min.css must exist`);
+    assert.ok(fs.existsSync(path.join(root, 'renginiu-kalendorius', 'assets', 'css', `${css}.min.css`)), `${css}.min.css must exist`);
 }
 
 // Public-input audit (7.35.1.11): visitor values in the search form are
@@ -454,7 +454,7 @@ assert.doesNotMatch(renderLibrary, /\? \$this->main->sanitize_deep_array\(\$_REQ
 // the map markers, the timetable's weekly program and the yearly view read
 // request sf/atts the same way and failed the same way (sf[month][]=x,
 // atts[sk-options]=x, mec_month[]=x, mec_next_page[]=x ...).
-const skinFiles = fs.readdirSync(path.join(root, 'modern-events-calendar-lite/app/skins')).filter((file) => file.endsWith('.php')).map((file) => `app/skins/${file}`);
+const skinFiles = fs.readdirSync(path.join(root, 'renginiu-kalendorius/app/skins')).filter((file) => file.endsWith('.php')).map((file) => `app/skins/${file}`);
 let normalisedSkinReads = 0;
 for (const file of skinFiles) {
     const source = plugin(file);
@@ -509,12 +509,12 @@ assert.doesNotMatch(mainLib, /`guid`='\$image_url'|`meta_value`='\$key'/, 'no qu
 // progress-bar module ships, and a module left out of the slim build renders
 // nothing instead of a PHP include warning.
 assert.doesNotMatch(buildWorkflow, /--exclude='app\/modules\/progress-bar\/'/, 'the progress-bar module must ship');
-assert.ok(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'app', 'modules', 'progress-bar', 'single.php')), 'progress-bar/single.php must exist');
+assert.ok(fs.existsSync(path.join(root, 'renginiu-kalendorius', 'app', 'modules', 'progress-bar', 'single.php')), 'progress-bar/single.php must exist');
 assert.match(plugin('app/libraries/main.php'), /\$path = MEC::import\('app\.modules\.' \. \$module, true, true\);\s*\/\/[^\n]*\n\s*\/\/[^\n]*\n\s*if \(!\$path \|\| !is_file\(\$path\)\) return '';/, 'module() must skip a missing module file');
 // Shell slips once committed empty files ("atts[", "id") to the plugin root,
 // and the release ZIP shipped them.
-const emptyRootFiles = fs.readdirSync(path.join(root, 'modern-events-calendar-lite'), { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name !== 'index.html' && fs.statSync(path.join(root, 'modern-events-calendar-lite', entry.name)).size === 0)
+const emptyRootFiles = fs.readdirSync(path.join(root, 'renginiu-kalendorius'), { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name !== 'index.html' && fs.statSync(path.join(root, 'renginiu-kalendorius', entry.name)).size === 0)
     .map((entry) => entry.name);
 assert.deepEqual(emptyRootFiles, [], 'no empty files may sit in the plugin root');
 // 7.35.1.31 (2026-10-21 audit): Import / Export forms need their own nonce, the

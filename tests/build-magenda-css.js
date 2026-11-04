@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Builds modern-events-calendar-lite/assets/css/magenda.min.css: the rules of
+ * Builds renginiu-kalendorius/assets/css/magenda.min.css: the rules of
  * frontend.min.css that a page showing only the magenda (Weekly View) uses.
  * Pages like that load this file instead of frontend.min.css (640 KB) and
  * iconfonts.css; the full files load when an event popup opens.
@@ -20,7 +20,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const dir = path.join(__dirname, '..', 'modern-events-calendar-lite', 'assets', 'css');
+const dir = path.join(__dirname, '..', 'renginiu-kalendorius', 'assets', 'css');
 const source = path.join(dir, 'frontend.min.css');
 const target = path.join(dir, 'magenda.min.css');
 

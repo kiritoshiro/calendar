@@ -30,7 +30,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -d '' php_files < <(find modern-events-calendar-lite -type f -name '*.php' -print0)
+          mapfile -d '' php_files < <(find renginiu-kalendorius -type f -name '*.php' -print0)
           if (( ${#php_files[@]} == 0 )); then
             echo 'No plugin PHP files were found.'
             exit 1
@@ -51,7 +51,7 @@ jobs:
 
       - name: Check customized JavaScript syntax
         run: |
-          node --check modern-events-calendar-lite/assets/js/frontend.js
+          node --check renginiu-kalendorius/assets/js/frontend.js
           node --check tests/verify-customizations.js
           node --check tests/build-magenda-css.js
 
@@ -59,7 +59,7 @@ jobs:
         run: node tests/build-magenda-css.js --check
 
       - name: Validate WPML XML configuration
-        run: python -c "import xml.etree.ElementTree as ET; ET.parse('modern-events-calendar-lite/wpml-config.xml')"
+        run: python -c "import xml.etree.ElementTree as ET; ET.parse('renginiu-kalendorius/wpml-config.xml')"
 
       - name: Reject unresolved merge conflict markers
         shell: bash
@@ -110,7 +110,7 @@ jobs:
         continue-on-error: true
         uses: WordPress/plugin-check-action@10857da14b6c2246d15402b3e69f777edcf8c12e # v1.1.9
         with:
-          build-dir: ./modern-events-calendar-lite
+          build-dir: ./renginiu-kalendorius
           categories: security
 
       - name: Compare with the legacy baseline
