@@ -38,22 +38,21 @@ only_renamed() {
     [ "$old_hash" = "$(git rev-parse "HEAD:$2")" ]
 }
 
-in_pathspec() {
-    local path="$1" spec
-    [ "${#specs[@]}" -eq 0 ] && return 0
-    for spec in "${specs[@]}"; do
-        spec="${spec%/}"
-        [ "$path" = "$spec" ] || [ "${path#"$spec"/}" != "$path" ] && return 0
-    done
-    return 1
-}
+# Rename detection needs both sides of a rename, so git diff runs without the
+# pathspec; git ls-files applies it (with full pathspec semantics: ./dir, .,
+# globs) to the tracked files, and only those are printed.
+declare -A wanted=()
+while IFS= read -r -d '' file; do
+    wanted["$file"]=1
+done < <(git ls-files -z -- "$@")
 
-specs=("$@")
-
-# Rename detection needs both sides of a rename, so the pathspec is applied to
-# the new path afterwards rather than passed to git diff.
-git -c diff.renameLimit=10000 diff --name-status -M --diff-filter=d "$base" HEAD |
-while IFS=$'\t' read -r status path new_path; do
+git -c diff.renameLimit=10000 diff -z --name-status -M --diff-filter=d "$base" HEAD |
+while IFS= read -r -d '' status && IFS= read -r -d '' path; do
+    case "$status" in
+        R*|C*)
+            IFS= read -r -d '' new_path
+            ;;
+    esac
     case "$status" in
         R100)
             continue
@@ -69,11 +68,11 @@ while IFS=$'\t' read -r status path new_path; do
             # Files of a line or two fall below rename detection's
             # similarity threshold; look for them under the old slug.
             old_path="${path//$new_slug/$old_slug}"
-            if [ "$old_path" != "$path" ] && git cat-file -e "$base:$old_path" 2>/dev/null \
-                && only_renamed "$old_path" "$path"; then
+            if [ "$old_path" != "$path" ] && git cat-file -e "$base:$old_path" 2>/dev/null                 && only_renamed "$old_path" "$path"; then
                 continue
             fi
             ;;
     esac
-    in_pathspec "$path" && printf '%s\n' "$path"
+    [ -n "${wanted[$path]:-}" ] && printf '%s
+' "$path"
 done | grep -E "$pattern" || true
