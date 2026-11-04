@@ -7,6 +7,12 @@
   - The consequence: scanners no longer report upstream MEC advisories for this plugin either. Upstream MEC security releases have to be watched and compared by hand.
   - Data is untouched: events (`mec-events`), taxonomies, `mec_*` options and tables, shortcodes, CSS classes and PHP class names are not keyed by the folder name. Theme overrides under `webnus/<plugin folder>/` must move to `webnus/renginiu-kalendorius/`.
   - Migration (once per site; the old build's updater cannot switch folders): deactivate "Modern Events Calendar Lite", upload and activate this ZIP, check the calendar, then delete the old plugin. Before deleting, make sure MEC → Settings → "Remove MEC Data on Plugin Uninstall" is Disabled: deleting the old plugin runs its uninstall routine. Later updates arrive through the updater as before.
+    - Do not activate both at once: the first copy WordPress loads defines `MECEXEC` and the other skips everything, its activation hook included.
+    - Automatic-update preferences are stored per plugin basename: turn them on again for the new plugin if the old one had them.
+    - Custom translation files outside the plugin (`wp-content/languages/modern-events-calendar-lite-<locale>.mo`, which `load_languages()` checks first, or a translation plugin's copies) must be renamed to `renginiu-kalendorius-<locale>.*`. wordpress.org has no Lithuanian or Russian pack for MEC Lite, so a stock site has none.
+    - Old builds keep checking the default branch for `modern-events-calendar-lite/modern-events-calendar-lite.php`. Once this is merged that file is gone, so their update check gets HTTP 404 and shows the updater's warning instead of offering any update. That warning is the cue to migrate.
+  - Unchanged: `is_new_version_available()` (unused) still asks the upstream Webnus API for the upstream slug `modern-events-calendar-lite`. The Lithuanian catalog still ships only as a `.po`, which WordPress does not load; this predates the rename.
+  - CI: `tools/linters/fork-owned-files.sh` treats a file whose only change since the upstream import is the rename (its path, and the old slug replaced in its text) as vendored code, so deep static analysis keeps its scope of 51 fork-maintained PHP files.
   - Historical entries below keep the old paths.
 
 ## 7.35.1.34

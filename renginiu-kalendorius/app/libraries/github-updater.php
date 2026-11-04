@@ -117,7 +117,7 @@ final class MEC_Adventistai_GitHub_Updater
         if(is_wp_error($remote)) return $result;
 
         return (object) array(
-            'name' => 'Modern Events Calendar Lite',
+            'name' => 'Renginių kalendorius',
             'slug' => self::PLUGIN_DIRECTORY,
             'version' => $remote['version'],
             'author' => '<a href="https://adventistai.lt">adventistai.lt</a>',

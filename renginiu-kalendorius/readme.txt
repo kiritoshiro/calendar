@@ -24,7 +24,7 @@ Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar 
 
 == Changelog ==
 = 7.35.1.35 =
-* Renamed to "Renginių kalendorius" (folder, main file and text domain renginiu-kalendorius) so security scanners stop matching it against Modern Events Calendar Lite advisories. Install it once by hand: deactivate the old plugin, upload this ZIP, activate it. Events and settings are kept.
+* Renamed to "Renginių kalendorius" (folder, main file and text domain renginiu-kalendorius) so security scanners stop matching it against Modern Events Calendar Lite advisories. Install it once by hand: first make sure M.E. Calendar → Settings → "Remove MEC Data on Plugin Uninstall" is Disabled, then deactivate the old plugin, upload this ZIP and activate it. Events and settings are kept. Turn automatic updates on again for the new plugin if the old one had them, and rename any custom translation files in wp-content/languages from modern-events-calendar-lite-* to renginiu-kalendorius-*. Delete the old plugin last: deleting it runs its uninstall routine.
 
 = 7.35.1.34 =
 * The small sidebar calendar is lighter: no header bar or day boxes, today in a filled circle, and a dot under the day for each event (up to three) instead of a number. The month is shown as "Lapkritis 2026". Screen readers still hear how many events a day has.

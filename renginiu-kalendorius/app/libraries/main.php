@@ -12519,7 +12519,7 @@ class MEC_main extends MEC_base
     {
         $url = add_query_arg(
             ['category' => 'mec'],
-            MEC_API_UPDATE . '/updates/?action=get_metadata&slug=renginiu-kalendorius'
+            MEC_API_UPDATE . '/updates/?action=get_metadata&slug=modern-events-calendar-lite'
         );
 
         $response = wp_remote_get($url);
