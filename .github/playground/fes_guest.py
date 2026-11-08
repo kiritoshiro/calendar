@@ -157,7 +157,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--php", default="8.4")
     parser.add_argument("--wp", default="latest")
-    parser.add_argument("--plugin-dir", default="modern-events-calendar-lite",
+    parser.add_argument("--plugin-dir", default="renginiu-kalendorius",
                         help="plugin folder to mount (another copy, to check that the test catches a reverted guard)")
     parser.add_argument("--port", type=int, default=smoke.PORT)
     parser.add_argument("--boot-timeout", type=int, default=420)
@@ -167,7 +167,7 @@ def main():
     with open(os.path.join(HERE, "fes-guest-mu-plugin.php"), encoding="utf-8") as fh:
         mu_plugin = fh.read()
     config = {
-        "mounts": [{"host": os.path.abspath(args.plugin_dir), "vfs": "/wordpress/wp-content/plugins/modern-events-calendar-lite"}],
+        "mounts": [{"host": os.path.abspath(args.plugin_dir), "vfs": "/wordpress/wp-content/plugins/renginiu-kalendorius"}],
         "plugins": [bookings.PLUGIN],
         "setup": [{"step": "writeFile", "path": "/wordpress/wp-content/mu-plugins/pgtest-fes-guest.php", "data": mu_plugin}],
     }

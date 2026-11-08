@@ -25,4 +25,54 @@ if [ -z "$base" ]; then
     exit 1
 fi
 
-git diff --name-only --diff-filter=d "$base" HEAD -- "$@" | grep -E "$pattern" || true
+# 7.35.1.35 renamed the plugin folder and text domain from the upstream slug
+# to this one. A file whose only change since the import is that rename (its
+# path, and the old slug replaced in its text) is still vendored code.
+old_slug='modern-events-calendar-lite'
+new_slug='renginiu-kalendorius'
+
+only_renamed() {
+    local old_hash
+    # -b keeps CRLF line endings intact under Git for Windows.
+    old_hash="$(git cat-file blob "$base:$1" | sed -b "s/$old_slug/$new_slug/g" | git hash-object --no-filters --stdin)"
+    [ "$old_hash" = "$(git rev-parse "HEAD:$2")" ]
+}
+
+# Rename detection needs both sides of a rename, so git diff runs without the
+# pathspec; git ls-files applies it (with full pathspec semantics: ./dir, .,
+# globs) to the tracked files, and only those are printed.
+declare -A wanted=()
+while IFS= read -r -d '' file; do
+    wanted["$file"]=1
+done < <(git ls-files -z -- "$@")
+
+git -c diff.renameLimit=10000 diff -z --name-status -M --diff-filter=d "$base" HEAD |
+while IFS= read -r -d '' status && IFS= read -r -d '' path; do
+    case "$status" in
+        R*|C*)
+            IFS= read -r -d '' new_path
+            ;;
+    esac
+    case "$status" in
+        R100)
+            continue
+            ;;
+        R*)
+            only_renamed "$path" "$new_path" && continue
+            path="$new_path"
+            ;;
+        C*)
+            path="$new_path"
+            ;;
+        A)
+            # Files of a line or two fall below rename detection's
+            # similarity threshold; look for them under the old slug.
+            old_path="${path//$new_slug/$old_slug}"
+            if [ "$old_path" != "$path" ] && git cat-file -e "$base:$old_path" 2>/dev/null                 && only_renamed "$old_path" "$path"; then
+                continue
+            fi
+            ;;
+    esac
+    [ -n "${wanted[$path]:-}" ] && printf '%s
+' "$path"
+done | grep -E "$pattern" || true

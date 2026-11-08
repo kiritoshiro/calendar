@@ -103,7 +103,7 @@ def main(argv):
         lines += [f'  - `{file}`: {code} (+{n})' for file, code, n in new]
         summary(lines)
         for file, code, n in new:
-            print(f'::error file=modern-events-calendar-lite/{file}::{n} new Plugin Check finding(s): {code}')
+            print(f'::error file=renginiu-kalendorius/{file}::{n} new Plugin Check finding(s): {code}')
         return 1
 
     lines.append('- No new findings.')

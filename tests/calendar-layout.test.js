@@ -8,7 +8,7 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 
 const root = path.resolve(__dirname, '..');
-const customCss = fs.readFileSync(path.join(root, 'modern-events-calendar-lite/assets/css/adventistai-calendar.css'), 'utf8');
+const customCss = fs.readFileSync(path.join(root, 'renginiu-kalendorius/assets/css/adventistai-calendar.css'), 'utf8');
 const screenshotPath = process.env.MEC_LAYOUT_SCREENSHOT || path.join(root, 'calendar-navigation-preview.png');
 
 const months = [
@@ -37,7 +37,7 @@ const baseCss = `
 
 // The magenda (Weekly View mini calendar) as weekly_view.php prints it, for
 // November 2026: today the 3rd, event counts per day, Dec 1-5 as padding.
-const magendaCss = fs.readFileSync(path.join(root, 'modern-events-calendar-lite/assets/css/magenda.min.css'), 'utf8');
+const magendaCss = fs.readFileSync(path.join(root, 'renginiu-kalendorius/assets/css/magenda.min.css'), 'utf8');
 // 19-21: three days in a row with three or more events.
 const magendaCounts = { 3: 1, 6: 1, 7: 1, 10: 2, 13: 3, 14: 1, 19: 3, 20: 5, 21: 4, 27: 1, 32: 1, 34: 1 };
 const magendaMarkup = () => {

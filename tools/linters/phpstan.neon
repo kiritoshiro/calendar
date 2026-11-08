@@ -10,7 +10,7 @@ parameters:
     # Symbols PHPStan must know about but must not analyse: the whole plugin
     # (so fork files resolve upstream classes) and optional integrations.
     scanDirectories:
-        - ../../modern-events-calendar-lite
+        - ../../renginiu-kalendorius
     scanFiles:
         - stubs/optional-integrations.php
         - stubs/removed-features.php
@@ -26,4 +26,4 @@ parameters:
         # The report template is included from MEC_feature_report::report(), so
         # its $this->main runs in class scope; PHPStan reads the file on its own.
         - identifier: property.private
-          path: ../../modern-events-calendar-lite/app/features/report/tpl.php
+          path: ../../renginiu-kalendorius/app/features/report/tpl.php
