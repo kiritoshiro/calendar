@@ -187,16 +187,19 @@ const parseYaml = (source, file) => {
     return document;
 };
 
-// The active elements of a PHPCS ruleset: comments removed, attributes read
-// in any order, spacing or quoting.
+// The active elements of a PHPCS ruleset, with attributes read in any order,
+// spacing or quoting. Comments are matched first and skipped, so an element
+// that is only commented out does not count.
 const rulesetElements = (relativePath) => {
-    const xml = read(relativePath).replace(/<!--[\s\S]*?-->/g, '');
-    assert.doesNotMatch(xml, /<!--|<!\[CDATA\[|<!DOCTYPE/i, `${relativePath} has XML this check cannot read`);
-    return [...xml.matchAll(/<([A-Za-z][\w.-]*)((?:\s+[\w.:-]+\s*=\s*(?:"[^"]*"|'[^']*'))*)\s*\/?>/g)].map(([, name, attributes]) => ({
-        name,
-        attributes: Object.fromEntries([...attributes.matchAll(/([\w.:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)]
-            .map(([, key, double, single]) => [key, double ?? single])),
-    }));
+    const xml = read(relativePath);
+    assert.doesNotMatch(xml, /<!\[CDATA\[|<!DOCTYPE/i, `${relativePath} has XML this check cannot read`);
+    return [...xml.matchAll(/<!--[\s\S]*?(?:-->|$)|<([A-Za-z][\w.-]*)((?:\s+[\w.:-]+\s*=\s*(?:"[^"]*"|'[^']*'))*)\s*\/?>/g)]
+        .filter(([token]) => !token.startsWith('<!--'))
+        .map(([, name, attributes]) => ({
+            name,
+            attributes: Object.fromEntries([...attributes.matchAll(/([\w.:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)]
+                .map(([, key, double, single]) => [key, double ?? single])),
+        }));
 };
 // Only these elements may appear, so an <exclude>, <severity> or <arg> that
 // weakens a rule fails instead of passing unnoticed.
@@ -475,7 +478,7 @@ try {
     const compare = (resultsText) => {
         if (resultsText === null) fs.rmSync(results, { force: true });
         else fs.writeFileSync(results, resultsText);
-        return run('python3', [path.join(root, 'tools', 'linters', 'plugin-check-baseline.py'), results, baseline], { env: { ...process.env, GITHUB_STEP_SUMMARY: '' } }).status;
+        return run('python3', ['tools/linters/plugin-check-baseline.py', results, baseline], { cwd: root, env: { ...process.env, GITHUB_STEP_SUMMARY: '' } }).status;
     };
     assert.equal(compare(`FILE: a.php\n[${known},${known}]\n`), 0, 'baseline findings must pass');
     assert.equal(compare(`FILE: a.php\n[${known}]\n`), 0, 'resolved findings must pass');
@@ -490,6 +493,8 @@ try {
     // other extensions, files outside the pathspec and files only carried
     // over by the plugin rename; UPSTREAM_IMPORT_REF overrides the import.
     const repo = path.join(scratch, 'repo');
+    // Run from beside the fixture so the script path is a fixed relative one.
+    fs.copyFileSync(path.join(root, 'tools', 'linters', 'fork-owned-files.sh'), path.join(scratch, 'fork-owned-files.sh'));
     fs.mkdirSync(repo);
     const git = (...args) => {
         const result = run('git', ['-c', 'user.name=verify', '-c', 'user.email=verify@example.invalid', '-c', 'commit.gpgsign=false', '-c', 'core.autocrlf=false', ...args], { cwd: repo });
@@ -530,7 +535,7 @@ try {
         const env = { ...process.env };
         delete env.UPSTREAM_IMPORT_REF;
         if (importRef) env.UPSTREAM_IMPORT_REF = importRef;
-        const listed = run('bash', [path.join(root, 'tools', 'linters', 'fork-owned-files.sh'), '[.]php$', NEW], { cwd: repo, env });
+        const listed = run('bash', ['../fork-owned-files.sh', '[.]php$', NEW], { cwd: repo, env });
         assert.equal(listed.status, 0, listed.stderr);
         return listed.stdout.split('\n').filter(Boolean).sort();
     };
