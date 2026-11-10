@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Builds modern-events-calendar-lite/assets/css/magenda.min.css: the rules of
+ * Builds renginiu-kalendorius/assets/css/magenda.min.css: the rules of
  * frontend.min.css that a page showing only the magenda (Weekly View) uses.
  * Pages like that load this file instead of frontend.min.css (640 KB) and
  * iconfonts.css; the full files load when an event popup opens.
@@ -20,7 +20,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const dir = path.join(__dirname, '..', 'modern-events-calendar-lite', 'assets', 'css');
+const dir = path.join(__dirname, '..', 'renginiu-kalendorius', 'assets', 'css');
 const source = path.join(dir, 'frontend.min.css');
 const target = path.join(dir, 'magenda.min.css');
 
@@ -107,7 +107,7 @@ function build() {
         const prelude = block.prelude;
         if (/^@font-face/i.test(prelude)) kept.push(prelude + '{' + block.body + '}');
         else if (/^@(-webkit-)?keyframes/i.test(prelude)) keyframes.set(prelude.split(/\s+/)[1], prelude + '{' + block.body + '}');
-        else if (/^@(media|supports)/i.test(prelude)) {
+        else if (/^@(media|supports|container)/i.test(prelude)) {
             const inner = blocks(block.body).filter((rule) => !rule.prelude.startsWith('@') && keepRule(rule.prelude));
             if (inner.length) kept.push(prelude + '{' + inner.map((rule) => rule.prelude + '{' + rule.body + '}').join('') + '}');
         } else if (!prelude.startsWith('@') && keepRule(prelude)) kept.push(prelude + '{' + block.body + '}');

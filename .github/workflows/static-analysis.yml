@@ -40,7 +40,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t files < <(bash tools/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
+          mapfile -t files < <(bash tools/linters/fork-owned-files.sh '[.]php$' renginiu-kalendorius)
           if [ "${#files[@]}" -eq 0 ]; then
             echo 'No fork-maintained PHP files were found; the import commit lookup is wrong.'
             exit 1
@@ -53,7 +53,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t files < <(bash tools/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
+          mapfile -t files < <(bash tools/linters/fork-owned-files.sh '[.]php$' renginiu-kalendorius)
           php tools/linters/vendor/bin/phpcs --standard=tools/linters/phpcs-compatibility.xml --report=full -- "${files[@]}"
 
       - name: PHPStan bug analysis
@@ -61,7 +61,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t files < <(bash tools/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
+          mapfile -t files < <(bash tools/linters/fork-owned-files.sh '[.]php$' renginiu-kalendorius)
           php tools/linters/vendor/bin/phpstan analyse --configuration=tools/linters/phpstan.neon --no-progress --memory-limit=3G -- "${files[@]}"
 
   wordpress-standards:
@@ -90,7 +90,7 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          mapfile -t files < <(bash tools/linters/fork-owned-files.sh '[.]php$' modern-events-calendar-lite)
+          mapfile -t files < <(bash tools/linters/fork-owned-files.sh '[.]php$' renginiu-kalendorius)
           if [ "${#files[@]}" -eq 0 ]; then
             echo 'No fork-maintained PHP files were found; the import commit lookup is wrong.'
             exit 1
@@ -154,7 +154,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          semgrep scan --config p/php --config p/security-audit --config p/secrets --metrics off --oss-only --sarif --output semgrep.sarif --exclude 'app/vendor' --exclude 'app/api' --exclude '*.min.js' modern-events-calendar-lite
+          semgrep scan --config p/php --config p/security-audit --config p/secrets --metrics off --oss-only --sarif --output semgrep.sarif --exclude 'app/vendor' --exclude 'app/api' --exclude '*.min.js' renginiu-kalendorius
           test -s semgrep.sarif
 
       - name: Upload Semgrep results
