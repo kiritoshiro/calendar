@@ -8,9 +8,9 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), 'utf8');
-const plugin = (relativePath) => read(path.join('modern-events-calendar-lite', relativePath));
+const plugin = (relativePath) => read(path.join('renginiu-kalendorius', relativePath));
 
-const main = plugin('modern-events-calendar-lite.php');
+const main = plugin('renginiu-kalendorius.php');
 const readme = plugin('readme.txt');
 const init = plugin('mec-init.php');
 const updater = plugin('app/libraries/github-updater.php');
@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.26', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.35', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -51,7 +51,7 @@ assert.match(updater, /empty\(\$_GET\['force-check'\]\) \|\| !current_user_can\(
 assert.match(updater, /delete_site_transient\('update_plugins'\);/);
 assert.match(updater, /\$release_version === \$version/);
 assert.match(updater, /Authorization'\] = 'Bearer ' \./);
-assert.match(updater, /REMOTE_PLUGIN_FILE = 'modern-events-calendar-lite\/modern-events-calendar-lite\.php'/);
+assert.match(updater, /REMOTE_PLUGIN_FILE = 'renginiu-kalendorius\/renginiu-kalendorius\.php'/);
 assert.match(updater, /mec_adventistai_invalid_update_package/);
 assert.doesNotMatch(updater, /[?&](?:token|access_token)=/i, 'a GitHub token must never be placed in a URL');
 assert.doesNotMatch(updater, /mec_adventistai_missing_github_token/, 'update checks must not require a token while the repository is public');
@@ -81,7 +81,7 @@ assert.match(dashboard, /is_readable\(\$log_file\)/);
 assert.match(dashboard, /mec-download-log-file=1/);
 assert.doesNotMatch(feature, /MEC-support|support_menu|support_page|display_support/);
 assert.doesNotMatch(factory, /MEC-support/);
-assert.equal(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'app', 'features', 'mec', 'support-page.php')), false, 'the standalone support page must stay removed');
+assert.equal(fs.existsSync(path.join(root, 'renginiu-kalendorius', 'app', 'features', 'mec', 'support-page.php')), false, 'the standalone support page must stay removed');
 assert.doesNotMatch(ix, /include_meetup_api|MEC-f-calendar-import|MEC-meetup-import|MEC-thirdparty|MEC-test-data|MEC-export|MEC-import|sync_f_import|sync_meetup_import/);
 for (const removed of ['app/features/mec/wizard.php', 'app/features/ix/export.php', 'app/features/ix/import.php', 'app/features/ix/import_f_calendar.php', 'app/features/ix/import_meetup.php', 'app/features/ix/thirdparty.php', 'app/features/ix/test_data.php']) {
     assert.match(buildWorkflow, new RegExp(`--exclude='${removed.replaceAll('/', '\\/')}'`));
@@ -218,7 +218,7 @@ assert.match(factory, /\$lean = \$late && \$this->lean_assets_only\(\);/);
 assert.match(factory, /\$popup = !\$lean \|\| self::\$rendered_event_popup;/);
 assert.match(factory, /if \(\$popup\) wp_enqueue_script\('featherlight'\);/);
 assert.match(skinsLibrary, /MEC_factory::mark_event_popup\(\);/);
-assert.match(read('modern-events-calendar-lite/assets/js/frontend.js'), /\.mec-magenda a\[data-event-id\]\[target="m1"\]/);
+assert.match(read('renginiu-kalendorius/assets/js/frontend.js'), /\.mec-magenda a\[data-event-id\]\[target="m1"\]/);
 assert.match(factory, /if \(!\$lean && !defined\("SHOW_CT_BUILDER"\)\) wp_enqueue_script\('jquery-ui-datepicker'\);/);
 
 // Those pages load the trimmed magenda stylesheet; the popup adds the full one.
@@ -226,7 +226,7 @@ assert.match(factory, /'mec-magenda-style' => \$this->main->asset\('css\/magenda
 assert.match(factory, /\$trimmed = \$lean && !is_rtl\(\) && !is_admin\(\)/);
 assert.match(factory, /&& !wp_style_is\('mec-frontend-style', 'enqueued'\)\s+&& !wp_style_is\('mec-frontend-style', 'done'\)/);
 assert.match(factory, /&& is_readable\(MEC_ABSPATH \. 'assets\/css\/magenda\.min\.css'\)\s+&& apply_filters\('mec_weekly_view_css', true\);/);
-assert.equal(fs.existsSync(path.join(root, 'modern-events-calendar-lite/assets/css/weekly-view.min.css')), false, 'only one trimmed stylesheet ships');
+assert.equal(fs.existsSync(path.join(root, 'renginiu-kalendorius/assets/css/weekly-view.min.css')), false, 'only one trimmed stylesheet ships');
 assert.match(factory, /if \(\$trimmed\) wp_enqueue_style\('mec-magenda-style'\);/);
 assert.match(factory, /'full_styles' => \$trimmed \? \$this->style_urls\(\['mec-font-icons', 'mec-frontend-style'\]\) : \[\]/);
 assert.match(frontendJs, /mecSingleEventDisplayer\.loadFullStyles\(\);\s+if \(jQuery\('\.mec-modal-result'\)/);
@@ -235,10 +235,102 @@ const magendaCss = plugin('assets/css/magenda.min.css');
 const weeklyRender = plugin('app/skins/weekly_view/render.php');
 assert.ok(!/<h4 class="mec-event-title"/.test(weeklyRender) && (weeklyRender.match(/<h3 class="mec-event-title">/g) || []).length === 2, 'Weekly View event titles are h3');
 assert.match(plugin('app/skins/weekly_view.php'), /<h2 class="mec-magenda-sr-title"><\?php echo esc_html\(\$calendar_heading\); \?><\/h2>/);
-// The agenda's clock is an SVG mask, so the icon font is not downloaded for it.
-assert.match(plugin('assets/css/magenda.min.css'), /\.mec-magenda \.mec-sl-clock-o\s*\{\s*font-family:\s*inherit !important;?\s*\}/);
+// The agenda shows no clock, so the icon font is not downloaded for it.
+assert.match(magendaCss, /\.mec-magenda-agenda \.mec-sl-clock-o,[^{]*\{\s*display:\s*none;?\s*\}/);
 assert.match(plugin('assets/css/magenda.min.css'), /\.mec-magenda \.mec-magenda-sr-title\s*\{[^}]*clip:\s*rect\(0, 0, 0, 0\)/);
-assert.ok(magendaCss.length < 40000 && /\.mec-magenda\s*\{[^}]*position:\s*relative/.test(magendaCss) && /@font-face\s*\{[^}]*simple-line-icons/.test(magendaCss), 'magenda.min.css holds the magenda styles and the icon font');
+// The ALPS theme inlines magenda.min.css only below 26,000 bytes (InlineStyles::MAX_FILE).
+assert.ok(Buffer.byteLength(magendaCss, 'utf8') < 26000 && /\.mec-magenda\s*\{[^}]*position:\s*relative/.test(magendaCss) && /@font-face\s*\{[^}]*simple-line-icons/.test(magendaCss), 'magenda.min.css holds the magenda styles and the icon font, under the theme\'s inline limit');
+
+// 7.35.1.34: the slim magenda. A dot per event (at most three) instead of a
+// count badge; the count is in the button's aria-label, the dots are hidden.
+assert.doesNotMatch(weeklySkin + frontendJs + magendaCss, /mec-magenda-day-count/, 'no count badges left');
+assert.match(weeklySkin, /<span class="mec-magenda-day-dots" data-n="<\?php echo esc_attr\(min\(\$count, 3\)\); \?>"><\/span>/);
+assert.match(weeklySkin, /aria-label="<\?php echo esc_attr\(\$day_num\.', '\.\$this->magenda_count_label\(\$count\)\); \?>"/);
+assert.match(miniAgendaInit, /\$root\.find\('\.mec-magenda-day-today'\)\.attr\('aria-current', 'date'\);/, 'today is marked for screen readers (MEC_kses drops aria-current from the page markup)');
+assert.match(frontendJs, /\(dateStr === today \? ' aria-current="date"' : ''\)/);
+assert.match(frontendJs, /'<span class="mec-magenda-day-dots" data-n="' \+ Math\.min\(count, 3\) \+ '" aria-hidden="true"><\/span>'/);
+assert.match(magendaCss, /\.mec-magenda-day-dots\[data-n="3"\]\s*\{[^}]*box-shadow:/);
+assert.match(magendaCss, /@container magenda \(min-width: ?260px\)\s*\{[^@]*\.mec-magenda-day\s*\{\s*height:\s*40px/, 'wider calendars scale with their own width');
+assert.match(magendaCss, /\.mec-magenda\s*\{[^}]*container:\s*magenda \/ inline-size/);
+assert.match(magendaCss, /\.mec-magenda button:focus-visible\s*\{[^}]*outline:\s*2px solid/, 'keyboard focus stays visible');
+assert.match(magendaCss, /\.mec-magenda-day\s*\{[^}]*transition:\s*none !important/, "MEC's button transition does not fade the focus outline in");
+// The plural rule in frontend.js matches magenda_count_label() in PHP.
+const countLabel = vm.runInNewContext(`${extractFunction(frontendJs, 'countLabel')}\ncountLabel`, {});
+const fakeRoot = (rule, forms) => ({ data: key => ({ 'count-rule': rule, 'count-forms': forms })[key] });
+const lt = fakeRoot('lt', ['%d renginys', '%d renginiai', '%d renginių']);
+const ru = fakeRoot('ru', ['%d событие', '%d события', '%d событий']);
+const en = fakeRoot('en', ['%d event', '%d events']);
+assert.deepEqual([1, 2, 9, 10, 11, 12, 21, 22, 30].map(n => countLabel(lt, n)), ['1 renginys', '2 renginiai', '9 renginiai', '10 renginių', '11 renginių', '12 renginių', '21 renginys', '22 renginiai', '30 renginių']);
+assert.deepEqual([1, 3, 5, 11, 14, 21, 24, 25].map(n => countLabel(ru, n)), ['1 событие', '3 события', '5 событий', '11 событий', '14 событий', '21 событие', '24 события', '25 событий']);
+assert.deepEqual([1, 2].map(n => countLabel(en, n)), ['1 event', '2 events']);
+assert.match(weeklySkin, /if \(strpos\(\$locale, 'lt'\) === 0\) return array\('lt', array\('%d renginys', '%d renginiai', '%d renginių'\)\);/);
+assert.match(weeklySkin, /elseif \(\(\$rule === 'lt' \? \$n % 10 >= 2 : \(\$n % 10 >= 2 && \$n % 10 <= 4\)\) && \(\$n % 100 < 10 \|\| \$n % 100 >= 20\)\) \$form = 1;/);
+// renderGrid() draws what magenda_render_grid_days() prints (the Playground
+// bookings test checks the PHP side): the count in aria-label, encoded like
+// esc_attr(), and at most three dots.
+const gridFns = ['pad', 'buildGridDays', 'escAttr', 'countLabel', 'renderGrid'].map(name => extractFunction(frontendJs, name)).join('\n');
+const renderGrid = vm.runInNewContext(`${gridFns}\nrenderGrid`, {});
+const drawGrid = (forms, counts) => {
+    let html = '';
+    const root = { data: key => ({ fdow: 0, today: '2026-11-03', 'count-rule': 'lt', 'count-forms': forms })[key], find: () => ({ html: value => { html = value; } }) };
+    renderGrid(root, 2026, 11, counts);
+    return html;
+};
+const grid = drawGrid(['%d renginys', '%d renginiai', '%d renginių'], { '2026-11-13': 3, '2026-11-21': 4, '2026-12-02': 1 });
+assert.equal((grid.match(/<button /g) || []).length, 35, 'November 2026 has five weeks');
+assert.match(grid, /<button type="button" class="mec-magenda-day mec-magenda-day-has-events" data-date="2026-11-13" aria-label="13, 3 renginiai"><span class="mec-magenda-day-num">13<\/span><span class="mec-magenda-day-dots" data-n="3" aria-hidden="true"><\/span><\/button>/);
+assert.match(grid, /data-date="2026-11-21" aria-label="21, 4 renginiai"><span class="mec-magenda-day-num">21<\/span><span class="mec-magenda-day-dots" data-n="3"/, 'four events still draw three dots');
+assert.match(grid, /class="mec-magenda-day mec-magenda-day-pad mec-magenda-day-has-events" data-date="2026-12-02" aria-label="2, 1 renginys">/);
+assert.match(grid, /class="mec-magenda-day mec-magenda-day-today" data-date="2026-11-03" aria-current="date">/);
+assert.doesNotMatch(grid, /data-date="2026-11-04"[^>]*aria-/, 'a day without events has no label');
+assert.match(drawGrid(Array(3).fill(`%d "x" <b> & 'y'`), { '2026-11-13': 3 }), /aria-label="13, 3 &quot;x&quot; &lt;b&gt; &amp; &#039;y&#039;"/, 'translated labels are encoded, not cut');
+
+// relabelToday() on a small fake of the DOM it touches. selectDay() runs it
+// every time; before a month loads, the page's own nodes stay in place.
+const fakeTime = (className, ...texts) => {
+    const attrs = new Set();
+    const childNodes = [{ nodeType: 1 }];
+    texts.forEach(text => childNodes.push({ nodeType: 3, nodeValue: text }, { nodeType: 1 }));
+    return { className, childNodes, hasAttribute: key => attrs.has(key), setAttribute: key => attrs.add(key) };
+};
+const timeText = el => el.childNodes.filter(node => node.nodeType === 3).map(node => node.nodeValue).join('').trim();
+// listDate: the day whose <li> the agenda holds (default: today).
+const agendaRoot = (times, today, listDate = today) => ({
+    data: key => ({ 'all-day-label': 'Visą dieną', 'today-word': 'Šiandien', 'mec-id': 'mec6', today })[key],
+    find: selector => selector === '#mec_weekly_view_date_eventsmec6_' + listDate.replace(/-/g, '') && times
+        ? { length: 1, find: () => ({ each: callback => times.forEach(el => callback.call(el)) }) }
+        : { length: 0 },
+});
+const relabelToday = vm.runInNewContext(`${extractFunction(frontendJs, 'relabelToday')}\nrelabelToday`, { $: el => ({ hasClass: name => el.className.split(' ').includes(name) }) });
+const timed = fakeTime('mec-event-time mec-color', ' 19:00 - 20:00');
+const allDay = fakeTime('mec-event-time mec-color', ' Visą dieną');
+// As display_detailed_time() prints it: clock, a space, then nested divs.
+const range = fakeTime('mec-event-detailed-time mec-event-time mec-color', ' ');
+const rangeWrapper = { nodeType: 1, innerHTML: '<div class="mec-detailed-time-start">Start from: 2026-11-03 - 19:00</div><div class="mec-detailed-time-end">End at: 2026-11-05 - 20:00</div>' };
+range.childNodes.splice(2, 1, rangeWrapper);
+const rangeAllDay = fakeTime('mec-event-detailed-time mec-event-time', ' Visą dieną');
+for (let i = 0; i < 3; i++) relabelToday(agendaRoot([timed, allDay, range, rangeAllDay], '2026-11-03'));
+assert.deepEqual([timed, allDay, rangeAllDay].map(timeText), ['Šiandien, 19:00 - 20:00', 'Šiandien', 'Šiandien'], 'today\'s times are relabelled once');
+assert.ok(range.childNodes[1].nodeValue === ' ' && range.childNodes[2] === rangeWrapper && rangeWrapper.innerHTML.startsWith('<div class="mec-detailed-time-start">Start from:') && !range.hasAttribute('data-magenda-today'), 'a multi-day range keeps its dates');
+// A loaded month puts new nodes in the agenda for each selection.
+const fresh = fakeTime('mec-event-time', ' 09:00', ' - 10:00');
+relabelToday(agendaRoot([fresh], '2026-11-03'));
+relabelToday(agendaRoot([fresh], '2026-11-03'));
+assert.equal(timeText(fresh), 'Šiandien, 09:00 - 10:00', 'only the first text node gets the prefix');
+const otherDay = fakeTime('mec-event-time', ' 09:00');
+relabelToday(agendaRoot([otherDay], '2026-11-03', '2026-11-04'));
+assert.equal(timeText(otherDay), '09:00', 'another day\'s events are not relabelled');
+
+// The header month is nominative ("Lapkritis"), on the page and after navigation.
+assert.match(weeklySkin, /11 => 'Lapkritis', 12 => 'Gruodis',/);
+assert.match(weeklySkin, /wp_date\('F', mktime\(12, 0, 0, \$m, 15, \$year\)\)/, 'mid-month noon: the same month in every site timezone');
+assert.doesNotMatch(weeklySkin, /mktime\(0, 0, 0, \$m, 1, \$year\)/);
+assert.match(weeklySkin, /\$month_full = \$month_full_names\[\$month - 1\];/);
+assert.match(weeklySkin, /data-month-full="<\?php echo esc_attr\(wp_json_encode\(\$month_full_names\)\); \?>"/);
+assert.match(frontendJs, /var label = \(\$root\.data\('month-full'\) \|\| \[\]\)\[month - 1\] \|\| data\.label;/);
+// Today's timed events read "Šiandien, 19:00 - 20:00", once per element.
+assert.match(frontendJs, /if \(el\.hasAttribute\('data-magenda-today'\)\) return;/);
+assert.match(frontendJs, /textNodes\[k\]\.nodeValue\.replace\(\/\^\(\\s\*\)\/, '\$1' \+ todayWord \+ ', '\)/);
 assert.match(factory, /\|\| self::\$rendered_search_form\) return false;/);
 assert.match(skinsLibrary, /private function note_search_form\(\$html\)/);
 assert.match(skinsLibrary, /strpos\(\$html, 'mec-search-form'\) !== false\) MEC_factory::mark_rendered\(\$this->skin, true\);/);
@@ -246,7 +338,7 @@ assert.match(skinsLibrary, /strpos\(\$html, 'mec-search-form'\) !== false\) MEC_
 // Unused libraries, the upstream update checker and unused locales stay out of
 // the repository; unminified stylesheets stay out of the package.
 for (const removed of ['app/api/Twilio', 'app/api/TFPDF', 'app/api/Stripe', 'app/api/Campaign_Monitor', 'app/api/Meetup', 'app/api/addons-api', 'app/core/puc']) {
-    assert.equal(fs.existsSync(path.join(root, 'modern-events-calendar-lite', removed)), false, `${removed} must stay removed`);
+    assert.equal(fs.existsSync(path.join(root, 'renginiu-kalendorius', removed)), false, `${removed} must stay removed`);
 }
 // A published package is never replaced, publishing waits for the security
 // checks, and Plugin Check fails only on findings beyond the legacy baseline.
@@ -254,9 +346,9 @@ const pluginChecks = read('.github/workflows/plugin-checks.yml');
 assert.doesNotMatch(buildWorkflow, /--clobber/);
 // The package's scripts are minified with the pinned esbuild; sources stay readable.
 assert.match(buildWorkflow, /npm ci --ignore-scripts/);
-assert.match(buildWorkflow, /node scripts\/minify-package-js\.cjs "\$stage\/modern-events-calendar-lite"/);
+assert.match(buildWorkflow, /node scripts\/minify-package-js\.cjs "\$stage\/renginiu-kalendorius"/);
 assert.equal(JSON.parse(read('package.json')).devDependencies.esbuild, '0.28.2');
-assert.ok(read('modern-events-calendar-lite/assets/js/frontend.js').includes('\n    getSinglePage: function'), 'frontend.js stays readable in the repository');
+assert.ok(read('renginiu-kalendorius/assets/js/frontend.js').includes('\n    getSinglePage: function'), 'frontend.js stays readable in the repository');
 assert.match(buildWorkflow, /uses: \.\/\.github\/workflows\/security-gate\.yml/);
 assert.match(buildWorkflow, /needs: security-gate\b/);
 const securityGate = read('.github/workflows/security-gate.yml');
@@ -273,15 +365,15 @@ for (const file of ['app/features/events.php', 'app/features/mec.php', 'app/libr
 }
 
 // The Events list offers "MS Excel Export"; its writer must ship.
-assert.ok(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'app', 'api', 'XLSX', 'xlsxwriter.class.php')), 'the XLSX writer must stay');
+assert.ok(fs.existsSync(path.join(root, 'renginiu-kalendorius', 'app', 'api', 'XLSX', 'xlsxwriter.class.php')), 'the XLSX writer must stay');
 assert.doesNotMatch(buildWorkflow, /--exclude='app\/api\/XLSX\/'/);
 // Vendored libraries' GitHub templates are not shipped.
 assert.match(buildWorkflow, /--exclude='\.github\/'/);
-const languages = fs.readdirSync(path.join(root, 'modern-events-calendar-lite', 'languages')).sort();
-assert.deepEqual(languages, ['index.html', 'modern-events-calendar-lite-en_US.mo', 'modern-events-calendar-lite-en_US.po', 'modern-events-calendar-lite-lt_LT.po', 'modern-events-calendar-lite-ru_RU.mo', 'modern-events-calendar-lite-ru_RU.po', 'modern-events-calendar-lite.pot']);
+const languages = fs.readdirSync(path.join(root, 'renginiu-kalendorius', 'languages')).sort();
+assert.deepEqual(languages, ['index.html', 'renginiu-kalendorius-en_US.mo', 'renginiu-kalendorius-en_US.po', 'renginiu-kalendorius-lt_LT.po', 'renginiu-kalendorius-ru_RU.mo', 'renginiu-kalendorius-ru_RU.po', 'renginiu-kalendorius.pot']);
 for (const css of ['frontend', 'backend', 'a11y', 'a11y-backend']) {
     assert.match(buildWorkflow, new RegExp(`--exclude='assets\\/css\\/${css}\\.css'`));
-    assert.ok(fs.existsSync(path.join(root, 'modern-events-calendar-lite', 'assets', 'css', `${css}.min.css`)), `${css}.min.css must exist`);
+    assert.ok(fs.existsSync(path.join(root, 'renginiu-kalendorius', 'assets', 'css', `${css}.min.css`)), `${css}.min.css must exist`);
 }
 
 // Public-input audit (7.35.1.11): visitor values in the search form are
@@ -294,7 +386,17 @@ const fesFeature = plugin('app/features/fes.php');
 assert.match(fesFeature, /if \(!\$this->guest_submission_allowed\(\)\) return false;/);
 assert.match(fesFeature, /get_current_user_id\(\) && \(int\) \$post->post_author === get_current_user_id\(\)/);
 assert.equal((fesFeature.match(/if \(!\$this->current_user_can_submit_event\(\)\) \$this->main->response/g) || []).length, 2, 'the event form and image upload must check submission access');
-assert.match(plugin('app/features/events.php'), /if \(!is_user_logged_in\(\) and \(!isset\(\$this->settings\['fes_guest_status'\]\)/);
+// 7.35.1.33 (2026-10-27 assessment, finding 3): the gallery uploader is gated like
+// the FES featured image; FES guest accounts never take over existing users and
+// are not Authors.
+const galleryUpload = plugin('app/features/events.php').match(/public function gallery_image_upload\(\)\s*\{[\s\S]*?\$images = /)?.[0] || '';
+assert.match(galleryUpload, /wp_verify_nonce\([^;]*'mec_event_gallery_image_upload'\)\) \$this->main->response[\s\S]*if \(!current_user_can\('upload_files'\)\)\s*\{[\s\S]*if \(!\$fes \|\| !\$fes->current_user_can_submit_event\(\)\) \$this->main->response\(\['success' => 0, 'code' => 'NO_ACCESS'/, 'the gallery upload must check its nonce, then upload_files or FES submission access');
+const guestStatusChanged = fesFeature.slice(fesFeature.indexOf('public function status_changed('), fesFeature.indexOf('public function current_user_attachments('));
+assert.match(guestStatusChanged, /if \(!get_post_meta\(\$post->ID, 'mec_fes_guest_submission', true\)\) return;[\s\S]*if \(email_exists\(\$guest_email\)\) return;[\s\S]*register_new_user\(/, 'guest accounts: guest submissions only, and never an existing account');
+assert.doesNotMatch(guestStatusChanged, /set_role\('author'\)|\$user_id = \$user_exists/, 'guest accounts must not be Authors or existing users');
+assert.match(guestStatusChanged, /apply_filters\('mec_fes_guest_user_role', 'subscriber', \$post\);\s*if \(!is_string\(\$role\) \|\| !get_role\(\$role\)\) \$role = 'subscriber';/);
+assert.match(guestStatusChanged, /\$role = 'subscriber';[\s\S]*add_filter\('pre_option_default_role', \$default_role, PHP_INT_MAX\);\s*try\s*\{\s*\$user_id = register_new_user\(\$guest_email, \$guest_email\);\s*\}\s*finally\s*\{\s*remove_filter\('pre_option_default_role', \$default_role, PHP_INT_MAX\);/, 'a guest account must be created with its final role, before registration hooks run');
+assert.match(fesFeature, /update_post_meta\(\$post_id, 'mec_created_by_fes', 1\);\s*(\/\/[^\n]*\n\s*)+if \(!is_user_logged_in\(\)\) update_post_meta\(\$post_id, 'mec_fes_guest_submission', 1\);/, 'new guest submissions must be flagged');
 assert.match(plugin('app/skins/single.php'), /\$viewable = is_post_publicly_viewable\(\$post\)/);
 assert.match(plugin('app/libraries/main.php'), /get_post_meta\(\(int\) \$book_id, 'mec_event_id', true\) === \(int\) \$event->ID/);
 // Logged-in handler audit (7.35.1.12): admin AJAX handlers check capabilities,
@@ -342,6 +444,31 @@ assert.match(plugin('app/skins/yearly_view.php'), /\$this->months_to_display = \
 const renderLibrary = plugin('app/libraries/render.php');
 assert.equal((renderLibrary.match(/\$SKO->normalize_request_values\(\$this->main->sanitize_deep_array\(\$_REQUEST\['sf'\]\), \['fields'\]\)/g) || []).length, 2, 'both render paths must normalise sf');
 assert.doesNotMatch(renderLibrary, /\? \$this->main->sanitize_deep_array\(\$_REQUEST\['sf'\]\) :/);
+// Other public skin actions (7.35.1.27): each view's load_month/load_more,
+// the map markers, the timetable's weekly program and the yearly view read
+// request sf/atts the same way and failed the same way (sf[month][]=x,
+// atts[sk-options]=x, mec_month[]=x, mec_next_page[]=x ...).
+const skinFiles = fs.readdirSync(path.join(root, 'renginiu-kalendorius/app/skins')).filter((file) => file.endsWith('.php')).map((file) => `app/skins/${file}`);
+let normalisedSkinReads = 0;
+for (const file of skinFiles) {
+    const source = plugin(file);
+    assert.doesNotMatch(source, /\? \$this->main->sanitize_deep_array\(\$_REQUEST\['(sf|atts)'\]\) :/, `${file} must normalise request sf/atts`);
+    assert.doesNotMatch(source, /\? \$_REQUEST\['mec_month'\] :|: \(\$_REQUEST\['mec_month'\] \?\? ''\)/, `${file} must sanitise mec_month before trim()`);
+    assert.doesNotMatch(source, /isset\(\$_REQUEST\['mec_next_page'\]\) and trim\(/, `${file} must check mec_next_page is a string`);
+    assert.doesNotMatch(source, /sanitize_text_field\(\$_REQUEST\['mec_(year|month)'\]/, `${file} must read mec_year/mec_month with request_date_part()`);
+    normalisedSkinReads += (source.match(/\$this->normalize_request_values\(\$this->main->sanitize_deep_array\(\$_REQUEST\['(sf|atts)'\]\), \[/g) || []).length;
+}
+// mec_year=x (or [], or a scalar sf[year]=x copied into it) reached mktime() in
+// the monthly templates as a string: a TypeError on PHP 8. So did a 20-digit
+// year, and mec_month=001 made strtotime() read "2023-001-01" as an ordinal
+// date, which kept the weekly view's week loop running until the time limit.
+assert.match(skinsLibrary, /public function request_date_part\(\$key, \$default = null\)[\s\S]*?is_string\(\$_REQUEST\[\$key\]\)\) \? trim\(\$_REQUEST\[\$key\]\) : '';\s*\$pattern = \$key === 'mec_year' \? '\/\^\\d\{4\}\$\/' : '\/\^\(0\?\[1-9\]\|1\[0-2\]\)\$\/';\s*return preg_match\(\$pattern, \$value\) \? \$value : \$default;/, 'mec_year must be four digits and mec_month 1-12, else the default');
+assert.match(plugin('app/skins/weekly_view/tpl.php'), /while\(isset\(\$week\[\$i\]\) and strtotime\(\$first_week_day\) < \$current_month_time\)/, 'the weekly week loop must stop at the last day of the week');
+// 34 new reads in 13 skins plus the 4 switch_skin() reads from 7.35.1.25.
+assert.equal(normalisedSkinReads, 38, 'every skin handler must normalise both sf and atts');
+assert.match(skinsLibrary, /isset\(\$field_value\['date_min'\], \$field_value\['date_max'\]\) and is_string\(\$field_value\['date_min'\]\) and is_string\(\$field_value\['date_max'\]\) and trim\(/, 'sf[fields][<id>][date_min][] must not reach trim()');
+assert.match(plugin('app/libraries/search.php'), /\$sf = \(isset\(\$_POST\['sf'\]\) and is_array\(\$_POST\['sf'\]\)\) \? array_filter\(\$this->main->sanitize_deep_array\(\$_POST\['sf'\]\), function\(\$value, \$key\)\s*\{\s*return is_scalar\(\$value\) or \$key === 'fields';\s*\}, ARRAY_FILTER_USE_BOTH\) : \[\];/, 'the search refine must drop array sf values except fields');
+assert.doesNotMatch(plugin('app/skins/general_calendar.php'), /'wp_ajax_(nopriv_)?mec_general_calendar_load_month'/, 'the general calendar has no load_month() method to register');
 const bookingCalendar = plugin('app/features/bookingcalendar.php');
 for (const key of ['event_id', 'year', 'month']) {
     assert.match(bookingCalendar, new RegExp(`isset\\(\\$_REQUEST\\['${key}'\\]\\) \\? absint\\(\\$_REQUEST\\['${key}'\\]\\)`), `booking calendar ${key} must be an integer`);
@@ -351,10 +478,52 @@ assert.match(plugin('app/skins/grid/render.php'), /gmapSkin\('\.json_encode\(\$e
 assert.match(plugin('app/addons/divi/includes/MECShortcodesForDivi.php'), /\$post_id = absint\(\$_POST\['shortcode_id'\] \?\? 0\);/);
 assert.match(ixFeature, /\$this->db->select\(\$wpdb->prepare\("SELECT `post_id` FROM `#__postmeta` WHERE `meta_value`=%s AND `meta_key`='mec_gcal_id'", \$gcal_id\), 'loadResult'\)/);
 assert.match(ixFeature, /\$this->db->select\(\$wpdb->prepare\("SELECT `dstart` FROM `#__mec_dates` WHERE `post_id`=%d ORDER BY `tstart` ASC LIMIT 50", \$post_id\), 'loadColumn'\)/);
+// CVE-2026-105067: get_bookings() concatenates its arguments into SQL, and the
+// logged-in bookings list and the FES CSV export passed request values to it.
+const getBookings = plugin('app/libraries/main.php').match(/public function get_bookings\([^)]*\)\s*\{([\s\S]*?)\$records = \$db->select/)?.[1] ?? '';
+assert.match(getBookings, /\$event_id = \(int\) \$event_id;\s*if \(\$event_id <= 0\) return \[\];/, 'get_bookings must cast the event ID');
+assert.match(getBookings, /if \(\$timestamp and !is_numeric\(\$timestamp\)\) return \[\];\s*\$timestamp = \$timestamp \? \(int\) \$timestamp : null;/, 'get_bookings must cast the timestamp');
+assert.match(getBookings, /\$user_id = \$user_id \? \(int\) \$user_id : null;/, 'get_bookings must cast the user ID');
+assert.match(getBookings, /\$limit = is_numeric\(\$limit\) \? \(int\) \$limit : -1;/, 'get_bookings must cast the limit');
+const eventBookings = plugin('app/features/events.php').match(/public function mec_event_bookings\(\)\s*\{([\s\S]*?)get_bookings\(/)?.[1] ?? '';
+assert.match(eventBookings, /wp_verify_nonce\(\$wpnonce, 'mec_event_bookings'\)/, 'mec_event_bookings must check its nonce');
+assert.match(eventBookings, /current_user_can\('edit_post', \$this->main->get_original_event\(\$id\)\)/, 'mec_event_bookings must check edit rights');
+assert.match(eventBookings, /\$id = isset\(\$_POST\['id'\]\) \? absint\(\$_POST\['id'\]\) : 0;/);
+assert.match(plugin('app/core/src/FES/FormBuilder.php'), /action=mec_event_bookings&id=<\?php echo esc_js\(\$post->ID\); \?>&_wpnonce=<\?php echo esc_js\(wp_create_nonce\('mec_event_bookings'\)\); \?>/, 'the attendees box must send the bookings nonce');
+assert.match(plugin('app/features/fes.php'), /\$timestamp = isset\(\$_REQUEST\['timestamp'\]\) \? absint\(\$_REQUEST\['timestamp'\]\) : 0;/, 'the FES CSV export timestamp must be an integer');
+assert.match(plugin('app/core/src/FES/FormBuilder.php'), /if \(response\.html\) \$attendees\.html\(response\.html\);\s*\/\/[^\n]*\n\s*else \$attendees\.empty\(\)/, 'a refused bookings request must clear the attendees list');
+// Same class, found by the 7.35.1.29 cross-review: quoted request strings in SQL.
+const mainLib = plugin('app/libraries/main.php');
+assert.match(mainLib, /\$db->select\(\$wpdb->prepare\("SELECT `ID` FROM `#__posts` WHERE `guid`=%s", \(string\) \$image_url\), 'loadResult'\)/, 'get_attach_id must prepare the URL');
+for (const key of ['verification', 'cancellation']) {
+    assert.match(mainLib, new RegExp(`\\$wpdb->prepare\\("SELECT \`post_id\` FROM \`#__postmeta\` WHERE \`meta_key\`='mec_${key}_key' AND \`meta_value\`=%s", \\$key\\)`), `the ${key} endpoint must prepare its key`);
+}
+assert.doesNotMatch(mainLib, /`guid`='\$image_url'|`meta_value`='\$key'/, 'no quoted request string may be interpolated into these lookups');
+// 7.35.1.30: single event pages always call display_progress_bar(), so the
+// progress-bar module ships, and a module left out of the slim build renders
+// nothing instead of a PHP include warning.
+assert.doesNotMatch(buildWorkflow, /--exclude='app\/modules\/progress-bar\/'/, 'the progress-bar module must ship');
+assert.ok(fs.existsSync(path.join(root, 'renginiu-kalendorius', 'app', 'modules', 'progress-bar', 'single.php')), 'progress-bar/single.php must exist');
+assert.match(plugin('app/libraries/main.php'), /\$path = MEC::import\('app\.modules\.' \. \$module, true, true\);\s*\/\/[^\n]*\n\s*\/\/[^\n]*\n\s*if \(!\$path \|\| !is_file\(\$path\)\) return '';/, 'module() must skip a missing module file');
 // Shell slips once committed empty files ("atts[", "id") to the plugin root,
 // and the release ZIP shipped them.
-const emptyRootFiles = fs.readdirSync(path.join(root, 'modern-events-calendar-lite'), { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name !== 'index.html' && fs.statSync(path.join(root, 'modern-events-calendar-lite', entry.name)).size === 0)
+const emptyRootFiles = fs.readdirSync(path.join(root, 'renginiu-kalendorius'), { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name !== 'index.html' && fs.statSync(path.join(root, 'renginiu-kalendorius', entry.name)).size === 0)
     .map((entry) => entry.name);
 assert.deepEqual(emptyRootFiles, [], 'no empty files may sit in the plugin root');
+// 7.35.1.31 (2026-10-21 audit): Import / Export forms need their own nonce, the
+// OAuth callback its state, FES edits events only, and Export & Purge is off.
+assert.match(ixFeature, /if \(\$this->action == 'save-sync-options' and !\$this->verify_ix_form_nonce\('mec_ix_sync'\)\)/, 'the sync form must check its nonce before saving');
+assert.match(ixFeature, /in_array\(\$this->action, \['google-calendar-import-start', 'google-calendar-import-do'\], true\) and !\$this->verify_ix_form_nonce\('mec_ix_g_calendar_import'\)\) \$this->response = /, 'both Google import steps must check their nonce');
+assert.match(plugin('app/features/ix/sync.php'), /wp_nonce_field\('mec_ix_sync', 'mec_ix_nonce', false\)/);
+assert.equal((plugin('app/features/ix/import_g_calendar.php').match(/wp_nonce_field\('mec_ix_g_calendar_import', 'mec_ix_nonce', false\)/g) || []).length, 2, 'both Google import forms must print their nonce');
+assert.match(ixFeature, /\$client->setState\(wp_create_nonce\('mec_ix_g_calendar_oauth'\)\);/, 'the Google authorization link must carry a state');
+assert.match(ixFeature, /if \(!\$state or !wp_verify_nonce\(\$state, 'mec_ix_g_calendar_oauth'\)\) wp_die\(/, 'the OAuth callback must check its state');
+const oauthCallback = ixFeature.slice(ixFeature.indexOf('public function g_calendar_export_get_token()'), ixFeature.indexOf('public function g_calendar_export_do()'));
+assert.match(oauthCallback, /wp_verify_nonce\(\$state, 'mec_ix_g_calendar_oauth'\)[\s\S]*if \(isset\(\$_GET\['error'\]\)\) wp_die\([^;]*;[\s\S]*\$client->authenticate\(/, 'the OAuth callback must handle errors after checking state and before authenticating');
+assert.match(fesFeature, /if \(\$post_id == -1\) return true;\s*(\/\/[^\n]*\n\s*)+if \(\(int\) \$post_id <= 0 \|\| get_post_type\(\$post_id\) !== \$this->PT\) return false;/, 'FES may only edit events');
+const reportFeature = plugin('app/features/report.php');
+assert.match(reportFeature, /public function export_purge\(\)\s*\{\s*wp_die\([^;]*'response' => 410[^;]*;\s*\}/, 'Export & Purge must only answer 410');
+assert.doesNotMatch(reportFeature, /new MEC_feature_books|mec-exports|wp_delete_post/, 'Export & Purge must stay disabled');
+assert.doesNotMatch(plugin('app/features/report/tpl.php'), /mec_export_purge/, 'the report page must not offer the Export & Purge form');
 console.log('Customization checks passed.');

@@ -10,7 +10,7 @@ parameters:
     # Symbols PHPStan must know about but must not analyse: the whole plugin
     # (so fork files resolve upstream classes) and optional integrations.
     scanDirectories:
-        - ../../modern-events-calendar-lite
+        - ../../renginiu-kalendorius
     scanFiles:
         - stubs/optional-integrations.php
         - stubs/removed-features.php
@@ -23,3 +23,7 @@ parameters:
         - identifier: return.missing
         # Upstream reads DOING_AJAX directly instead of wp_doing_ajax().
         - identifier: phpstanWP.wpConstant.fetch
+        # The report template is included from MEC_feature_report::report(), so
+        # its $this->main runs in class scope; PHPStan reads the file on its own.
+        - identifier: property.private
+          path: ../../renginiu-kalendorius/app/features/report/tpl.php
