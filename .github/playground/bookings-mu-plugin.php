@@ -1,7 +1,7 @@
 <?php
 /**
  * Test-only helpers for .github/playground/bookings.py (7.35.1.29, CVE-2026-105067;
- * 7.35.1.31, the 2026-10-21 audit fixes).
+ * 7.35.1.31, the 2026-10-21 audit fixes; 7.35.1.32, the PR #48 review follow-ups).
  *
  * Installed as a must-use plugin in a throwaway WordPress Playground site only;
  * it is not part of the plugin and never ships. The test fixtures use harmless
@@ -9,8 +9,10 @@
  */
 
 // The fork forces booking_status off (option_mec_options, default priority). Turn it
-// back on afterwards so the booking handlers register and can be tested.
+// back on afterwards so the booking handlers register and can be tested. A request
+// with pgtest_bookings_off=1 sees the production setting instead.
 add_filter('option_mec_options', function ($options) {
+    if (!empty($_REQUEST['pgtest_bookings_off'])) return $options;
     if (!is_array($options)) $options = [];
     $options['settings']['booking_status'] = 1;
     return $options;
@@ -33,6 +35,12 @@ add_filter('query', function ($query) {
     }
     return $query;
 });
+
+// 7.35.1.32: log every e-mail instead of sending it.
+add_filter('pre_wp_mail', function ($return, $atts) {
+    pgtest_log('mail: ' . implode(',', (array) $atts['to']) . ' ' . $atts['subject']);
+    return true;
+}, 10, 2);
 
 add_filter('map_meta_cap', function ($caps, $cap, $user_id, $args) {
     if ($cap !== 'edit_post' || !isset($args[0])) return $caps;
@@ -144,6 +152,9 @@ add_action('wp_ajax_pgtest_setup', function () {
     $ids['sub_post'] = wp_insert_post(['post_type' => 'post', 'post_status' => 'publish', 'post_title' => 'Subscriber post', 'post_author' => $users['pgsub']]);
     $ids['sub_attachment'] = wp_insert_post(['post_type' => 'attachment', 'post_status' => 'inherit', 'post_title' => 'Subscriber attachment', 'post_author' => $users['pgsub']]);
 
+    // 7.35.1.32: an event for the FES remove action to delete.
+    $ids['remove_event'] = pgtest_event('Event to remove', 1);
+
     update_option('pgtest_ids', $ids);
     wp_send_json($ids);
 });
@@ -153,7 +164,7 @@ add_action('wp_ajax_pgtest_nonces', function () {
         'bookings' => wp_create_nonce('mec_event_bookings'), 'fes' => wp_create_nonce('mec_fes_nonce'),
         'fes_form' => wp_create_nonce('mec_fes_form'), 'report' => wp_create_nonce('mec_settings_nonce'),
         'purge' => wp_create_nonce('mec_export_purge'), 'ix_import' => wp_create_nonce('mec_ix_g_calendar_import'),
-        'ix_export' => wp_create_nonce('mec_ix_g_calendar_export'),
+        'ix_export' => wp_create_nonce('mec_ix_g_calendar_export'), 'fes_remove' => wp_create_nonce('mec_fes_remove'),
     ]);
 });
 
@@ -163,7 +174,7 @@ add_action('wp_ajax_pgtest_state', function () {
 
     $ids = get_option('pgtest_ids');
     $posts = [];
-    foreach (['event', 'author_event', 'page', 'sub_page', 'sub_post', 'sub_attachment'] as $key)
+    foreach (['event', 'author_event', 'page', 'sub_page', 'sub_post', 'sub_attachment', 'remove_event'] as $key)
     {
         $post = !empty($ids[$key]) ? get_post($ids[$key]) : null;
         if ($post) $posts[$key] = ['title' => $post->post_title, 'status' => $post->post_status];
@@ -172,6 +183,9 @@ add_action('wp_ajax_pgtest_state', function () {
     $ix = (new MEC_main())->get_ix_options();
     wp_send_json([
         'php' => PHP_VERSION, 'registered' => (bool) has_action('wp_ajax_mec_event_bookings'), 'fes_export' => (bool) has_action('wp_ajax_mec_fes_csv_export'),
+        'report_ajax' => array_values(array_filter(['report_event_dates', 'mec_attendees', 'mec_mass_email', 'mec_report_mass'], function ($action) {
+            return (bool) has_action('wp_ajax_' . $action);
+        })),
         'posts' => $posts,
         'ix' => (object) array_intersect_key(is_array($ix) ? $ix : [], array_flip(['sync_g_import', 'sync_g_export', 'google_import_api_key', 'google_export_client_id'])),
         'booking_rows' => (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mec_bookings"),

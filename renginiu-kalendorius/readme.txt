@@ -4,7 +4,7 @@ Tags: calendar, events, google calendar
 Requires at least: 6.6
 Tested up to: 7.0.2
 Requires PHP: 8.4
-Stable tag: 7.35.1.35
+Stable tag: 7.35.1.36
 License: GPLv2 or later
 
 Focused events calendar maintained by adventistai.lt, forked from Modern Events Calendar Lite.
@@ -23,6 +23,9 @@ Booking, attendees, payments, WooCommerce, SMS, PDF invoices, non-Google importe
 Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar → Import / Export. For private updates define ADVENTISTAI_CALENDAR_GITHUB_TOKEN in wp-config.php with repository read access.
 
 == Changelog ==
+= 7.35.1.36 =
+* Security: the booking report's background requests, including one that sent e-mail from the site, are no longer available while bookings are switched off, as they are in this build. The frontend "Remove Event" button removes events only, never pages, posts or media.
+
 = 7.35.1.35 =
 * Renamed to "Renginių kalendorius" (folder, main file and text domain renginiu-kalendorius) so security scanners stop matching it against Modern Events Calendar Lite advisories. Install it once by hand: first make sure M.E. Calendar → Settings → "Remove MEC Data on Plugin Uninstall" is Disabled, then deactivate the old plugin, upload this ZIP and activate it. Events and settings are kept. Turn automatic updates on again for the new plugin if the old one had them, and rename any custom translation files in wp-content/languages from modern-events-calendar-lite-* to renginiu-kalendorius-*. Delete the old plugin last: deleting it runs its uninstall routine.
 

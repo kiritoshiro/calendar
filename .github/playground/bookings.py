@@ -25,6 +25,15 @@ And for the 7.35.1.31 audit fixes (2026-10-21):
   site's own authorization link;
 - Export & Purge is disabled: it answers 410 and deletes no booking.
 
+And for the follow-ups from the PR #48 review (7.35.1.32):
+
+- with bookings off, as in production, the Report page's AJAX actions are not
+  registered, so mec_mass_email sends nothing; with bookings on, the mailer
+  still refuses subscribers and requests without its nonce, and a missing
+  nonce causes no PHP warning;
+- the FES remove action refuses pages, posts and attachments the caller may
+  delete, but still removes an event.
+
 All markers are harmless strings ("pgmarker", an apostrophe in a key).
 
 Usage: python3 .github/playground/bookings.py [--php 8.4] [--wp latest] [--plugin-dir DIR]
@@ -102,7 +111,7 @@ class Log:
         return [line for line in text.splitlines() if line]
 
 
-def run_tests(log, php):
+def run_tests(log, debug, php):
     admin = login(smoke.USER, smoke.PASSWORD)
     state = ajax_json(admin, {"action": "pgtest_state"}) or {}
     if not state.get("registered"):
@@ -175,6 +184,7 @@ def run_tests(log, php):
             check(item["name"], item["ok"], item.get("detail"))
 
     run_audit_tests(users, nonces, ids, t1)
+    run_review_followup_tests(users, nonces, ids, log, debug)
 
 
 def page_text(body):
@@ -294,6 +304,65 @@ def run_audit_tests(users, nonces, ids, t1):
           status == 200 and "not available" in page_text(body) and "mec_export_purge" not in body, status)
 
 
+def run_review_followup_tests(users, nonces, ids, log, debug):
+    """7.35.1.32: the follow-ups from the PR #48 review."""
+    admin = users["admin"]
+
+    def state(**extra):
+        return ajax_json(admin, dict({"action": "pgtest_state"}, **extra)) or {}
+
+    # The Report page's AJAX actions exist only with the booking module on.
+    report_actions = ["report_event_dates", "mec_attendees", "mec_mass_email", "mec_report_mass"]
+    off = state(pgtest_bookings_off=1)
+    check("with bookings off (as in production), no report AJAX action is registered",
+          off.get("report_ajax") == [] and not off.get("registered"), [off.get("report_ajax"), off.get("registered")])
+    check("with bookings on, the report AJAX actions are registered", state().get("report_ajax") == report_actions, state().get("report_ajax"))
+
+    mail = {"action": "mec_mass_email", "nonce": nonces["admin"]["report"], "mail_recipients_info": "Pg:.:pgmarker@example.test",
+            "mail_subject": "pgmarker subject", "mail_content": "<p>pgmarker</p>"}
+
+    def mass_email(name, user, data, expect_sent):
+        log.since_last()
+        status, body = ajax(users[user], data)
+        mails = [line for line in log.since_last() if line.startswith("mail: ")]
+        if expect_sent:
+            check(f"mec_mass_email {name} sends the e-mail", body.strip() == "1" and mails == ["mail: pgmarker@example.test pgmarker subject"], [status, body[:200], mails])
+        else:
+            check(f"mec_mass_email {name} sends nothing", body.strip() != "1" and not mails, [status, body[:200], mails])
+        return status, body
+
+    status, body = mass_email("with bookings off", "admin", dict(mail, pgtest_bookings_off=1), False)
+    check("with bookings off, admin-ajax does not know mec_mass_email", status == 400 and body.strip() == "0", [status, body[:200]])
+    debug.since_last()
+    mass_email("without a nonce", "admin", {key: value for key, value in mail.items() if key != "nonce"}, False)
+    _, body = ajax(admin, {"action": "report_event_dates", "event_id": ids["event"]})
+    check("report_event_dates answers nothing without a nonce", body.strip() == "", body[:200])
+    warnings = [line for line in debug.since_last() if "features/report.php" in line]
+    check("a missing report nonce causes no PHP warning", not warnings, warnings)
+    status, body = mass_email("for a subscriber with their own nonce", "pgsub", dict(mail, nonce=nonces["pgsub"]["report"]), False)
+    check("mec_mass_email refuses a subscriber", '"NO_ACCESS"' in body, [status, body[:200]])
+    mass_email("for an admin with the nonce (bookings on)", "admin", mail, True)
+
+    # FES removes events only, even where WordPress lets the caller delete the post.
+    before = state().get("posts", {})
+
+    def remove(name, user, target, expect):
+        response = ajax_json(users[user], {"action": "mec_fes_remove", "_wpnonce": nonces[user]["fes_remove"], "post_id": ids[target]}) or {}
+        post = state().get("posts", {}).get(target)
+        if expect == "removed":
+            # wp_delete_post() trashes only posts and pages; an event is deleted.
+            check(f"FES remove: {name} is removed", response.get("success") == 1 and before.get(target) and post is None, [response, post])
+        else:
+            check(f"FES remove: {name} is refused with {expect} and kept",
+                  response.get("code") == expect and post and post == before.get(target), [response, post, before.get(target)])
+
+    remove("admin, a page", "admin", "page", "INVALID_EVENT")
+    remove("admin, a subscriber's post", "admin", "sub_post", "INVALID_EVENT")
+    remove("admin, a subscriber's attachment", "admin", "sub_attachment", "INVALID_EVENT")
+    remove("subscriber, admin's event", "pgsub", "remove_event", "USER_CANNOT_REMOVE_EVENT")
+    remove("admin, an event", "admin", "remove_event", "removed")
+
+
 def report_debug_log(logs_dir):
     """PHP fatals fail the test; warnings in the booking module (disabled in production) are only reported."""
     path = os.path.join(logs_dir, "debug.log")
@@ -341,7 +410,7 @@ def main():
         sys.exit(f"::error::port {smoke.PORT} is already in use")
     proc = smoke.start_server(args, config, os.getcwd(), logs_dir, workdir)
     try:
-        run_tests(Log(os.path.join(logs_dir, "bookings.log")), args.php)
+        run_tests(Log(os.path.join(logs_dir, "bookings.log")), Log(os.path.join(logs_dir, "debug.log")), args.php)
     finally:
         smoke.stop_server(proc)
         report_debug_log(logs_dir)

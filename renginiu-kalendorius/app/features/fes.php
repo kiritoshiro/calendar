@@ -288,7 +288,11 @@ class MEC_feature_fes extends MEC_base
         // Verify that the nonce is valid.
         if (!wp_verify_nonce(sanitize_text_field($_POST['_wpnonce']), 'mec_fes_remove')) $this->main->response(['success' => 0, 'code' => 'NONCE_IS_INVALID']);
 
-        $post_id = isset($_POST['post_id']) ? sanitize_text_field($_POST['post_id']) : 0;
+        $post_id = isset($_POST['post_id']) ? absint($_POST['post_id']) : 0;
+
+        // adventistai.lt: FES only removes events, as current_user_can_upsert_event()
+        // only edits them. wp_delete_post() deletes an attachment outright.
+        if (!$post_id || get_post_type($post_id) !== $this->PT) $this->main->response(['success' => 0, 'code' => 'INVALID_EVENT']);
 
         // Verify current user can remove the event
         if (!current_user_can('delete_post', $post_id)) $this->main->response(['success' => 0, 'code' => 'USER_CANNOT_REMOVE_EVENT']);

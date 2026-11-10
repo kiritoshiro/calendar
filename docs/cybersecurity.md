@@ -87,7 +87,9 @@ enforce required checks, so review the gate result before merging there.
   - (7.35.1.31) `mec_fes_form` changes a page, post or attachment, even one the caller owns, or another author's event, or refuses an author's own event;
   - `mec_attendees` answers a subscriber or a request without its nonce, or stops listing an occurrence's attendees for an admin;
   - the Import / Export Synchronization or Google import forms save or import without their `mec_ix_nonce`, or the Google OAuth callback runs without the `state` from the site's own authorization link or refuses a valid state (tested via Google's error path without a token request);
-  - Export & Purge does anything but answer 410, or the report page still offers its form.
+  - Export & Purge does anything but answer 410, or the report page still offers its form;
+  - (7.35.1.32) with bookings off, as in production, any of the Report page's AJAX actions (`report_event_dates`, `mec_attendees`, `mec_mass_email`, `mec_report_mass`) is registered or `mec_mass_email` sends mail; with bookings on, the mailer answers a subscriber or a request without its nonce, or a missing report nonce logs a PHP warning;
+  - `mec_fes_remove` removes a page, post or attachment, even one the caller may delete, or stops removing an event.
 
   It uses harmless marker strings only. Run it locally with `python3 .github/playground/bookings.py --php 8.4` (`--plugin-dir` mounts another copy of the plugin, `--port` picks another port).
 - **Playground FES guest and gallery test** (2026-10-28, 7.35.1.33): `.github/playground/fes_guest.py` with a test-only mu-plugin (`fes-guest-mu-plugin.php`, never shipped) that turns on guest submission, guest account creation and the event gallery, limits FES to administrators and subscribers, and stops all e-mail. It fails if:
