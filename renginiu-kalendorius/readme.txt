@@ -4,7 +4,7 @@ Tags: calendar, events, google calendar
 Requires at least: 6.6
 Tested up to: 7.0.2
 Requires PHP: 8.4
-Stable tag: 7.35.1.36
+Stable tag: 7.35.1.37
 License: GPLv2 or later
 
 Focused events calendar maintained by adventistai.lt, forked from Modern Events Calendar Lite.
@@ -23,6 +23,9 @@ Booking, attendees, payments, WooCommerce, SMS, PDF invoices, non-Google importe
 Upload the ZIP, activate it, then configure Google Calendar under M.E. Calendar → Import / Export. For private updates define ADVENTISTAI_CALENDAR_GITHUB_TOKEN in wp-config.php with repository read access.
 
 == Changelog ==
+= 7.35.1.37 =
+* The small sidebar calendar marks today with a Denim circle (#2F557F, the logo palette colour) instead of the dark navy. Day numbers, the month and event dots keep their colours.
+
 = 7.35.1.36 =
 * Security: the booking report's background requests, including one that sent e-mail from the site, are no longer available while bookings are switched off, as they are in this build. The frontend "Remove Event" button removes events only, never pages, posts or media.
 

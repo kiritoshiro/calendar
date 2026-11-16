@@ -1,5 +1,12 @@
 # adventistai.lt fork changelog
 
+## 7.35.1.37
+
+- The magenda's today circle is Denim `#2F557F` (the logo palette colour, also the Sabbath column) instead of the dark navy `#04132b`, as in the approved homepage v4 mock-up (identity guideline to-do 1). A separate `--magenda-today` variable carries it; `--magenda-ink` is unchanged, so day numbers, the month title and the agenda titles stay `#04132b`. Event dots, the Saturday letter, the selected-day tint and the focus outline keep `--magenda-accent`. The white number on Denim is 7.7:1.
+  - `frontend.css`, `frontend.min.css` and the rebuilt `magenda.min.css` (23,594 bytes, under the ALPS theme's 26,000-byte inline limit). The theme inlines the plugin's file at runtime, so it needs no matching change.
+  - The sidebar search button ("IEŠKOTI") is the theme's search form, not this plugin's; it is already Denim on the live site.
+  - Tests: `verify-customizations.js` checks the variable and the today rule; `calendar-layout.test.js` expects the Denim circle and checks that day numbers and the month title keep the ink.
+
 ## 7.35.1.36
 
 - Security follow-ups from the review of PR #48 (7.35.1.31):

@@ -31,7 +31,7 @@ const headerVersion = main.match(/^\s*\*\s*Version:\s*([^\s]+)/m)?.[1];
 const constantVersion = main.match(/define\('MEC_VERSION',\s*'([^']+)'\)/)?.[1];
 const stableVersion = readme.match(/^Stable tag:\s*(\S+)/m)?.[1];
 
-assert.equal(headerVersion, '7.35.1.36', 'unexpected plugin header version');
+assert.equal(headerVersion, '7.35.1.37', 'unexpected plugin header version');
 assert.equal(constantVersion, headerVersion, 'MEC_VERSION must match the plugin header');
 assert.equal(stableVersion, headerVersion, 'readme stable tag must match the plugin header');
 assert.match(main, /^\s*\*\s*Author:\s*adventistai\.lt\s*$/m);
@@ -254,6 +254,9 @@ assert.match(magendaCss, /@container magenda \(min-width: ?260px\)\s*\{[^@]*\.me
 assert.match(magendaCss, /\.mec-magenda\s*\{[^}]*container:\s*magenda \/ inline-size/);
 assert.match(magendaCss, /\.mec-magenda button:focus-visible\s*\{[^}]*outline:\s*2px solid/, 'keyboard focus stays visible');
 assert.match(magendaCss, /\.mec-magenda-day\s*\{[^}]*transition:\s*none !important/, "MEC's button transition does not fade the focus outline in");
+// 7.35.1.37: today's circle is Denim (#2f557f, the logo palette colour); text keeps the dark ink.
+assert.match(magendaCss, /\.mec-magenda\s*\{[^}]*--magenda-ink:\s*#04132b;[^}]*--magenda-today:\s*#2f557f;/);
+assert.match(magendaCss, /\.mec-magenda-day-today:hover \.mec-magenda-day-num\s*\{\s*background:\s*var\(--magenda-today\);\s*color:\s*#fff;/, 'today is a filled Denim circle with a white number');
 // The plural rule in frontend.js matches magenda_count_label() in PHP.
 const countLabel = vm.runInNewContext(`${extractFunction(frontendJs, 'countLabel')}\ncountLabel`, {});
 const fakeRoot = (rule, forms) => ({ data: key => ({ 'count-rule': rule, 'count-forms': forms })[key] });
