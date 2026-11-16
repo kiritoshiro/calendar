@@ -26319,6 +26319,7 @@ body.rtl .mec-wrap {
 .mec-magenda {
     --magenda-accent: var(--mec-color-skin, #2d5c88);
     --magenda-ink: #04132b;
+    --magenda-today: #2f557f; /* Denim, the logo palette colour: the filled today circle (white on it 7.7:1) */
     --magenda-muted: #545e6e; /* 6.6:1 on white */
     --magenda-pad: #6b7280; /* other-month days: 4.8:1 on white */
     --magenda-dot: var(--magenda-accent);
@@ -26527,7 +26528,7 @@ body.rtl .mec-wrap {
 
 .mec-magenda-day-today .mec-magenda-day-num,
 .mec-magenda-day-today:hover .mec-magenda-day-num {
-    background: var(--magenda-ink);
+    background: var(--magenda-today);
     color: #fff;
     font-weight: 700;
 }

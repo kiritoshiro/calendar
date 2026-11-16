@@ -114,12 +114,13 @@ async function checkMagenda(browser) {
             overflow: root.scrollWidth > root.clientWidth + 0.5,
             rows: tops.length,
             rowPitch: tops[1] - tops[0],
-            plainDay: { background: plain.backgroundColor, border: plain.borderTopWidth, shadow: plain.boxShadow, radius: plain.borderTopLeftRadius, transform: plain.textTransform },
+            plainDay: { background: plain.backgroundColor, border: plain.borderTopWidth, shadow: plain.boxShadow, radius: plain.borderTopLeftRadius, transform: plain.textTransform, colour: plain.color },
             todayNum: { background: todayNum.backgroundColor, colour: todayNum.color, weight: todayNum.fontWeight, radius: todayNum.borderTopLeftRadius },
             dots: { d6: dotGroup(day('2026-11-06')), d10: dotGroup(day('2026-11-10')), d13: dotGroup(day('2026-11-13')), d19: dotGroup(day('2026-11-19')), d20: dotGroup(day('2026-11-20')), d21: dotGroup(day('2026-11-21')), pad: dotGroup(day('2026-12-02')) },
             numCentre: (numRect.left + numRect.right) / 2,
             numBottom: numRect.bottom,
             header: { prevLeft: prev.left - rect(root).left, nextRight: rect(root).right - next.right, titleCentre: (month.left + year.right) / 2 - (rect(root).left + rect(root).width / 2), titleTop: month.top, yearTop: year.top },
+            monthColour: getComputedStyle(document.querySelector('.mec-magenda-month-label')).color,
             saturdayLetter: getComputedStyle(document.querySelector('.mec-magenda-weekday-saturday')).color,
             padColour: getComputedStyle(day('2026-12-03')).color,
             agendaRule: getComputedStyle(document.querySelector('.mec-magenda-agenda')).borderTopWidth,
@@ -139,7 +140,9 @@ async function checkMagenda(browser) {
     assert.equal(m.plainDay.border, '0px');
     assert.equal(m.plainDay.shadow, 'none');
     assert.equal(m.plainDay.transform, 'none', 'the theme button style does not leak in');
-    assert.equal(m.todayNum.background, 'rgb(4, 19, 43)', 'today is a filled navy circle');
+    assert.equal(m.todayNum.background, 'rgb(47, 85, 127)', 'today is a filled Denim (#2f557f) circle');
+    assert.equal(m.plainDay.colour, 'rgb(4, 19, 43)', 'day numbers keep the dark ink');
+    assert.equal(m.monthColour, 'rgb(4, 19, 43)', 'the month title keeps the dark ink');
     assert.equal(m.todayNum.colour, 'rgb(255, 255, 255)');
     assert.equal(m.todayNum.weight, '700');
     assert.equal(m.todayNum.radius, '50%');
